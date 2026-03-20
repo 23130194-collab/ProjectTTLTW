@@ -63,13 +63,6 @@ public class AttributeService {
         return attributeDao.getAttributeById(id);
     }
 
-    public AttributePage getPaginatedAttributes(String keyword, int categoryId, int limit, int offset) {
-        List<Attribute> attributes = attributeDao.getAttributes(keyword, categoryId, limit, offset);
-
-        int totalAttributes = attributeDao.countAttributes(keyword, categoryId);
-
-        return new AttributePage(attributes, totalAttributes);
-    }
 
     public boolean isAttributeExists(String name, int categoryId) {
         return attributeDao.isAttributeExists(name, categoryId);
