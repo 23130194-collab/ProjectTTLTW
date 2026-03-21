@@ -1,0 +1,243 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    background: #f6f6f6;
+    padding-top: 90px;
+}
+
+header.header {
+    background: linear-gradient(90deg, #ff6633, #ff3366);
+    padding: 20px 0;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.logo img {
+    height: 48px;
+}
+
+.brand-name {
+    color: white;
+    font-size: 24px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    font-size: 18px;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 17px;
+    position: relative;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #ffe6e6;
+}
+
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: white;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: right;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+.search-box input {
+    border: none;
+    padding: 6px 16px;
+    outline: none;
+    width: 430px;
+    font-size: 15px;
+}
+
+.search-box button {
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    cursor: pointer;
+    color: #ff3366;
+    font-size: 16px;
+}
+
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: -25px;
+}
+
+.header-actions a {
+    text-decoration: none !important;
+    outline: none !important;
+    border: none !important;
+    display: flex;
+}
+
+.icon-btn {
+    background: white;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff3366;
+    font-size: 18px;
+    transition: background 0.3s;
+    text-decoration: none !important;
+}
+
+.icon-btn:hover {
+    background: #ffe6ec;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease;
+    z-index: 20;
+}
+
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.category-box {
+    position: absolute;
+    top: calc(100% + 25px);
+    left: 0;
+    width: 300px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    display: none;
+    flex-direction: column;
+    z-index: 30;
+    overflow: hidden;
+}
+
+.category-box.show {
+    display: flex;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    text-decoration: none;
+    color: #222;
+    font-size: 15px;
+    border-bottom: 1px solid #f1f1f1;
+    transition: background 0.18s;
+}
+
+.category-item:hover {
+    background: #f8f8f8;
+}
+
+.category-item i {
+    color: #e91e63;
+    width: 20px;
+}
+
+.category-item .category-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    margin-right: 8px;
+}
+
+.cart-btn-wrapper {
+    position: relative;
+    overflow: visible !important;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+
+    background-color: #ffffff;
+    color: #ff3366;
+    border: 2px solid #ff3366;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 11px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.cart-btn-wrapper:hover .cart-badge {
+    background-color: #ff3366;
+    color: #ffffff;
+    border-color: #ffffff;
+}
