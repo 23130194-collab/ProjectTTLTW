@@ -43,4 +43,6 @@ public class UserService {
     public int getTotalCustomersCount() {
         return userDao.getTotalCustomersCount();
     }
+
+    public  void createUser(User user){ userDao.createUser(user);}
 }
