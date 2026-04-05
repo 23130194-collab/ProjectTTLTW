@@ -265,3 +265,20 @@ a:hover {
     margin-bottom: 13px;
     text-align: center;
 }
+
+.password-container {
+    position: relative;
+}
+
+.password-container input {
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #000;
+}

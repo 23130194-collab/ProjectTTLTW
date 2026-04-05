@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Đăng nhập | TechNova</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css"/>
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
 </head>
 
@@ -33,7 +33,10 @@
             </div>
 
             <div class="input-group ${not empty errors.password ? 'has-error' : ''}">
-                <input type="password" name="password" placeholder="Nhập mật khẩu" class="${not empty errors.password ? 'input-error' : ''}" required/>
+                <div class="password-container">
+                    <input type="password" name="password" id="password" placeholder="Nhập mật khẩu" class="${not empty errors.password ? 'input-error' : ''}" required/>
+                    <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+                </div>
                 <c:if test="${not empty errors.password}">
                     <span class="error-message">${errors.password}</span>
                 </c:if>
@@ -62,6 +65,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function (e) {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+</script>
 
 </body>
 </html>

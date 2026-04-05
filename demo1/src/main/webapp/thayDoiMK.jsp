@@ -9,6 +9,7 @@
     <meta charset="UTF-8">
     <title>Thay đổi mật khẩu</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body>
     <div class="overlay">
@@ -21,19 +22,28 @@
                 </c:if>
                 <form action="${pageContext.request.contextPath}/change-password" method="post">
                     <div class="input-group ${not empty requestScope.oldPassword_error ? 'has-error' : ''}">
-                        <input type="password" name="oldPassword" placeholder="Mật khẩu cũ" class="${not empty requestScope.oldPassword_error ? 'input-error' : ''}" required>
+                        <div class="password-container">
+                            <input type="password" id="oldPassword" name="oldPassword" placeholder="Mật khẩu cũ" class="${not empty requestScope.oldPassword_error ? 'input-error' : ''}" required>
+                            <i class="fa-solid fa-eye toggle-password" id="toggleOldPassword"></i>
+                        </div>
                         <c:if test="${not empty requestScope.oldPassword_error}">
                             <span class="error-message">${requestScope.oldPassword_error}</span>
                         </c:if>
                     </div>
                     <div class="input-group ${not empty requestScope.newPassword_error ? 'has-error' : ''}">
-                        <input type="password" name="newPassword" placeholder="Mật khẩu mới" class="${not empty requestScope.newPassword_error ? 'input-error' : ''}" required>
+                        <div class="password-container">
+                            <input type="password" id="newPassword" name="newPassword" placeholder="Mật khẩu mới" class="${not empty requestScope.newPassword_error ? 'input-error' : ''}" required>
+                            <i class="fa-solid fa-eye toggle-password" id="toggleNewPassword"></i>
+                        </div>
                         <c:if test="${not empty requestScope.newPassword_error}">
                             <span class="error-message">${requestScope.newPassword_error}</span>
                         </c:if>
                     </div>
                     <div class="input-group ${not empty requestScope.confirmPassword_error ? 'has-error' : ''}">
-                        <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu mới" class="${not empty requestScope.confirmPassword_error ? 'input-error' : ''}" required>
+                        <div class="password-container">
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Xác nhận mật khẩu mới" class="${not empty requestScope.confirmPassword_error ? 'input-error' : ''}" required>
+                            <i class="fa-solid fa-eye toggle-password" id="toggleConfirmPassword"></i>
+                        </div>
                         <c:if test="${not empty requestScope.confirmPassword_error}">
                             <span class="error-message">${requestScope.confirmPassword_error}</span>
                         </c:if>
@@ -46,5 +56,23 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function setupPasswordToggle(toggleId, passwordId) {
+            const toggleButton = document.getElementById(toggleId);
+            const passwordInput = document.getElementById(passwordId);
+
+            toggleButton.addEventListener('click', function () {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        setupPasswordToggle('toggleOldPassword', 'oldPassword');
+        setupPasswordToggle('toggleNewPassword', 'newPassword');
+        setupPasswordToggle('toggleConfirmPassword', 'confirmPassword');
+    </script>
 </body>
 </html>
