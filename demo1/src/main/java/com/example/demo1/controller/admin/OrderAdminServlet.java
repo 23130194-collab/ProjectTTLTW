@@ -97,12 +97,6 @@ public class OrderAdminServlet extends HttpServlet {
                     if (order != null) {
                         ProductService productService = new ProductService();
                         List<OrderItem> items = orderService.getOrderItemsByOrderId(orderId);
-
-                        if (items != null) {
-                            for (OrderItem item : items) {
-                                productService.incrementSoldQuantity(item.getProductId(), item.getQuantity());
-                            }
-                        }
                     }
                 }
             }
