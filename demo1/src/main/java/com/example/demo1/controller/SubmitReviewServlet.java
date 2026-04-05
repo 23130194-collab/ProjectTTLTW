@@ -1,9 +1,7 @@
 package com.example.demo1.controller;
 
-import com.example.demo1.dao.NotificationDao;
 import com.example.demo1.dao.ProductDao;
 import com.example.demo1.dao.ReviewDao;
-import com.example.demo1.model.Notification;
 import com.example.demo1.model.Product;
 import com.example.demo1.model.User;
 

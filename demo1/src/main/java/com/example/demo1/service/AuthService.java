@@ -30,7 +30,7 @@ public class AuthService {
     public void register(String name, String email, String hashedPassword, String otp, Timestamp otpExpiry) {
         authDao.insertUser(name, email, hashedPassword, otp, otpExpiry);
     }
-    
+
     public void activateUser(int userId) {
         authDao.activateUser(userId);
     }
