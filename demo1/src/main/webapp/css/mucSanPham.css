@@ -272,14 +272,20 @@ body {
 }
 
 .confirm-button {
-    border: none;
-    background: #007bff;
+    border: #d70018;
+    background: #d70018;
     color: white;
     font-weight: 600;
 }
 
 .confirm-button:hover {
-    background: #0056b3;
+    background: #b30014;
+}
+
+.confirm-button:disabled {
+    background: #ff677d;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 @media (max-width: 768px) {
@@ -349,6 +355,18 @@ body {
 
 .remove-filter-btn:hover {
     opacity: 1;
+}
+
+.clear-all-btn {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.clear-all-btn:hover {
+    text-decoration: none;
 }
 
 .sort-wrapper {
