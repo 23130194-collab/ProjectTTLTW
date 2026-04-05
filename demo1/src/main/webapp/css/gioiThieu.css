@@ -1,0 +1,272 @@
+ body {
+            font-family: "Segoe UI", sans-serif;
+            background: #f6f6f6;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .hero-section {
+            margin-top: 20px;
+            min-height: 100px;
+            background: linear-gradient(90deg, #cecfd1, #e5e7eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 12px;
+            padding-bottom: 25px;
+        }
+
+
+
+        .hero-content {
+            text-align: center;
+            color: rgb(45, 44, 44);
+            max-width: 800px;
+
+        }
+
+        .hero-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: 8px;
+            margin-bottom: 0px;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            opacity: 0.95;
+           
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            font-weight: 600;
+            opacity: 0.85;
+            max-width: 600px;
+            margin: 0 auto;
+            
+        }
+
+        .section {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: "Segoe UI", sans-serif;
+            font-size: 2.5rem;
+            color: #3a3a3a;
+            margin-bottom: 60px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* Values Section */
+        .values-section {
+            background: #f8fafc;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .value-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .value-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .value-title {
+            font-family: "Segoe UI", sans-serif;
+            font-size: 1.5rem;
+            color: #d32f2f;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .value-desc {
+            color: #64748b;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        /* Vision Section */
+        .vision-section {
+            background: white;
+        }
+
+        .vision-content {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+
+        .vision-image {
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .vision-image img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .vision-text {
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .vision-text h2 {
+            font-family: "Segoe UI", sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+
+        .vision-text p {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            color: #475569;
+        }
+
+        /* Core Section */
+        .core-section {
+            background: #f8fafc;
+        }
+
+        .core-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .core-item {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .core-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .core-number {
+            font-family: "Segoe UI", sans-serif;
+            font-size: 2.5rem;
+            color: #d32f2f;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .core-title {
+            font-family: "Segoe UI", sans-serif;
+            font-size: 1.3rem;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .core-desc {
+            color: #64748b;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* Mission Section */
+        .mission-section {
+            background: white;
+        }
+
+        .mission-content {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .mission-text {
+            background: #f8fafc;
+            padding: 50px;
+            border-radius: 12px;
+            border-left: 6px solid #d32f2f;
+        }
+
+        .mission-text h2 {
+            font-family: "Segoe UI", sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+
+        .mission-text p {
+            font-size: 1.1rem;
+            line-height: 2;
+            color: #475569;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: #d32f2f;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3rem;
+                letter-spacing: 4px;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .vision-text h2 {
+                font-size: 2rem;
+            }
+
+            .mission-text h2 {
+                font-size: 2rem;
+            }
+
+            .section {
+                padding: 60px 20px;
+            }
+
+            .mission-text {
+                padding: 30px;
+            }
+        }
