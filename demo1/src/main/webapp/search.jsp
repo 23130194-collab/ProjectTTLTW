@@ -24,11 +24,45 @@
             gap: 20px;
             width: 100%;
         }
-
         .page-title {
-            margin: 20px 0;
+            margin: 20px 0 5px 0;
             font-size: 1.5rem;
             color: #333;
+        }
+        .search-info {
+            margin-bottom: 20px;
+            color: #262626;
+            font-size: 18px;
+        }
+        .no-result-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            margin: 20px 0;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn-return-home {
+            display: inline-block;
+            background-color: #D8081F;
+            color: white !important;
+            text-decoration: none;
+            padding: 12px 0;
+            width: 220px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.3s ease;
+            margin: 20px 10px;
+        }
+        .btn-return-home:hover {
+            background-color: #b30619;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -49,8 +83,7 @@
 
         <div class="search-box">
             <form action="search" method="get" style="display: flex; width: 100%;">
-                <input type="text" name="keyword" value="${selectedKeyword}" placeholder="Bạn muốn mua gì hôm nay?"
-                       autocomplete="off">
+                <input type="text" name="keyword" value="${selectedKeyword}" placeholder="Bạn muốn mua gì hôm nay?" autocomplete="off">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
         </div>
@@ -59,12 +92,9 @@
             <%
                 int totalQuantity = 0;
                 Map<Integer, CartItem> cart = (Map<Integer, CartItem>) session.getAttribute("cart");
-
-                if (cart != null) {
-                    totalQuantity = cart.size();
-                }
+                if (cart != null) { totalQuantity = cart.size(); }
             %>
-            <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn" title="Giỏ hàng">
+            <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <% if (totalQuantity > 0) { %>
                 <span class="cart-badge"><%= totalQuantity %></span>
@@ -94,8 +124,7 @@
                             <img src="${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:when>
                         <c:otherwise>
-                            <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon"
-                                 alt="${cat.name}">
+                            <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
                         ${cat.name}
@@ -106,79 +135,98 @@
     </div>
 </header>
 <div class="overlay" id="overlay"></div>
+
 <main class="container">
     <h1 class="page-title">Kết quả tìm kiếm cho: "${selectedKeyword}"</h1>
-    <div class="sort-wrapper">
-        <div class="sort-buttons">
-            <c:url var="baseUrl" value="search">
-                <c:param name="keyword" value="${selectedKeyword}"/>
-            </c:url>
-            <a href="${baseUrl}&sort=popular" class="sort-btn ${selectedSortOrder == 'popular' ? 'active' : ''}">Phổ
-                biến</a>
-            <a href="${baseUrl}&sort=price_asc" class="sort-btn ${selectedSortOrder == 'price_asc' ? 'active' : ''}">Giá
-                Thấp - Cao</a>
-            <a href="${baseUrl}&sort=price_desc" class="sort-btn ${selectedSortOrder == 'price_desc' ? 'active' : ''}">Giá
-                Cao - Thấp</a>
-        </div>
-    </div>
-    <div class="product-grid">
-        <c:forEach items="${productList}" var="p">
-            <div class="product-card">
-                <c:if test="${p.discountValue > 0}">
-                    <div class="discount-tag">
-                        <span class="discount-percent">-<fmt:formatNumber value="${p.discountValue}"
-                                                                          pattern="#"/>%</span>
-                    </div>
-                </c:if>
-                <a href="product-detail?id=${p.id}" class="product-link">
-                    <img src="${p.image.startsWith('http') ? p.image : pageContext.request.contextPath.concat('/').concat(p.image)}"
-                         class="product-image" alt="${p.name}">
-                    <h3 class="product-title">${p.name}</h3>
-                    <div class="price-section">
-                        <div class="current-price"><fmt:formatNumber value="${p.price}" pattern="#,###"/>đ</div>
-                        <c:if test="${p.discountValue > 0}">
-                            <div class="original-price"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
-                        </c:if>
-                    </div>
+
+    <c:choose>
+        <c:when test="${empty productList}">
+            <div class="no-result-container">
+                <h2>Không tìm thấy sản phẩm phù hợp với từ khóa "${selectedKeyword}".</h2>
+                <p>Vui lòng thử lại với từ khóa khác hoặc quay về trang chủ.</p>
+                <a href="${pageContext.request.contextPath}/home" class="btn-return-home">
+                    Quay lại trang chủ
                 </a>
-                <div class="product-footer-interaction">
-                    <div class="action-item rating">
-                        <div class="stars-container">
-                            <div class="stars-outer">
-                                <div class="stars-inner" style="width: ${(p.avgRating / 5) * 100}%;"></div>
-                            </div>
-                        </div>
-                        <span class="rating-value"><fmt:formatNumber value="${p.avgRating}" pattern="0.0"/></span>
-                    </div>
-                    <button class="action-item like-btn"><i class="fa-regular fa-heart"></i></button>
+            </div>
+        </c:when>
+
+        <c:otherwise>
+            <div class="search-info">
+                Tìm thấy <strong>${totalProducts}</strong> sản phẩm.
+            </div>
+
+            <div class="sort-wrapper">
+                <div class="sort-buttons">
+                    <c:url var="baseUrl" value="search">
+                        <c:param name="keyword" value="${selectedKeyword}"/>
+                    </c:url>
+                    <a href="${baseUrl}&sort=popular" class="sort-btn ${selectedSortOrder == 'popular' ? 'active' : ''}">Phổ biến</a>
+                    <a href="${baseUrl}&sort=price_asc" class="sort-btn ${selectedSortOrder == 'price_asc' ? 'active' : ''}">Giá Thấp - Cao</a>
+                    <a href="${baseUrl}&sort=price_desc" class="sort-btn ${selectedSortOrder == 'price_desc' ? 'active' : ''}">Giá Cao - Thấp</a>
                 </div>
             </div>
-        </c:forEach>
-    </div>
-    <c:if test="${totalPages > 1}">
-        <div class="pagination-container">
-            <c:forEach begin="1" end="${totalPages}" var="i">
-                <c:url var="pageUrl" value="search">
-                    <c:param name="keyword" value="${selectedKeyword}"/>
-                    <c:param name="sort" value="${selectedSortOrder}"/>
-                    <c:param name="page" value="${i}"/>
-                </c:url>
-                <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}">${i}</a>
-            </c:forEach>
-        </div>
-    </c:if>
+
+            <div class="product-grid">
+                <c:forEach items="${productList}" var="p">
+                    <div class="product-card">
+                        <c:if test="${p.discountValue > 0}">
+                            <div class="discount-tag">
+                                <span class="discount-percent">-<fmt:formatNumber value="${p.discountValue}" pattern="#"/>%</span>
+                            </div>
+                        </c:if>
+                        <a href="product-detail?id=${p.id}" class="product-link">
+                            <img src="${p.image.startsWith('http') ? p.image : pageContext.request.contextPath.concat('/').concat(p.image)}"
+                                 class="product-image" alt="${p.name}">
+                            <h3 class="product-title">${p.name}</h3>
+                            <div class="price-section">
+                                <div class="current-price"><fmt:formatNumber value="${p.price}" pattern="#,###"/>đ</div>
+                                <c:if test="${p.discountValue > 0}">
+                                    <div class="original-price"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
+                                </c:if>
+                            </div>
+                        </a>
+                        <div class="product-footer-interaction">
+                            <div class="action-item rating">
+                                <div class="stars-container">
+                                    <div class="stars-outer">
+                                        <div class="stars-inner" style="width: ${(p.avgRating / 5) * 100}%;"></div>
+                                    </div>
+                                </div>
+                                <span class="rating-value"><fmt:formatNumber value="${p.avgRating}" pattern="0.0"/></span>
+                            </div>
+                            <button class="action-item like-btn">
+                                <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+
+            <c:if test="${totalPages > 1}">
+                <div class="pagination-container">
+                    <c:forEach begin="1" end="${totalPages}" var="i">
+                        <c:url var="pageUrl" value="search">
+                            <c:param name="keyword" value="${selectedKeyword}"/>
+                            <c:param name="sort" value="${selectedSortOrder}"/>
+                            <c:param name="page" value="${i}"/>
+                        </c:url>
+                        <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}">${i}</a>
+                    </c:forEach>
+                </div>
+            </c:if>
+        </c:otherwise>
+    </c:choose>
 </main>
+
 <footer>
     <div class="footer-container">
         <div class="footer-main-content">
-
             <div class="footer-col col-1">
                 <h4>Tổng đài hỗ trợ miễn phí</h4>
                 <ul>
-                    <li>Mua hàng - bảo hành 1800.2097 (7h30 - 18h30)</li>
-                    <li>Khiếu nại 1800.2063 (8h00 - 21h30)</li>
+                    <li>Mua hàng - bảo hành 1800.2097 (7h30 - 18h30) [cite: 30]</li>
+                    <li>Khiếu nại 1800.2063 (8h00 - 21h30) [cite: 30]</li>
                 </ul>
-
                 <h4>Phương thức thanh toán</h4>
                 <div class="payment-methods">
                     <img src="https://i.postimg.cc/FsJvZGsX/apple-Pay.png" alt="Apple Pay">
@@ -187,54 +235,24 @@
                     <img src="https://i.postimg.cc/bYn803wR/Zalo-Pay.png" alt="Zalo Pay">
                 </div>
             </div>
-
             <div class="footer-col col-2">
                 <h4>Thông tin về chính sách</h4>
                 <ul>
-                    <li>Mua hàng và thanh toán online</li>
-                    <li>Mua hàng trả góp online</li>
-                    <li>Mua hàng trả góp bằng thẻ tín dụng</li>
-                    <li>Chính sách giao hàng</li>
-                    <li>Chính sách đổi trả</li>
-                    <li>Đổi điểm</li>
-                    <li>Xem ưu đãi</li>
-                    <li>Tra cứu hóa đơn điện tử</li>
-                    <li>Thông tin hóa đơn mua hàng</li>
-                    <li>Trung tâm bảo hành chính hãng</li>
-                    <li>Quy định về việc sao lưu dữ liệu</li>
-                    <li>Thuế VAT</li>
+                    <li>Chính sách đổi trả [cite: 33]</li>
+                    <li>Chính sách giao hàng [cite: 33]</li>
                 </ul>
             </div>
-
-            <div class="footer-col col-3">
-                <h4>Dịch vụ và thông tin khác</h4>
-                <ul>
-                    <li>Khách hàng doanh nghiệp</li>
-                    <li>Ưu đãi thanh toán</li>
-                    <li>Quy chế hoạt động</li>
-                    <li>Chính sách bảo mật thông tin cá nhân</li>
-                    <li>Chính sách bảo hành</li>
-                    <li>Liên hệ hợp tác kinh doanh</li>
-                    <li>Tuyển dụng</li>
-                    <li>Dịch vụ bảo hành</li>
-                </ul>
-            </div>
-
             <div class="footer-col col-4">
                 <h4>Kết nối với TechNova</h4>
                 <div class="connect-methods">
                     <img src="https://i.postimg.cc/CLjh0my7/youtube.png" alt="Youtube">
                     <img src="https://i.postimg.cc/rsBv3Xyx/facebook.png" alt="Facebook">
-                    <img src="https://i.postimg.cc/vBkYYKHS/tiktok.png" alt="TikTok">
-                    <img src="https://i.postimg.cc/k55qxC26/Zalo.png" alt="Zalo">
                 </div>
             </div>
-
         </div>
-        <div class="footer-subscription"></div>
     </div>
 </footer>
 
-<script src="js/header.js"></script>
+<script src="${pageContext.request.contextPath}/js/header.js"></script>
 </body>
 </html>
