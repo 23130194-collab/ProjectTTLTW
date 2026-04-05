@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 
 public class User {
     @SerializedName("id")
+    private String socialId;
 
     private int userId;
     private int role;
@@ -18,10 +19,22 @@ public class User {
     private String gender;
     private Date birthday;
     private String status;
+    private String otpCode;
+    private Timestamp otpExpiry;
+    private Timestamp passwordUpdatedAt;
+    private String updated_at;
     private Timestamp created_at;
     private int orderCount;
 
     public User() {
+    }
+
+    public String getSocialId() {
+        return socialId;
+    }
+
+    public void setSocialId(String socialId) {
+        this.socialId = socialId;
     }
 
     public int getUserId() {
@@ -110,6 +123,38 @@ public class User {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
+
+    public Timestamp getOtpExpiry() {
+        return otpExpiry;
+    }
+
+    public void setOtpExpiry(Timestamp otpExpiry) {
+        this.otpExpiry = otpExpiry;
+    }
+
+    public Timestamp getPasswordUpdatedAt() {
+        return passwordUpdatedAt;
+    }
+
+    public void setPasswordUpdatedAt(Timestamp passwordUpdatedAt) {
+        this.passwordUpdatedAt = passwordUpdatedAt;
+    }
+
+    public String getUpdated_at() {
+        return updated_at;
+    }
+
+    public void setUpdated_at(String updated_at) {
+        this.updated_at = updated_at;
     }
 
     public Timestamp getCreated_at() {

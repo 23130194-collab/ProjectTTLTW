@@ -46,5 +46,13 @@ public class FavoriteDao {
         );
     }
 
+    public void deleteByProductId(int productId) {
+        jdbi.useHandle(handle ->
+                handle.createUpdate("DELETE FROM favorites WHERE product_id = :productId")
+                        .bind("productId", productId)
+                        .execute()
+        );
+    }
+
 
 }

@@ -1,8 +1,6 @@
 package com.example.demo1.controller;
 
-import com.example.demo1.dao.NotificationDao;
 import com.example.demo1.dao.OrderDao;
-import com.example.demo1.model.Notification;
 import com.example.demo1.model.Order;
 import com.example.demo1.model.OrderItem;
 import com.example.demo1.model.User;
@@ -125,15 +123,6 @@ public class OrderController extends HttpServlet {
                 if (order != null && order.getUserId() == user.getId()) {
                     if ("Chờ xác nhận".equals(order.getOrderStatus())) {
                         orderDao.cancelOrder(orderId);
-                        try {
-                            NotificationDao notiDao = new NotificationDao();
-                            String adminContent = "Khách hàng " + user.getName() + " vừa HỦY đơn hàng " + order.getOrderCode();
-                            String adminLink = "admin/orders?action=view&id=" + order.getId();
-                            Notification adminNoti = new Notification(null, adminContent, adminLink, 1);
-                            notiDao.insert(adminNoti);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
                     }
                 }
                 response.sendRedirect(request.getContextPath() + "/order-detail?id=" + orderId);

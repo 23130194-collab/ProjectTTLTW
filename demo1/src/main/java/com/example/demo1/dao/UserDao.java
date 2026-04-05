@@ -17,22 +17,44 @@ public class UserDao {
                 .stream().findFirst().orElse(null));
     }
 
-    public void insertUser(String name, String email, String password) {
+    public void insertUser(String name, String email, String password, String otp, Timestamp otpExpiry) {
         jdbi.useHandle(h ->
-                h.createUpdate("INSERT INTO users(name, email, password, role, status) VALUES (:name, :email, :password, :role, :status)")
+                h.createUpdate("INSERT INTO users(name, email, password, role, status, otp_code, otp_expiry) VALUES (:name, :email, :password, :role, :status, :otp_code, :otp_expiry)")
                         .bind("name", name)
                         .bind("email", email)
                         .bind("password", password)
                         .bind("role", 0)
                         .bind("status", "unverified")
+                        .bind("otp_code", otp)
+                        .bind("otp_expiry", otpExpiry)
                         .execute()
         );
     }
 
     public void activateUser(int userId) {
         jdbi.useHandle(h ->
-                h.createUpdate("UPDATE users SET status = 'active' WHERE id = :id")
+                h.createUpdate("UPDATE users SET status = 'active', otp_code = NULL, otp_expiry = NULL WHERE id = :id")
                         .bind("id", userId)
+                        .execute()
+        );
+    }
+
+    public void updateOtp(String email, String otp, Timestamp otpExpiry) {
+        jdbi.useHandle(h ->
+                h.createUpdate("UPDATE users SET otp_code = :otp_code, otp_expiry = :otp_expiry WHERE email = :email")
+                        .bind("otp_code", otp)
+                        .bind("otp_expiry", otpExpiry)
+                        .bind("email", email)
+                        .execute()
+        );
+    }
+
+    public void updatePassword(String email, String password, Timestamp updatedAt) {
+        jdbi.useHandle(h ->
+                h.createUpdate("UPDATE users SET password = :password, password_updated_at = :updatedAt, otp_code = NULL, otp_expiry = NULL WHERE email = :email")
+                        .bind("password", password)
+                        .bind("updatedAt", updatedAt)
+                        .bind("email", email)
                         .execute()
         );
     }
@@ -44,7 +66,6 @@ public class UserDao {
                         .execute()
         );
     }
-
 
     public void updateUserStatus(int userId, String newStatus) {
         jdbi.useHandle(h ->
@@ -129,5 +150,34 @@ public class UserDao {
                         .mapTo(Integer.class)
                         .one()
         );
+    }
+
+    public void insertUser(String name, String email, String password) {
+        jdbi.useHandle(h ->
+                h.createUpdate("INSERT INTO users(name, email, password, role, status) VALUES (:name, :email, :password, :role, :status)")
+                        .bind("name", name)
+                        .bind("email", email)
+                        .bind("password", password)
+                        .bind("role", 0)
+                        .bind("status", "unverified")
+                        .execute()
+        );
+    }
+
+    public void createUser(User user) {
+        jdbi.useHandle(handle -> {
+            int defaultRole = 2;
+            String defaultStatus = "active";
+
+            handle.createUpdate("INSERT INTO users (role, email, password, name, status, social_id) " +
+                            "VALUES (:role, :email, NULL, :name, :status, :social_id)")
+                    .bind("role", defaultRole)
+                    .bind("email", user.getEmail())
+                    .bind("name", user.getName())
+                    .bind("status", defaultStatus)
+                    .bind("social_id", user.getSocialId())
+                    .execute();
+
+        });
     }
 }
