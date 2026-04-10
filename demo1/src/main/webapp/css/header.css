@@ -92,7 +92,6 @@ header.header {
     align-items: center;
     background: white;
     border-radius: 25px;
-    overflow: hidden;
 }
 
 .search-box input {
@@ -101,6 +100,7 @@ header.header {
     outline: none;
     width: 430px;
     font-size: 15px;
+    border-radius: 25px;
 }
 
 .search-box button {

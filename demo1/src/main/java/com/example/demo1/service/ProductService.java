@@ -147,4 +147,8 @@ public class ProductService {
     public Category getCategory(int categoryId) {
         return cdao.getById(categoryId);
     }
+
+    public List<ProductSuggestion> getSuggestions(String keyword, int limit) {
+        return pdao.searchSuggestions(keyword, limit);
+    }
 }

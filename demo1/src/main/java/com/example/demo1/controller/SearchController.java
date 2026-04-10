@@ -25,7 +25,12 @@ public class SearchController extends HttpServlet {
         String keyword = request.getParameter("keyword");
 
         if (keyword == null || keyword.trim().isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/home");
+            String referer = request.getHeader("Referer");
+            if (referer != null && !referer.isEmpty()) {
+                response.sendRedirect(referer);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/home");
+            }
             return;
         }
 
