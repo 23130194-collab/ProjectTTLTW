@@ -272,14 +272,20 @@ body {
 }
 
 .confirm-button {
-    border: none;
-    background: #007bff;
+    border: #d70018;
+    background: #d70018;
     color: white;
     font-weight: 600;
 }
 
 .confirm-button:hover {
-    background: #0056b3;
+    background: #b30014;
+}
+
+.confirm-button:disabled {
+    background: #ff677d;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 @media (max-width: 768px) {
@@ -349,6 +355,18 @@ body {
 
 .remove-filter-btn:hover {
     opacity: 1;
+}
+
+.clear-all-btn {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.clear-all-btn:hover {
+    text-decoration: none;
 }
 
 .sort-wrapper {
@@ -511,8 +529,9 @@ body {
     width: 100%;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    flex-wrap: nowrap;
+    margin-top: auto;
+    padding-top: 12px;
+    gap: 12px;
 }
 
 .product-footer-interaction .separator {
@@ -530,8 +549,8 @@ body {
     padding: 4px 8px;
     border-radius: 6px;
     transition: all 0.2s;
-    border: none;
     background: transparent;
+    border: none;
 }
 
 .action-item:hover {
@@ -591,33 +610,46 @@ body {
 
 .like-btn {
     color: #a19f9f;
-    text-decoration: none;
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .like-btn i {
-    font-size: 16px;
-    transition: color 0.2s;
+    font-size: 18px;
+    transition: color 0.25s ease;
 }
 
-.like-btn:hover,
-.like-btn:hover i,
-.like-btn:hover .action-label {
+.like-btn i.fa-regular {
+    color: #a19f9f !important;
+}
+
+.like-btn.is-favorite,
+.like-btn.is-favorite i,
+.like-btn.is-favorite .action-label {
+    color: #d70018 !important;
+}
+
+.like-btn.is-favorite i.fa-solid {
+    color: #d70018 !important;
+}
+
+.like-btn:not(.is-favorite):hover,
+.like-btn:not(.is-favorite):hover i {
     color: #d70018;
 }
 
-.like-btn:focus,
-.like-btn:focus i,
-.like-btn:focus .action-label {
-    color: #d70018;
+.like-btn:focus {
     outline: none;
+    background-color: #f8f8f8;
 }
 
-.like-btn:focus i {
-    font-weight: 900;
-}
-
-.like-btn .fa-solid.fa-heart {
-    color: #d70018;
+.like-btn .fa-solid.fa-heart,
+.like-btn:hover .fa-solid.fa-heart {
+    color: #d70018 !important;
 }
 
 .pagination-container {

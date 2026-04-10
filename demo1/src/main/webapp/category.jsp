@@ -228,6 +228,13 @@
                     </c:forEach>
                 </c:forEach>
             </div>
+            <c:url var="clearAllUrl" value="list-product">
+                <c:param name="id" value="${category.id}"/>
+                <c:if test="${not empty selectedBrandId}">
+                    <c:param name="brandId" value="${selectedBrandId}"/>
+                </c:if>
+            </c:url>
+            <a href="${clearAllUrl}" class="clear-all-btn">Bỏ chọn tất cả</a>
         </c:if>
     </div>
 
@@ -255,53 +262,56 @@
         </div>
     </div>
 
-    <div class="product-grid">
-        <c:forEach items="${productList}" var="p">
-            <div class="product-card" data-product="Core i5" data-generation="Intel thế hệ 12" data-socket="LGA 1700"
-                 data-core="6">
-                <c:if test="${p.discountValue > 0}">
-                    <div class="discount-tag">
-                        <span class="discount-percent">-<fmt:formatNumber value="${p.discountValue}"
-                                                                          pattern="#"/>%</span>
-                    </div>
-                </c:if>
-                <a href="product-detail?id=${p.id}" class="product-link">
-                    <img src="${p.image}" alt="${p.name}" class="product-image">
-                    <h3 class="product-title">${p.name}</h3>
-                    <div class="price-section">
-                        <div class="current-price"><fmt:formatNumber value="${p.price}" pattern="#,###"/>đ</div>
+    <c:choose>
+        <c:when test="${not empty productList}">
+            <div class="product-grid">
+                <c:forEach items="${productList}" var="p">
+                    <div class="product-card" data-product="Core i5" data-generation="Intel thế hệ 12" data-socket="LGA 1700"
+                         data-core="6">
                         <c:if test="${p.discountValue > 0}">
-                            <div class="original-price"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
-                        </c:if>
-                    </div>
-                </a>
-
-                <div class="product-footer-interaction">
-                    <div class="action-item rating">
-                        <div class="stars-container">
-                            <div class="stars-outer">
-                                <div class="stars-inner" style="width: ${ (p.avgRating * 1.0 / 5) * 100 }%;"></div>
+                            <div class="discount-tag">
+                                <span class="discount-percent">-<fmt:formatNumber value="${p.discountValue}"
+                                                                                  pattern="#"/>%</span>
                             </div>
+                        </c:if>
+                        <a href="product-detail?id=${p.id}" class="product-link">
+                            <img src="${p.image}" alt="${p.name}" class="product-image">
+                            <h3 class="product-title">${p.name}</h3>
+                            <div class="price-section">
+                                <div class="current-price"><fmt:formatNumber value="${p.price}" pattern="#,###"/>đ</div>
+                                <c:if test="${p.discountValue > 0}">
+                                    <div class="original-price"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
+                                </c:if>
+                            </div>
+                        </a>
+
+                        <div class="product-footer-interaction">
+                            <div class="action-item rating">
+                                <div class="stars-container">
+                                    <div class="stars-outer">
+                                        <div class="stars-inner" style="width: ${ (p.avgRating * 1.0 / 5) * 100 }%;"></div>
+                                    </div>
+                                </div>
+                                <span class="rating-value"><fmt:formatNumber value="${p.avgRating}" pattern="0.0"/></span>
+                            </div>
+
+                            <button type="button"
+                                    class="action-item like-btn ${p.favorite ? 'is-favorite' : ''}"
+                                    data-id="${p.id}">
+                                <i class="fa-heart ${p.favorite ? 'fa-solid' : 'fa-regular'}"></i>
+                            </button>
                         </div>
-                        <span class="rating-value"><fmt:formatNumber value="${p.avgRating}" pattern="0.0"/></span>
                     </div>
-
-                    <a href="${pageContext.request.contextPath}/toggle-favorite?id=${p.id}" class="action-item like-btn"
-                       style="text-decoration: none; border: none; background: none; color: #d70018;">
-                        <c:choose>
-                            <c:when test="${p.favorite}">
-                                <i class="fa-solid fa-heart"></i>
-                            </c:when>
-                            <c:otherwise>
-                                <i class="fa-regular fa-heart"></i>
-                            </c:otherwise>
-                        </c:choose>
-                    </a>
-
-                </div>
+                </c:forEach>
             </div>
-        </c:forEach>
-    </div>
+        </c:when>
+        <c:otherwise>
+            <div class="no-products-message" style="text-align: center; padding: 50px; font-size: 1.2em; font-weight: 600">
+                Không có sản phẩm phù hợp với tiêu chí bạn tìm
+            </div>
+        </c:otherwise>
+    </c:choose>
+
 
     <c:if test="${totalPages > 1}">
         <div class="pagination-container">
@@ -423,9 +433,12 @@
     </div>
 </footer>
 
-
-<script src="js/header.js"></script>
-<script src="js/boLoc.js"></script>
-<script src="js/dualBannerSlideshow.js"></script>
+<script>
+    const globalContextPath = "${pageContext.request.contextPath}";
+</script>
+<script src="${pageContext.request.contextPath}/js/header.js"></script>
+<script src="${pageContext.request.contextPath}/js/boLoc.js"></script>
+<script src="${pageContext.request.contextPath}/js/dualBannerSlideshow.js"></script>
+<script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 </body>
 </html>

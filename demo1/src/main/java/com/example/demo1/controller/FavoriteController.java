@@ -40,15 +40,27 @@ public class FavoriteController extends HttpServlet {
 
         if (path.equals("/toggle-favorite")) {
             int productId = Integer.parseInt(request.getParameter("id"));
+
+            boolean isNowFavorite;
             if (favDao.isFavorite(user.getId(), productId)) {
                 favDao.removeFavorite(user.getId(), productId);
+                isNowFavorite = false;
             } else {
                 favDao.addFavorite(user.getId(), productId);
+                isNowFavorite = true;
             }
-            response.sendRedirect(referer != null ? referer : request.getContextPath() + "/home");
+
+            String requestedWith = request.getHeader("X-Requested-With");
+            if ("XMLHttpRequest".equals(requestedWith)) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"isFavorite\": " + isNowFavorite + "}");
+                return;
+            } else {
+                response.sendRedirect(referer != null ? referer : request.getContextPath() + "/home");
+            }
             return;
         }
-
 
         OrderDao orderDao = new OrderDao();
         request.setAttribute("totalOrders", orderDao.countTotalOrdersByUserId(user.getId()));

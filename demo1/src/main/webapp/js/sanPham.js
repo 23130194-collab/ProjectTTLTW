@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const globalContextPath = document.querySelector('script[src*="sanPham.js"]').getAttribute('src')
+        .replace('/js/sanPham.js', '');
     const specBtn = document.querySelector('.spec-btn');
     const specModal = document.getElementById('spec-modal');
     const closeSpecBtn = document.getElementById('close-spec-modal');
@@ -48,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
             else btnScrollTop.classList.remove('show');
         });
         btnScrollTop.addEventListener('click', () => {
-            window.scrollTo({top: 0, behavior: 'smooth'});
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
@@ -59,8 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ratingGroup) {
         function highlightStars(count) {
             ratingOptions.forEach((option, index) => {
-                if (index < count) option.classList.add('star-fill');
-                else option.classList.remove('star-fill');
+                option.classList.toggle('star-fill', index < count);
             });
         }
 
@@ -76,39 +77,66 @@ document.addEventListener('DOMContentLoaded', function () {
             option.addEventListener('mouseenter', () => highlightStars(index + 1));
         });
         ratingGroup.addEventListener('mouseleave', resetStars);
-        ratingInputs.forEach((input) => {
-            input.addEventListener('change', resetStars);
-        });
+        ratingInputs.forEach(input => input.addEventListener('change', resetStars));
+
         resetStars();
     }
 
     const mainImage = document.getElementById('main-product-img');
+    const thumbnailsWrapper = document.querySelector('.thumbnails-wrapper');
     const thumbnailImages = document.querySelectorAll('.thumbnails-wrapper img');
+    const btnPrev = document.getElementById('prev-thumb-btn');
+    const btnNext = document.getElementById('next-thumb-btn');
 
-    if (mainImage && thumbnailImages.length > 0) {
+    if (mainImage && thumbnailsWrapper && thumbnailImages.length > 0) {
+
         thumbnailImages.forEach(thumb => {
             thumb.addEventListener('click', function () {
-                const newSrc = this.getAttribute('data-main-img');
-                if (newSrc) mainImage.src = newSrc;
+                mainImage.src = this.getAttribute('data-main-img');
 
                 thumbnailImages.forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
             });
         });
-    }
 
-    const sliderWrapper = document.querySelector('.thumbnails-wrapper');
-    const btnPrev = document.querySelector('.thumb-nav.prev-btn');
-    const btnNext = document.querySelector('.thumb-nav.next-btn');
+        if (thumbnailImages[0]) thumbnailImages[0].classList.add('active');
 
-    if (sliderWrapper && btnPrev && btnNext) {
-        const scrollAmount = (75 + 10) * 2;
-        btnNext.addEventListener('click', () => {
-            sliderWrapper.scrollBy({left: scrollAmount, behavior: 'smooth'});
-        });
-        btnPrev.addEventListener('click', () => {
-            sliderWrapper.scrollBy({left: -scrollAmount, behavior: 'smooth'});
-        });
+        const visibleCount = 7;
+        const thumbWidth = 85;
+
+        function scrollToShow(index) {
+            const scrollLeft = Math.max(0, (index - visibleCount + 2) * thumbWidth);
+            thumbnailsWrapper.scrollTo({
+                left: scrollLeft,
+                behavior: 'smooth'
+            });
+        }
+
+        function changeImage(direction) {
+            const currentActive = document.querySelector('.thumbnails-wrapper img.active');
+            if (!currentActive) return;
+
+            let nextActive;
+            if (direction === 'next') {
+                nextActive = currentActive.nextElementSibling || thumbnailImages[0];
+            } else {
+                nextActive = currentActive.previousElementSibling || thumbnailImages[thumbnailImages.length - 1];
+            }
+
+            if (nextActive) {
+                nextActive.click();
+                const newIndex = Array.from(thumbnailImages).indexOf(nextActive);
+                scrollToShow(newIndex);
+            }
+        }
+
+        if (btnNext) {
+            btnNext.addEventListener('click', () => changeImage('next'));
+        }
+
+        if (btnPrev) {
+            btnPrev.addEventListener('click', () => changeImage('prev'));
+        }
     }
 
     const reviewForm = document.getElementById('form-review-product');
@@ -116,9 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (reviewForm && txtReviewContent) {
         reviewForm.addEventListener('submit', (e) => {
-            const content = txtReviewContent.value;
-
-            if (content.trim() === "") {
+            if (txtReviewContent.value.trim() === "") {
                 alert("Bạn chưa nhập nội dung đánh giá!");
                 e.preventDefault();
             }
@@ -131,8 +157,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const productIdInput = document.querySelector('input[name="productId"]');
 
     if (reviewsList && filterReviewInputs.length > 0 && productIdInput) {
-        const productId = productIdInput.value;
-
         let currentOffset = 5;
         let currentFilter = 0;
         let isLoading = false;
@@ -144,10 +168,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const formattedDate = new Date(review.createdAt).toLocaleDateString('vi-VN');
 
-            let ratingLabel = 'Bình thường';
-            if (review.rating >= 5) ratingLabel = 'Tuyệt vời';
-            else if (review.rating >= 4) ratingLabel = 'Tốt';
-            else if (review.rating < 3) ratingLabel = 'Tệ';
+            let ratingLabel = review.rating >= 5 ? 'Tuyệt vời' :
+                review.rating >= 4 ? 'Tốt' :
+                    review.rating >= 3 ? 'Bình thường' : 'Tệ';
 
             let starsHtml = '';
             for (let i = 1; i <= 5; i++) {
@@ -155,28 +178,25 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             reviewItem.innerHTML = `
-            <div class="reviewer-avatar">${review.userName.substring(0, 1)}</div>
-            <div class="review-content">
-                <div class="reviewer-name">${review.userName}</div>
-                <div class="review-rating">
-                    ${starsHtml}
-                    <span class="rating-label-text">${ratingLabel}</span>
+                <div class="reviewer-avatar">${(review.userName || 'U').substring(0, 1)}</div>
+                <div class="review-content">
+                    <div class="reviewer-name">${review.userName || 'Người dùng ẩn danh'}</div>
+                    <div class="review-rating">
+                        ${starsHtml}
+                        <span class="rating-label-text">${ratingLabel}</span>
+                    </div>
+                    <div class="review-text">${review.content}</div>
+                    <div class="review-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Đánh giá đã đăng vào: ${formattedDate}
+                    </div>
                 </div>
-                <div class="review-text">${review.content}</div>
-                <div class="review-time">
-                    <i class="fa-regular fa-clock"></i>
-                    Đánh giá đã đăng vào: ${formattedDate}
-                </div>
-            </div>
-        `;
+            `;
             return reviewItem;
         }
 
         async function fetchReviews() {
-            if (isLoading) {
-                return;
-            }
-
+            if (isLoading) return;
             isLoading = true;
 
             if (btnSeeMore) {
@@ -184,76 +204,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 btnSeeMore.disabled = true;
             }
 
-            const apiUrl = `${globalContextPath}/api/reviews?productId=${productId}&filter=${currentFilter}&offset=${currentOffset}`;
-
             try {
-                const response = await fetch(apiUrl);
+                const response = await fetch(
+                    `${globalContextPath}/api/reviews?productId=${productIdInput.value}&filter=${currentFilter}&offset=${currentOffset}`
+                );
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error('Network error');
 
                 const newReviews = await response.json();
 
                 if (newReviews.length > 0) {
                     newReviews.forEach(review => {
-                        const reviewElement = createReviewElement(review);
-                        reviewsList.appendChild(reviewElement);
+                        reviewsList.appendChild(createReviewElement(review));
                     });
-
                     currentOffset += newReviews.length;
 
-                    if (newReviews.length < 5 && btnSeeMore) {
-                        btnSeeMore.style.display = 'none';
-                    }
-                } else {
-                    if (btnSeeMore) {
-                        btnSeeMore.style.display = 'none';
-                    }
+                    if (newReviews.length < 5 && btnSeeMore) btnSeeMore.style.display = 'none';
+                } else if (btnSeeMore) {
+                    btnSeeMore.style.display = 'none';
                 }
-
             } catch (error) {
-                console.error('Fetch error:', error);
-                if (btnSeeMore) {
-                    btnSeeMore.textContent = 'Lỗi, thử lại?';
-                }
+                console.error(error);
                 alert('Không thể tải đánh giá. Vui lòng thử lại!');
             } finally {
                 isLoading = false;
                 if (btnSeeMore) {
                     btnSeeMore.disabled = false;
-                    if (btnSeeMore.textContent === 'Đang tải...') {
-                        btnSeeMore.textContent = 'Xem thêm đánh giá';
-                    }
+                    btnSeeMore.textContent = 'Xem thêm đánh giá';
                 }
             }
         }
 
-        if (btnSeeMore) {
-            btnSeeMore.addEventListener('click', fetchReviews);
-        }
+        if (btnSeeMore) btnSeeMore.addEventListener('click', fetchReviews);
 
         filterReviewInputs.forEach(input => {
-            input.addEventListener('change', function () {
-                let newFilterValue = 0;
-                if (this.id === 'filter-all') {
-                    newFilterValue = 0;
-                } else {
-                    const match = this.id.match(/\d+/);
-                    newFilterValue = match ? parseInt(match[0]) : 0;
-                }
-
-                currentFilter = newFilterValue;
-
+            input.addEventListener('change', () => {
+                currentFilter = input.id === 'filter-all' ? 0 : parseInt(input.value) || 0;
                 currentOffset = 0;
-
                 reviewsList.innerHTML = '';
-
-                if (btnSeeMore) {
-                    btnSeeMore.style.display = 'flex';
-                    btnSeeMore.textContent = 'Xem thêm đánh giá';
-                }
-
+                if (btnSeeMore) btnSeeMore.style.display = 'flex';
                 fetchReviews();
             });
         });

@@ -71,6 +71,7 @@ public class SearchController extends HttpServlet {
         request.setAttribute("currentPage", currentPage);
 
         request.setAttribute("totalPages", (int) Math.ceil((double) productPage.getTotalProducts() / PRODUCTS_PER_PAGE));
+        request.setAttribute("totalProducts", productPage.getTotalProducts());
 
         request.getRequestDispatcher("search.jsp").forward(request, response);
     }
