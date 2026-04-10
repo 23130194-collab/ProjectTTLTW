@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 @WebServlet(name = "VerifyServlet", value = "/verify")
 public class VerifyServlet extends HttpServlet {
     private AuthService authService;
+    private static final int MAX_OTP_ATTEMPTS = 5;
 
     @Override
     public void init() throws ServletException {
@@ -25,6 +26,13 @@ public class VerifyServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Integer otpAttemptCount = (Integer) session.getAttribute("otp_attempt_count");
+
+        if (otpAttemptCount != null && otpAttemptCount >= MAX_OTP_ATTEMPTS) {
+            request.setAttribute("otp_error", "Bạn đã nhập sai mã OTP quá nhiều lần. Vui lòng gửi lại mã OTP mới.");
+            request.setAttribute("disable_otp_input", true);
+        }
         request.getRequestDispatcher("/verify.jsp").forward(request, response);
     }
 
@@ -34,6 +42,18 @@ public class VerifyServlet extends HttpServlet {
         String email = (String) session.getAttribute("email_for_verification");
         String otpFlow = (String) session.getAttribute("otp_flow");
         String otp = request.getParameter("otp");
+
+        Integer otpAttemptCount = (Integer) session.getAttribute("otp_attempt_count");
+        if (otpAttemptCount == null) {
+            otpAttemptCount = 0;
+        }
+
+        if (otpAttemptCount >= MAX_OTP_ATTEMPTS) {
+            request.setAttribute("otp_error", "Bạn đã nhập sai mã OTP quá nhiều lần. Vui lòng gửi lại mã OTP mới.");
+            request.setAttribute("disable_otp_input", true);
+            request.getRequestDispatcher("/verify.jsp").forward(request, response);
+            return;
+        }
 
         if (email == null || otpFlow == null || otp == null || otp.trim().isEmpty()) {
             request.setAttribute("error", "Phiên làm việc đã hết hạn hoặc dữ liệu không hợp lệ. Vui lòng thử lại.");
@@ -47,6 +67,7 @@ public class VerifyServlet extends HttpServlet {
             if (user.getOtpExpiry() != null && user.getOtpExpiry().after(new Timestamp(System.currentTimeMillis()))) {
                 session.removeAttribute("email_for_verification");
                 session.removeAttribute("otp_flow");
+                session.removeAttribute("otp_attempt_count");
 
                 if ("registration".equals(otpFlow)) {
                     authService.activateUser(user.getId());
@@ -62,7 +83,15 @@ public class VerifyServlet extends HttpServlet {
                 request.getRequestDispatcher("/verify.jsp").forward(request, response);
             }
         } else {
-            request.setAttribute("otp_error", "Mã OTP không chính xác.");
+            otpAttemptCount++;
+            session.setAttribute("otp_attempt_count", otpAttemptCount);
+
+            if (otpAttemptCount >= MAX_OTP_ATTEMPTS) {
+                request.setAttribute("otp_error", "Bạn đã nhập sai mã OTP quá nhiều lần. Vui lòng gửi lại mã OTP mới.");
+                request.setAttribute("disable_otp_input", true);
+            } else {
+                request.setAttribute("otp_error", "Mã OTP không chính xác. Bạn còn " + (MAX_OTP_ATTEMPTS - otpAttemptCount) + " lần thử.");
+            }
             request.getRequestDispatcher("/verify.jsp").forward(request, response);
         }
     }
