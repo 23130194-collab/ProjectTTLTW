@@ -115,19 +115,12 @@
             <div class="product-left">
                 <h2>${p.name}</h2>
                 <div class="product-actions">
-                    <a href="${pageContext.request.contextPath}/toggle-favorite?id=${p.id}" class="action-item like-btn"
-                       style="text-decoration: none; border: none; background: none; color: #d70018;">
-                        <c:choose>
-                            <c:when test="${p.favorite}">
-                                <i class="fa-solid fa-heart"></i>
-                                <span class="action-label">Yêu thích</span>
-                            </c:when>
-                            <c:otherwise>
-                                <i class="fa-regular fa-heart"></i>
-                                <span class="action-label">Yêu thích</span>
-                            </c:otherwise>
-                        </c:choose>
-                    </a>
+                    <button type="button"
+                            class="action-item like-btn ${p.favorite ? 'is-favorite' : ''}"
+                            data-id="${p.id}">
+                        <i class="fa-heart ${p.favorite ? 'fa-solid' : 'fa-regular'}"></i>
+                        <span class="action-label">Yêu thích</span>
+                    </button>
 
                     <span class="separator">|</span>
 
@@ -153,8 +146,8 @@
                 </div>
 
                 <div class="thumbnail-section slider-container" id="thumbnail-slider">
-                    <button class="thumb-nav prev-btn">❮</button>
-                    <button class="thumb-nav next-btn">❯</button>
+                    <button class="thumb-nav prev-btn" id="prev-thumb-btn">❮</button>
+                    <button class="thumb-nav next-btn" id="next-thumb-btn">❯</button>
 
                     <div class="thumbnails-wrapper slides-wrapper">
                         <img src="${p.image}" class="active" data-main-img="${p.image}">
@@ -270,18 +263,11 @@
                                 <span class="rating-value"><fmt:formatNumber value="${rp.avgRating}"
                                                                              pattern="0.0"/></span>
                             </div>
-                            <a href="${pageContext.request.contextPath}/toggle-favorite?id=${p.id}"
-                               class="action-item like-btn"
-                               style="text-decoration: none; border: none; background: none; color: #d70018;">
-                                <c:choose>
-                                    <c:when test="${p.favorite}">
-                                        <i class="fa-solid fa-heart"></i>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <i class="fa-regular fa-heart"></i>
-                                    </c:otherwise>
-                                </c:choose>
-                            </a>
+                            <button type="button"
+                                    class="action-item like-btn ${rp.favorite ? 'is-favorite' : ''}"
+                                    data-id="${rp.id}">
+                                <i class="fa-heart ${rp.favorite ? 'fa-solid' : 'fa-regular'}"></i>
+                            </button>
                         </div>
                     </div>
                 </c:forEach>
@@ -567,6 +553,7 @@
 
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPham.js"></script>
+<script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 </body>
 
 </html>

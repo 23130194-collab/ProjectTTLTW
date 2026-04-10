@@ -295,18 +295,11 @@
                                 <span class="rating-value"><fmt:formatNumber value="${p.avgRating}" pattern="0.0"/></span>
                             </div>
 
-                            <a href="${pageContext.request.contextPath}/toggle-favorite?id=${p.id}" class="action-item like-btn"
-                               style="text-decoration: none; border: none; background: none; color: #d70018;">
-                                <c:choose>
-                                    <c:when test="${p.favorite}">
-                                        <i class="fa-solid fa-heart"></i>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <i class="fa-regular fa-heart"></i>
-                                    </c:otherwise>
-                                </c:choose>
-                            </a>
-
+                            <button type="button"
+                                    class="action-item like-btn ${p.favorite ? 'is-favorite' : ''}"
+                                    data-id="${p.id}">
+                                <i class="fa-heart ${p.favorite ? 'fa-solid' : 'fa-regular'}"></i>
+                            </button>
                         </div>
                     </div>
                 </c:forEach>
@@ -440,9 +433,12 @@
     </div>
 </footer>
 
-
-<script src="js/header.js"></script>
-<script src="js/boLoc.js"></script>
-<script src="js/dualBannerSlideshow.js"></script>
+<script>
+    const globalContextPath = "${pageContext.request.contextPath}";
+</script>
+<script src="${pageContext.request.contextPath}/js/header.js"></script>
+<script src="${pageContext.request.contextPath}/js/boLoc.js"></script>
+<script src="${pageContext.request.contextPath}/js/dualBannerSlideshow.js"></script>
+<script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 </body>
 </html>

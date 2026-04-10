@@ -36,13 +36,14 @@ public class FavoriteDao {
     }
 
     public boolean isFavorite(int userId, int productId) {
-        String sql = "SELECT COUNT(*) FROM favorites WHERE user_id = :userId AND product_id = :productId";
+        String sql = "SELECT 1 FROM favorites WHERE user_id = :userId AND product_id = :productId";
         return jdbi.withHandle(handle ->
                 handle.createQuery(sql)
                         .bind("userId", userId)
                         .bind("productId", productId)
                         .mapTo(Integer.class)
-                        .one() > 0
+                        .findFirst()
+                        .isPresent()
         );
     }
 
