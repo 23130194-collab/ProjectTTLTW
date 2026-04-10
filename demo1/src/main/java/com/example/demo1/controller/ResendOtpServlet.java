@@ -40,6 +40,8 @@ public class ResendOtpServlet extends HttpServlet {
             return;
         }
 
+        session.removeAttribute("otp_attempt_count");
+
         AuthService authService = new AuthService();
         
         String otp = OtpService.generateOtp();
@@ -49,7 +51,6 @@ public class ResendOtpServlet extends HttpServlet {
         try {
             EmailService.sendOtpEmail(email, otp);
             session.setAttribute("resend_success", "Mã OTP mới đã được gửi thành công!");
-
             session.setAttribute("last_otp_send_time", currentTime);
         } catch (Exception e) {
             session.setAttribute("resend_error", "Không thể gửi lại mã OTP vào lúc này.");

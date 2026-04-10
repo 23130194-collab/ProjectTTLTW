@@ -33,12 +33,15 @@
 
         <form action="verify" method="post">
             <div class="input-group ${not empty otp_error ? 'has-error' : ''}">
-                <input type="text" id="otp" name="otp" placeholder="Nhập mã OTP" class="${not empty otp_error ? 'input-error' : ''}" required>
+                <input type="text" id="otp" name="otp" placeholder="Nhập mã OTP" class="${not empty otp_error ? 'input-error' : ''}"
+                       ${requestScope.disable_otp_input ? 'disabled' : ''} required>
                 <c:if test="${not empty otp_error}">
                     <span class="error-message">${otp_error}</span>
                 </c:if>
             </div>
-            <button type="submit" class="login-btn">Xác nhận</button>
+            <c:if test="${not requestScope.disable_otp_input}">
+                <button type="submit" class="login-btn">Xác nhận</button>
+            </c:if>
         </form>
 
         <div class="login" style="margin-top: 20px;">

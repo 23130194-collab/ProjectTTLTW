@@ -195,7 +195,7 @@
 
     <section class="flash-sale">
         <div class="flash-sale-header">
-            <h2>SẢN PHẨM BÁN CHẠY</h2>
+            <h2>SẢN PHẨM MỚI</h2>
         </div>
 
         <div class="slider-wrapper">
@@ -244,18 +244,11 @@
                                                                                  pattern="0.0"/></span>
                                 </div>
 
-                                <a href="${pageContext.request.contextPath}/toggle-favorite?id=${p.id}"
-                                   class="action-item like-btn"
-                                   style="text-decoration: none; border: none; background: none; color: #d70018;">
-                                    <c:choose>
-                                        <c:when test="${p.favorite}">
-                                            <i class="fa-solid fa-heart"></i>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <i class="fa-regular fa-heart"></i>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </a>
+                                <button type="button"
+                                        class="action-item like-btn ${p.favorite ? 'is-favorite' : ''}"
+                                        data-id="${p.id}">
+                                    <i class="fa-heart ${p.favorite ? 'fa-solid' : 'fa-regular'}"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -270,8 +263,8 @@
 
         <div class="product-grid">
             <c:forEach var="p" items="${suggestedProducts}">
-                <a href="${pageContext.request.contextPath}/product-detail?id=${p.id}" class="slider-item">
-                    <div class="product-card">
+                <div class="product-card">
+                    <a href="${pageContext.request.contextPath}/product-detail?id=${p.id}" class="slider-item">
                         <c:if test="${p.discountValue > 0}">
                             <div class="discount-tag">
                                 <span class="discount-percent">-<fmt:formatNumber value="${p.discountValue}"
@@ -301,26 +294,26 @@
                                 </div>
                             </c:if>
                         </div>
-
-                        <div class="product-footer-interaction">
-                            <div class="action-item rating">
-                                <div class="stars-container">
-                                    <div class="stars-outer">
-                                        <div class="stars-inner"
-                                             style="width: ${ (p.avgRating * 1.0 / 5) * 100 }%;"></div>
-                                    </div>
+                    </a>
+                    <div class="product-footer-interaction">
+                        <div class="action-item rating">
+                            <div class="stars-container">
+                                <div class="stars-outer">
+                                    <div class="stars-inner"
+                                         style="width: ${ (p.avgRating * 1.0 / 5) * 100 }%;"></div>
                                 </div>
-                                <span class="rating-value"><fmt:formatNumber value="${p.avgRating}"
-                                                                             pattern="0.0"/></span>
                             </div>
-
-                            <button class="action-item like-btn">
-                                <i class="fa-regular fa-heart"></i>
-                            </button>
+                            <span class="rating-value"><fmt:formatNumber value="${p.avgRating}"
+                                                                         pattern="0.0"/></span>
                         </div>
-
+                        <button type="button"
+                                class="action-item like-btn ${p.favorite ? 'is-favorite' : ''}"
+                                data-id="${p.id}">
+                            <i class="fa-heart ${p.favorite ? 'fa-solid' : 'fa-regular'}"></i>
+                        </button>
                     </div>
-                </a>
+                </div>
+
             </c:forEach>
         </div>
     </section>
@@ -394,10 +387,13 @@
     </div>
 </footer>
 
-
+<script>
+    const globalContextPath = "${pageContext.request.contextPath}";
+</script>
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/flashSale.js"></script>
 <script src="${pageContext.request.contextPath}/js/dualBannerSlideshow.js"></script>
+<script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 
 </body>
 

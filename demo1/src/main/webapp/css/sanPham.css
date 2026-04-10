@@ -81,37 +81,6 @@ body {
     background: #f8f8f8;
 }
 
-.like-btn {
-    color: #a19f9f;
-    text-decoration: none;
-}
-
-.like-btn i {
-    font-size: 16px;
-    transition: color 0.2s;
-}
-
-.like-btn:hover,
-.like-btn:hover i,
-.like-btn:hover .action-label {
-    color: #d70018;
-}
-
-.like-btn:focus,
-.like-btn:focus i,
-.like-btn:focus .action-label {
-    color: #d70018;
-    outline: none;
-}
-
-.like-btn:focus i {
-    font-weight: 900;
-}
-
-.like-btn .fa-solid.fa-heart {
-    color: #d70018;
-}
-
 .spec-btn {
     color: #666;
 }
@@ -157,19 +126,17 @@ body {
 }
 
 .thumbnail-section {
-    margin-top: 12px;
     position: relative;
-    overflow: hidden;
+    margin-top: 12px;
 }
 
 .thumbnails-wrapper {
     display: flex;
     gap: 10px;
-    padding-bottom: 5px;
-    margin-bottom: 8px;
-    width: 100%;
     overflow-x: auto;
     scroll-behavior: smooth;
+    padding: 5px 0;
+    scrollbar-width: none;
 }
 
 .thumbnails-wrapper img {
@@ -178,9 +145,9 @@ body {
     height: 75px;
     border-radius: 8px;
     border: 2px solid #e0e0e0;
-    cursor: pointer;
     object-fit: cover;
-    display: block;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .thumbnails-wrapper {
@@ -195,39 +162,33 @@ body {
     transform: translateY(-50%);
     width: 38px;
     height: 38px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     color: white;
     border: none;
-
-    cursor: pointer;
+    border-radius: 50%;
     font-size: 18px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2;
-
+    cursor: pointer;
+    z-index: 10;
     opacity: 0;
-    visibility: hidden;
-    transition: all 0.5s ease;
+    transition: all 0.3s;
 }
 
 .thumbnail-section:hover .thumb-nav {
     opacity: 1;
-    visibility: visible;
 }
 
 .thumb-nav.prev-btn {
-    left: 10px;
+    left: 8px;
 }
 
 .thumb-nav.next-btn {
-    right: 10px;
+    right: 8px;
 }
 
-.thumbnails-wrapper img:hover,
-.thumbnails-wrapper img.active {
-    border: 2px solid #ff3366;
+.thumbnails-wrapper img.active,
+.thumbnails-wrapper img:hover {
+    border-color: #ff3366;
+    transform: scale(1.05);
 }
 
 .product-commitment {
@@ -1362,14 +1323,6 @@ body {
     border-color: #d70018;
 }
 
-.like-btn.active {
-    color: #db1d32;
-}
-.like-btn.active .action-label {
-    color: #db1d32;
-}
-
-
 .preview-container {
     display: flex;
     gap: 10px;
@@ -1602,4 +1555,44 @@ body {
 }
 @media (max-width: 768px) {
     .related-products-section .product-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.like-btn {
+    color: #a19f9f;
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.like-btn i {
+    font-size: 18px;
+    transition: color 0.25s ease;
+}
+
+.like-btn i.fa-regular {
+    color: #a19f9f !important;
+}
+
+.like-btn.is-favorite,
+.like-btn.is-favorite i,
+.like-btn.is-favorite .action-label {
+    color: #d70018 !important;
+}
+
+.like-btn.is-favorite i.fa-solid {
+    color: #d70018 !important;
+}
+
+.like-btn:not(.is-favorite):hover,
+.like-btn:not(.is-favorite):hover i,
+.like-btn:not(.is-favorite):hover .action-label {
+    color: #d70018;
+}
+
+.like-btn:focus {
+    outline: none;
+    background-color: #f8f8f8;
 }

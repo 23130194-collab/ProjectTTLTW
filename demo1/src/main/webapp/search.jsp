@@ -19,16 +19,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/footer.css">
     <style>
-        .product-grid {
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-            width: 100%;
-        }
-        .page-title {
-            margin: 20px 0 5px 0;
-            font-size: 1.5rem;
-            color: #333;
-        }
         .search-info {
             margin-bottom: 20px;
             color: #262626;
@@ -194,8 +184,10 @@
                                 </div>
                                 <span class="rating-value"><fmt:formatNumber value="${p.avgRating}" pattern="0.0"/></span>
                             </div>
-                            <button class="action-item like-btn">
-                                <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                            <button type="button"
+                                    class="action-item like-btn ${p.favorite ? 'is-favorite' : ''}"
+                                    data-id="${p.id}">
+                                <i class="fa-heart ${p.favorite ? 'fa-solid' : 'fa-regular'}"></i>
                             </button>
                         </div>
                     </div>
@@ -253,6 +245,10 @@
     </div>
 </footer>
 
+<script>
+    const globalContextPath = "${pageContext.request.contextPath}";
+</script>
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
+<script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 </body>
 </html>
