@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -48,9 +49,11 @@ public class ForgotPasswordServlet extends HttpServlet {
             return;
         }
 
+        HttpSession session = request.getSession();
+        session.setAttribute("otp_flow", "reset_password");
+        session.setAttribute("email_for_verification", email);
+        session.setAttribute("otp_attempt_count", 0);
 
-        request.getSession().setAttribute("otp_flow", "reset_password");
-        request.getSession().setAttribute("email_for_verification", email);
         response.sendRedirect(request.getContextPath() + "/verify");
     }
 }

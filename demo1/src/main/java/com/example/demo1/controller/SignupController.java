@@ -41,6 +41,21 @@ public class SignupController extends HttpServlet {
         Map<String, String> errors = new HashMap<>();
         AuthService service = new AuthService();
 
+        if (name == null || name.trim().isEmpty()) {
+            errors.put("name", "Họ và tên không được để trống.");
+        } else {
+            if (name.trim().length() > 50) {
+                errors.put("name", "Họ và tên không được vượt quá 50 ký tự.");
+            }
+            if (!name.trim().contains(" ")) {
+                errors.put("name", "Giữa họ và tên phải có khoảng trắng.");
+            }
+
+            if (!name.matches("^[\\p{L}\\s'-]+$")) {
+                errors.put("name", "Họ và tên không được chứa ký tự đặc biệt hoặc số.");
+            }
+        }
+
         if (!DataValidator.isEmailValid(email)) {
             errors.put("email", "Định dạng email không hợp lệ.");
         } else if (service.emailExists(email)) {
@@ -48,7 +63,7 @@ public class SignupController extends HttpServlet {
         }
 
         if (!DataValidator.isPasswordValid(password)) {
-            errors.put("password", "Mật khẩu phải dài ít nhất 8 ký tự, gồm chữ hoa, số và ký tự đặc biệt.");
+            errors.put("password", "Mật khẩu cần ít nhất 8 ký tự, gồm chữ hoa, số và ký tự đặc biệt.");
         }
 
         if (!password.equals(confirmPassword)) {
@@ -68,12 +83,13 @@ public class SignupController extends HttpServlet {
         Timestamp otpExpiry = OtpService.getOtpExpiryTime();
 
         service.register(name, email, hashedPassword, otp, otpExpiry);
-        
+
         try {
             EmailService.sendOtpEmail(email, otp);
             HttpSession session = request.getSession();
             session.setAttribute("otp_flow", "registration");
             session.setAttribute("email_for_verification", email);
+            session.setAttribute("otp_attempt_count", 0);
 
             session.setAttribute("last_otp_send_time", System.currentTimeMillis());
             response.sendRedirect(request.getContextPath() + "/verify");
