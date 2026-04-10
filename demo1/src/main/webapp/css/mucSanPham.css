@@ -529,8 +529,9 @@ body {
     width: 100%;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    flex-wrap: nowrap;
+    margin-top: auto;
+    padding-top: 12px;
+    gap: 12px;
 }
 
 .product-footer-interaction .separator {
@@ -548,8 +549,8 @@ body {
     padding: 4px 8px;
     border-radius: 6px;
     transition: all 0.2s;
-    border: none;
     background: transparent;
+    border: none;
 }
 
 .action-item:hover {
@@ -609,33 +610,46 @@ body {
 
 .like-btn {
     color: #a19f9f;
-    text-decoration: none;
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .like-btn i {
-    font-size: 16px;
-    transition: color 0.2s;
+    font-size: 18px;
+    transition: color 0.25s ease;
 }
 
-.like-btn:hover,
-.like-btn:hover i,
-.like-btn:hover .action-label {
+.like-btn i.fa-regular {
+    color: #a19f9f !important;
+}
+
+.like-btn.is-favorite,
+.like-btn.is-favorite i,
+.like-btn.is-favorite .action-label {
+    color: #d70018 !important;
+}
+
+.like-btn.is-favorite i.fa-solid {
+    color: #d70018 !important;
+}
+
+.like-btn:not(.is-favorite):hover,
+.like-btn:not(.is-favorite):hover i {
     color: #d70018;
 }
 
-.like-btn:focus,
-.like-btn:focus i,
-.like-btn:focus .action-label {
-    color: #d70018;
+.like-btn:focus {
     outline: none;
+    background-color: #f8f8f8;
 }
 
-.like-btn:focus i {
-    font-weight: 900;
-}
-
-.like-btn .fa-solid.fa-heart {
-    color: #d70018;
+.like-btn .fa-solid.fa-heart,
+.like-btn:hover .fa-solid.fa-heart {
+    color: #d70018 !important;
 }
 
 .pagination-container {
