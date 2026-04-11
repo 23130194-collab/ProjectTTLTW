@@ -18,11 +18,8 @@
             </c:if>
 
             <form action="forgot-password" method="post">
-                <div class="input-group ${not empty error ? 'has-error' : ''}">
-                    <input type="email" id="email" name="email" value="${emailValue}" class="${not empty error ? 'input-error' : ''}" required>
-                    <c:if test="${not empty error}">
-                        <span class="error-message">${error}</span>
-                    </c:if>
+                <div class="input-group">
+                    <input type="email" id="email" name="email" value="${emailValue}" required>
                 </div>
                 <button type="submit" class="login-btn">Gửi mã xác nhận</button>
             </form>

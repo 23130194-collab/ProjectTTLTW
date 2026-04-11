@@ -88,7 +88,7 @@ public class OrderAdminServlet extends HttpServlet {
             boolean success = false;
 
             if ("Đã hủy".equals(status)) {
-                success = orderService.cancelOrder(orderId);
+                success = orderService.cancelOrder(orderId, "Bị hủy bởi quản trị viên");
             } else {
                 success = orderService.updateOrderStatus(orderId, status);
 

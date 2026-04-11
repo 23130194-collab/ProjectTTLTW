@@ -259,10 +259,11 @@ public class OrderDao {
         );
     }
 
-    public boolean cancelOrder(int orderId) {
+    public boolean cancelOrder(int orderId, String reason) {
         return jdbi.withHandle(handle ->
-                handle.createUpdate("UPDATE orders SET order_status = 'Đã hủy' WHERE id = :orderId")
+                handle.createUpdate("UPDATE orders SET order_status = 'Đã hủy', cancellation_reason = :reason WHERE id = :orderId")
                         .bind("orderId", orderId)
+                        .bind("reason", reason)
                         .execute() > 0
         );
     }

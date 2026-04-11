@@ -162,13 +162,17 @@
                 <h2>Thông tin tài khoản</h2>
 
                 <c:if test="${not empty sessionScope.updateProfileSuccess}">
-                    <div class="success-message" style="margin-bottom: 20px;">${sessionScope.updateProfileSuccess}</div>
+                    <div class="success-message" style="margin-bottom: 20px;">${sessionScope.updateProfileSuccess}<span class="close-btn">&times;</span></div>
                     <c:remove var="updateProfileSuccess" scope="session"/>
                 </c:if>
                 <c:if test="${not empty sessionScope.updateProfileError}">
                     <div class="error-message-form"
-                         style="margin-bottom: 20px;">${sessionScope.updateProfileError}</div>
+                         style="margin-bottom: 20px;">${sessionScope.updateProfileError}<span class="close-btn">&times;</span></div>
                     <c:remove var="updateProfileError" scope="session"/>
+                </c:if>
+                <c:if test="${not empty sessionScope.changePassSuccess}">
+                    <div class="success-message" style="margin-bottom: 20px;">${sessionScope.changePassSuccess}<span class="close-btn">&times;</span></div>
+                    <c:remove var="changePassSuccess" scope="session"/>
                 </c:if>
 
                 <c:set var="isEditMode" value="${param.mode == 'edit'}"/>
@@ -311,6 +315,20 @@
                 }
             });
         }
+
+        const alertMessages = document.querySelectorAll('.success-message, .error-message-form');
+        alertMessages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.display = 'none';
+            }, 5000);
+
+            const closeBtn = message.querySelector('.close-btn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    message.style.display = 'none';
+                });
+            }
+        });
     });
 </script>
 </body>

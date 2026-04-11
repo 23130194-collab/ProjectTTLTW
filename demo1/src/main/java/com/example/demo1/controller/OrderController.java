@@ -113,6 +113,7 @@ public class OrderController extends HttpServlet {
 
         String action = request.getParameter("action");
         String orderIdStr = request.getParameter("id");
+        String reason = request.getParameter("cancellationReason");
 
         if ("cancel".equals(action) && orderIdStr != null) {
             try {
@@ -122,7 +123,7 @@ public class OrderController extends HttpServlet {
 
                 if (order != null && order.getUserId() == user.getId()) {
                     if ("Chờ xác nhận".equals(order.getOrderStatus())) {
-                        orderDao.cancelOrder(orderId);
+                        orderDao.cancelOrder(orderId, reason);
                     }
                 }
                 response.sendRedirect(request.getContextPath() + "/order-detail?id=" + orderId);
