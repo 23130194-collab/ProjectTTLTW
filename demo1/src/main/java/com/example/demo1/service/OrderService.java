@@ -109,8 +109,8 @@ public class OrderService {
         return orderDao.createOrder(order, recipient, cart, payment);
     }
 
-    public boolean cancelOrder(int orderId) {
-        return orderDao.cancelOrder(orderId);
+    public boolean cancelOrder(int orderId, String reason) {
+        return orderDao.cancelOrder(orderId, reason);
     }
 
     public RecipientInfo getRecipientInfoByOrderId(int orderId) {
