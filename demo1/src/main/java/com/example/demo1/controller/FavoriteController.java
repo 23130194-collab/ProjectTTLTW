@@ -34,7 +34,14 @@ public class FavoriteController extends HttpServlet {
         if (path.equals("/remove-favorite")) {
             int productId = Integer.parseInt(request.getParameter("id"));
             favDao.removeFavorite(user.getId(), productId);
-            response.sendRedirect(referer != null ? referer : request.getContextPath() + "/favorites");
+            String requestedWith = request.getHeader("X-Requested-With");
+            if ("XMLHttpRequest".equals(requestedWith)) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"success\": true}");
+            } else {
+                response.sendRedirect(referer != null ? referer : request.getContextPath() + "/favorites");
+            }
             return;
         }
 
@@ -67,7 +74,21 @@ public class FavoriteController extends HttpServlet {
         request.setAttribute("totalSpent", orderDao.calculateTotalSpentByUserId(user.getId()));
 
 
-        request.setAttribute("favList", favDao.getFavoritesByUserId(user.getId()));
+        int pageSize = 4;
+        int currentPage = 1;
+        try {
+            String pageParam = request.getParameter("page");
+            if (pageParam != null) currentPage = Integer.parseInt(pageParam);
+            if (currentPage < 1) currentPage = 1;
+        } catch (NumberFormatException ignored) {}
+        int totalItems = favDao.countFavoritesByUserId(user.getId());
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        if (totalPages < 1) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        int offset = (currentPage - 1) * pageSize;
+        request.setAttribute("favList", favDao.getFavoritesByUserIdPaged(user.getId(), offset, pageSize));
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/sanPhamYeuThich.jsp").forward(request, response);
     }
 }

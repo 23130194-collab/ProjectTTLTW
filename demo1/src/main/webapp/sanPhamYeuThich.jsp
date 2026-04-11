@@ -199,6 +199,36 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
+
+                <c:if test="${totalPages > 1}">
+                    <div class="pagination">
+                        <a href="${pageContext.request.contextPath}/favorites?page=${currentPage - 1}"
+                           class="page-btn ${currentPage == 1 ? 'disabled' : ''}">&#171;</a>
+
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <c:set var="show" value="false"/>
+                            <c:if test="${i == 1 || i == 2}"><c:set var="show" value="true"/></c:if>
+                            <c:if test="${i >= currentPage - 2 && i <= currentPage + 2}"><c:set var="show" value="true"/></c:if>
+                            <c:if test="${i == totalPages - 1 || i == totalPages}"><c:set var="show" value="true"/></c:if>
+
+                            <c:if test="${show}">
+                                <c:set var="prevShow" value="false"/>
+                                <c:if test="${i - 1 == 1 || i - 1 == 2}"><c:set var="prevShow" value="true"/></c:if>
+                                <c:if test="${i - 1 >= currentPage - 2 && i - 1 <= currentPage + 2}"><c:set var="prevShow" value="true"/></c:if>
+                                <c:if test="${i - 1 == totalPages - 1 || i - 1 == totalPages}"><c:set var="prevShow" value="true"/></c:if>
+                                <c:if test="${i > 1 && !prevShow}">
+                                    <span class="page-ellipsis">...</span>
+                                </c:if>
+                                <a href="${pageContext.request.contextPath}/favorites?page=${i}"
+                                   class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                            </c:if>
+                        </c:forEach>
+
+                        <a href="${pageContext.request.contextPath}/favorites?page=${currentPage + 1}"
+                           class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">&#187;</a>
+                    </div>
+                </c:if>
+
             </div>
         </section>
     </div>
@@ -241,5 +271,9 @@
         }
     });
 </script>
+<script>
+    const globalContextPath = "${pageContext.request.contextPath}";
+</script>
+<script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 </body>
 </html>
