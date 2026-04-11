@@ -17,13 +17,11 @@
             <div class="login-form">
                 <h2>Thay đổi mật khẩu</h2>
                 <p>Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu cho người khác.</p>
-                <c:if test="${not empty requestScope.general_error}">
-                    <div class="error-message-general">${requestScope.general_error}</div>
-                </c:if>
+
                 <form action="${pageContext.request.contextPath}/change-password" method="post">
                     <div class="input-group ${not empty requestScope.oldPassword_error ? 'has-error' : ''}">
                         <div class="password-container">
-                            <input type="password" id="oldPassword" name="oldPassword" placeholder="Mật khẩu cũ" class="${not empty requestScope.oldPassword_error ? 'input-error' : ''}" required>
+                            <input type="password" id="oldPassword" name="oldPassword" placeholder="Mật khẩu cũ" required>
                             <i class="fa-solid fa-eye toggle-password" id="toggleOldPassword"></i>
                         </div>
                         <c:if test="${not empty requestScope.oldPassword_error}">
@@ -32,7 +30,7 @@
                     </div>
                     <div class="input-group ${not empty requestScope.newPassword_error ? 'has-error' : ''}">
                         <div class="password-container">
-                            <input type="password" id="newPassword" name="newPassword" placeholder="Mật khẩu mới" class="${not empty requestScope.newPassword_error ? 'input-error' : ''}" required>
+                            <input type="password" id="newPassword" name="newPassword" placeholder="Mật khẩu mới" required>
                             <i class="fa-solid fa-eye toggle-password" id="toggleNewPassword"></i>
                         </div>
                         <c:if test="${not empty requestScope.newPassword_error}">
@@ -41,7 +39,7 @@
                     </div>
                     <div class="input-group ${not empty requestScope.confirmPassword_error ? 'has-error' : ''}">
                         <div class="password-container">
-                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Xác nhận mật khẩu mới" class="${not empty requestScope.confirmPassword_error ? 'input-error' : ''}" required>
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Xác nhận mật khẩu mới" required>
                             <i class="fa-solid fa-eye toggle-password" id="toggleConfirmPassword"></i>
                         </div>
                         <c:if test="${not empty requestScope.confirmPassword_error}">
