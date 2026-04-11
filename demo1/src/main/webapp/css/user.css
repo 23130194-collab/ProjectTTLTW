@@ -1749,3 +1749,58 @@ body {
 .modal-btn-cancel:hover {
     background-color: #d3d9df;
 }
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(.active):not(.disabled) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.page-btn.active {
+    background: #c0392b;
+    border-color: #c0392b;
+    color: #fff;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.page-btn.disabled {
+    color: #cbd5e1;
+    pointer-events: none;
+    cursor: default;
+}
+
+.page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    color: #94a3b8;
+    font-size: 14px;
+}
