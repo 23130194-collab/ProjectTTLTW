@@ -24,29 +24,12 @@ public class LoginController extends HttpServlet {
         String password = request.getParameter("password");
 
         Map<String, String> errors = new HashMap<>();
-
-
         request.setAttribute("email_value", email);
-
-
-        if (!DataValidator.isEmailValid(email)) {
-            errors.put("email", "Định dạng email không hợp lệ.");
-        }
-        if (!DataValidator.isPasswordValid(password)) {
-            errors.put("password", "Mật khẩu cần ít nhất 8 ký tự, gồm chữ hoa, số và ký tự đặc biệt.");
-        }
-
-        if (!errors.isEmpty()) {
-            request.setAttribute("errors", errors);
-            request.getRequestDispatcher("login.jsp").forward(request, response);
-            return;
-        }
 
         AuthService as = new AuthService();
         User user = as.checkLogin(email, password);
 
         if (user != null) {
-
             if ("unverified".equalsIgnoreCase(user.getStatus())) {
                 request.getSession().setAttribute("email_for_verification", email);
                 response.sendRedirect(request.getContextPath() + "/verify.jsp");
@@ -55,7 +38,6 @@ public class LoginController extends HttpServlet {
 
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
-
 
             if (user.getRole() == 1) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
