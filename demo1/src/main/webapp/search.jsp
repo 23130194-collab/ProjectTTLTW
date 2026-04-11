@@ -18,43 +18,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/mucSanPham.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/footer.css">
-    <style>
-        .search-info {
-            margin-bottom: 20px;
-            color: #262626;
-            font-size: 18px;
-        }
-        .no-result-container {
-            text-align: center;
-            padding: 60px 20px;
-            background: #f9f9f9;
-            border-radius: 10px;
-            margin: 20px 0;
-            min-height: 500px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .btn-return-home {
-            display: inline-block;
-            background-color: #D8081F;
-            color: white !important;
-            text-decoration: none;
-            padding: 12px 0;
-            width: 220px;
-            text-align: center;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            transition: background 0.3s ease;
-            margin: 20px 10px;
-        }
-        .btn-return-home:hover {
-            background-color: #b30619;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-    </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css">
 </head>
 <body>
 <header class="header">
@@ -71,11 +35,12 @@
             <a href="${pageContext.request.contextPath}/contact">Liên hệ</a>
         </nav>
 
-        <div class="search-box">
-            <form action="search" method="get" style="display: flex; width: 100%;">
-                <input type="text" name="keyword" value="${selectedKeyword}" placeholder="Bạn muốn mua gì hôm nay?" autocomplete="off">
+        <div class="search-box" style="position: relative; overflow: visible;">
+            <form action="search" method="get" id="searchForm" style="display: flex; width: 100%;">
+                <input type="text" name="keyword" id="searchInput" autocomplete="off" placeholder="Bạn muốn mua gì...">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
+            <div id="suggestion-box" class="suggestion-box"></div>
         </div>
 
         <div class="header-actions">
@@ -250,5 +215,9 @@
 </script>
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
+<script>
+    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+</script>
+<script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>
 </html>

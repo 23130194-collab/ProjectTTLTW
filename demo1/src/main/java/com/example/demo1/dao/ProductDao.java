@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.example.demo1.model.ProductSuggestion;
+
 public class ProductDao {
     private final Jdbi jdbi = DatabaseDao.get();
 
@@ -56,8 +58,20 @@ public class ProductDao {
             whereSql.append(" AND p.status != 'delete'");
         }
         if (keyword != null && !keyword.isEmpty()) {
-            whereSql.append(" AND (LOWER(p.name) LIKE :keyword)");
-            params.put("keyword", "%" + keyword.toLowerCase() + "%");
+            String[] keywords = keyword.toLowerCase().split("\\s+và\\s+|,\\s*|\\s+");
+
+            StringBuilder keywordSql = new StringBuilder(" AND (");
+            for (int i = 0; i < keywords.length; i++) {
+                String paramName = "keyword" + i;
+                keywordSql.append("LOWER(p.name) LIKE :").append(paramName);
+
+                if (i < keywords.length - 1) {
+                    keywordSql.append(" OR ");
+                }
+                params.put(paramName, "%" + keywords[i].trim() + "%");
+            }
+            keywordSql.append(")");
+            whereSql.append(keywordSql);
         }
         if (brandId != null) {
             whereSql.append(" AND p.brand_id = :brandId");
@@ -292,20 +306,20 @@ public class ProductDao {
         });
     }
 
-    public List<Product> searchByNameForSuggestion(String keyword, int limit) {
-
-        String sql = "SELECT id, name, price, image, old_price FROM products " +
+    public List<ProductSuggestion> searchSuggestions(String keyword, int limit) {
+        String sql = "SELECT id, name FROM products " +
                 "WHERE status = 'active' AND LOWER(name) LIKE :keyword " +
                 "ORDER BY sold_quantity DESC " +
                 "LIMIT :limit";
 
-        return jdbi.withHandle(handle ->
-                handle.createQuery(sql)
-                        .bind("keyword", "%" + keyword.toLowerCase() + "%")
-                        .bind("limit", limit)
-                        .mapToBean(Product.class)
-                        .list()
-        );
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("keyword", "%" + keyword.toLowerCase() + "%")
+                .bind("limit", limit)
+                .map((rs, ctx) -> new ProductSuggestion(
+                        rs.getInt("id"),
+                        rs.getString("name")
+                ))
+                .list());
     }
 
     public int getActiveProductsCount() {

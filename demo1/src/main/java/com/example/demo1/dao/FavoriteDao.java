@@ -55,5 +55,27 @@ public class FavoriteDao {
         );
     }
 
+    public int countFavoritesByUserId(int userId) {
+        String sql = "SELECT COUNT(*) FROM favorites WHERE user_id = :userId";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("userId", userId)
+                        .mapTo(Integer.class)
+                        .one()
+        );
+    }
+
+    public List<Product> getFavoritesByUserIdPaged(int userId, int offset, int limit) {
+        String sql = "SELECT p.* FROM products p JOIN favorites f ON p.id = f.product_id WHERE f.user_id = :userId ORDER BY f.created_at DESC LIMIT :limit OFFSET :offset";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("userId", userId)
+                        .bind("limit", limit)
+                        .bind("offset", offset)
+                        .mapToBean(Product.class)
+                        .list()
+        );
+    }
+
 
 }

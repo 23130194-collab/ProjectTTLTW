@@ -92,7 +92,6 @@ header.header {
     align-items: center;
     background: white;
     border-radius: 25px;
-    overflow: hidden;
 }
 
 .search-box input {
@@ -101,6 +100,7 @@ header.header {
     outline: none;
     width: 430px;
     font-size: 15px;
+    border-radius: 25px;
 }
 
 .search-box button {
@@ -240,4 +240,68 @@ header.header {
     background-color: #ff3366;
     color: #ffffff;
     border-color: #ffffff;
+}
+
+.fav-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #F1FCF5;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 420px;
+    min-width: 280px;
+}
+
+.fav-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.fav-toast-icon {
+    color: #22c55e;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.fav-toast-msg {
+    color: #34B766;
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+}
+
+.fav-toast-view {
+    color: #c0392b;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 6px;
+}
+
+.fav-toast-view:hover {
+    text-decoration: underline;
+}
+
+.fav-toast-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 0 0 6px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.fav-toast-close:hover {
+    color: #334155;
 }
