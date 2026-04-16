@@ -117,4 +117,8 @@ public class OrderService {
         return orderDao.getRecipientInfoByOrderId(orderId);
     }
 
+    public boolean hasUserPurchasedProduct(int userId, int productId) {
+        return orderDao.hasUserPurchasedProduct(userId, productId);
+    }
+
 }

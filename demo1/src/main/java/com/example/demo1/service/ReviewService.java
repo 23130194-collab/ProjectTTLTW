@@ -37,4 +37,8 @@ public class ReviewService {
     public int getTotalReviewCount(String keyword, String status) {
         return reviewDao.getTotalReviewCount(keyword, status);
     }
+
+    public boolean hasUserReviewedProduct(int userId, int productId) {
+        return reviewDao.hasUserReviewedProduct(userId, productId);
+    }
 }
