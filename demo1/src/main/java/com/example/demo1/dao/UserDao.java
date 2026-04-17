@@ -17,6 +17,13 @@ public class UserDao {
                 .stream().findFirst().orElse(null));
     }
 
+    public User getUserById(int id) {
+        return jdbi.withHandle(h -> h.createQuery("SELECT * FROM users WHERE id = :id")
+                .bind("id", id)
+                .mapToBean(User.class)
+                .stream().findFirst().orElse(null));
+    }
+
     public void insertUser(String name, String email, String password, String otp, Timestamp otpExpiry) {
         jdbi.useHandle(h ->
                 h.createUpdate("INSERT INTO users(name, email, password, role, status, otp_code, otp_expiry) VALUES (:name, :email, :password, :role, :status, :otp_code, :otp_expiry)")
@@ -49,6 +56,16 @@ public class UserDao {
         );
     }
 
+    public void updateOtpById(int userId, String otp, Timestamp otpExpiry) {
+        jdbi.useHandle(h ->
+                h.createUpdate("UPDATE users SET otp_code = :otp_code, otp_expiry = :otp_expiry WHERE id = :id")
+                        .bind("otp_code", otp)
+                        .bind("otp_expiry", otpExpiry)
+                        .bind("id", userId)
+                        .execute()
+        );
+    }
+
     public void updatePassword(String email, String password, Timestamp updatedAt) {
         jdbi.useHandle(h ->
                 h.createUpdate("UPDATE users SET password = :password, password_updated_at = :updatedAt, otp_code = NULL, otp_expiry = NULL WHERE email = :email")
@@ -63,6 +80,14 @@ public class UserDao {
         jdbi.useHandle(h ->
                 h.createUpdate("UPDATE users SET name = :name, email = :email, phone = :phone, address = :address, gender = :gender, birthday = :birthday WHERE id = :id")
                         .bindBean(user)
+                        .execute()
+        );
+    }
+
+    public void clearOtp(int userId) {
+        jdbi.useHandle(h ->
+                h.createUpdate("UPDATE users SET otp_code = NULL, otp_expiry = NULL WHERE id = :id")
+                        .bind("id", userId)
                         .execute()
         );
     }
