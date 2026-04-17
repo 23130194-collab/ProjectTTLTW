@@ -1,5 +1,6 @@
 package com.example.demo1.controller;
 
+import com.example.demo1.model.User;
 import com.example.demo1.service.AuthService;
 import com.example.demo1.service.EmailService;
 import com.example.demo1.service.OtpService;
@@ -22,13 +23,30 @@ public class ResendOtpServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("email_for_verification");
+        AuthService authService = new AuthService();
 
-        if (email == null) {
+        String otpFlow = (String) session.getAttribute("otp_flow");
+        User userToVerify = null;
+        String emailToSend = null;
+
+        if ("update_email".equals(otpFlow)) {
+            Integer userId = (Integer) session.getAttribute("user_id_for_verification");
+            if (userId != null) {
+                userToVerify = authService.getUserById(userId);
+                emailToSend = (String) session.getAttribute("new_email_for_display");
+            }
+        } else {
+            String email = (String) session.getAttribute("email_for_verification");
+            if (email != null) {
+                userToVerify = authService.getUserByEmail(email);
+                emailToSend = email;
+            }
+        }
+
+        if (userToVerify == null || emailToSend == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
 
         Long lastSendTime = (Long) session.getAttribute("last_otp_send_time");
         long currentTime = System.currentTimeMillis();
@@ -41,15 +59,13 @@ public class ResendOtpServlet extends HttpServlet {
         }
 
         session.removeAttribute("otp_attempt_count");
-
-        AuthService authService = new AuthService();
-        
         String otp = OtpService.generateOtp();
         Timestamp otpExpiry = OtpService.getOtpExpiryTime();
-        authService.updateOtpForUser(email, otp, otpExpiry);
+        
+        authService.updateOtpForUserById(userToVerify.getId(), otp, otpExpiry);
 
         try {
-            EmailService.sendOtpEmail(email, otp);
+            EmailService.sendOtpEmail(emailToSend, otp);
             session.setAttribute("resend_success", "Mã OTP mới đã được gửi thành công!");
             session.setAttribute("last_otp_send_time", currentTime);
         } catch (Exception e) {
