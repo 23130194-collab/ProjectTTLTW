@@ -43,6 +43,50 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const btnCannotReview = document.getElementById('btn-cannot-review');
+    const reviewToast = document.getElementById('review-toast');
+    const reviewToastClose = document.getElementById('review-toast-close');
+    let reviewToastTimer = null;
+
+    if (btnCannotReview && reviewToast) {
+        btnCannotReview.addEventListener('click', () => {
+            reviewToast.classList.add('show');
+            clearTimeout(reviewToastTimer);
+            reviewToastTimer = setTimeout(() => {
+                reviewToast.classList.remove('show');
+            }, 5000);
+        });
+    }
+
+    if (reviewToastClose && reviewToast) {
+        reviewToastClose.addEventListener('click', () => {
+            clearTimeout(reviewToastTimer);
+            reviewToast.classList.remove('show');
+        });
+    }
+
+    const btnAlreadyReviewed = document.getElementById('btn-already-reviewed');
+    const reviewedToast = document.getElementById('reviewed-toast');
+    const reviewedToastClose = document.getElementById('reviewed-toast-close');
+    let reviewedToastTimer = null;
+
+    if (btnAlreadyReviewed && reviewedToast) {
+        btnAlreadyReviewed.addEventListener('click', () => {
+            reviewedToast.classList.add('show');
+            clearTimeout(reviewedToastTimer);
+            reviewedToastTimer = setTimeout(() => {
+                reviewedToast.classList.remove('show');
+            }, 5000);
+        });
+    }
+
+    if (reviewedToastClose && reviewedToast) {
+        reviewedToastClose.addEventListener('click', () => {
+            clearTimeout(reviewedToastTimer);
+            reviewedToast.classList.remove('show');
+        });
+    }
+
     const btnScrollTop = document.getElementById('btn-scroll-top');
     if (btnScrollTop) {
         window.addEventListener('scroll', () => {
