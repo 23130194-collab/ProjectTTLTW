@@ -8,6 +8,7 @@ import com.example.demo1.service.ProductService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
+import com.example.demo1.service.NotificationService;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,7 +25,11 @@ public class HomeController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
-
+        if (user != null) {
+            NotificationService notificationService = new NotificationService();
+            List<Notification> notiList = notificationService.getNotificationsForUser(user.getId());
+            request.setAttribute("notificationList", notiList);
+        }
         try {
             List<Category> categoryList = categoryService.getAllCategories();
             request.setAttribute("categoryList", categoryList);
