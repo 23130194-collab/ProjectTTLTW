@@ -23,6 +23,10 @@ public class AuthService {
         return authDao.getUserByEmail(email);
     }
 
+    public User getUserById(int userId) {
+        return authDao.getUserById(userId);
+    }
+
     public boolean emailExists(String email) {
         return authDao.getUserByEmail(email) != null;
     }
@@ -39,11 +43,19 @@ public class AuthService {
         authDao.updateOtp(email, otp, otpExpiry);
     }
 
+    public void updateOtpForUserById(int userId, String otp, Timestamp otpExpiry) {
+        authDao.updateOtpById(userId, otp, otpExpiry);
+    }
+
     public void updatePassword(String email, String hashedPassword, Timestamp updatedAt) {
         authDao.updatePassword(email, hashedPassword, updatedAt);
     }
 
     public void updateUser(User user) {
         authDao.updateUser(user);
+    }
+
+    public void clearOtpForUser(int userId) {
+        authDao.clearOtp(userId);
     }
 }
