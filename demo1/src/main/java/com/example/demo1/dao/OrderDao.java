@@ -314,6 +314,19 @@ public class OrderDao {
         );
     }
 
+    public boolean hasUserPurchasedProduct(int userId, int productId) {
+        String sql = "SELECT COUNT(*) FROM orders o " +
+                "JOIN order_details od ON o.id = od.order_id " +
+                "WHERE o.user_id = :userId AND od.product_id = :productId AND o.order_status = 'Đã giao'";
+        return jdbi.withHandle(h ->
+                h.createQuery(sql)
+                        .bind("userId", userId)
+                        .bind("productId", productId)
+                        .mapTo(Integer.class)
+                        .one() > 0
+        );
+    }
+
     public Map<String, Double> getDailyRevenueForLast7Days() {
         String sql = "SELECT DATE(created_at) as order_date, SUM(total_amount) as daily_revenue " +
                 "FROM orders " +

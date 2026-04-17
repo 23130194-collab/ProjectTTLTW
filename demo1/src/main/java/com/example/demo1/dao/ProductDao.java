@@ -137,18 +137,19 @@ public class ProductDao {
 
     private void appendOrderBy(StringBuilder sql, String sortOrder) {
         String orderBy;
+        String effectivePrice = "(CASE WHEN d.id IS NOT NULL AND NOW() BETWEEN d.start_time AND d.end_time THEN p.price ELSE p.old_price END)";
         switch (sortOrder) {
             case "price_asc":
-                orderBy = " ORDER BY p.price ASC, p.id ASC ";
+                orderBy = " ORDER BY " + effectivePrice + " ASC, p.id ASC ";
                 break;
             case "price_desc":
-                orderBy = " ORDER BY p.price DESC, p.id DESC ";
+                orderBy = " ORDER BY " + effectivePrice + " DESC, p.id DESC ";
                 break;
             case "name_asc":
                 orderBy = " ORDER BY p.name ASC, p.id ASC ";
                 break;
             case "popular":
-                orderBy = " ORDER BY p.sold_quantity DESC, p.id DESC ";
+                orderBy = " ORDER BY p.sold_quantity DESC, avgRating DESC, p.id DESC ";
                 break;
             default:
                 orderBy = " ORDER BY p.created_at DESC, p.id DESC ";
@@ -160,10 +161,6 @@ public class ProductDao {
     public ProductPage filterAndSortProducts(Integer categoryId, String status, String keyword, Integer brandId, Map<Integer, List<String>> specFilters, String sortOrder, int page, int pageSize) {
         return jdbi.withHandle(handle -> {
             QueryParts queryParts = buildQueryParts(categoryId, status, keyword, brandId, specFilters);
-
-            if ("popular".equals(sortOrder)) {
-                queryParts.whereSql += " AND p.sold_quantity >= 0 ";
-            }
 
             int totalProducts = countTotalProducts(handle, queryParts, specFilters);
 
@@ -189,6 +186,7 @@ public class ProductDao {
                         .findOne()
         ).orElse(null);
     }
+
     public Product getById(int productId, String status) {
         String sql = "SELECT " + SELECT_PRODUCT_FIELDS +
                 "FROM products p " +
@@ -211,7 +209,7 @@ public class ProductDao {
                                 "FROM products p " +
                                 "LEFT JOIN discounts d ON p.discount_id = d.id " +
                                 "LEFT JOIN reviews r ON p.id = r.product_id " +
-                                "WHERE p.category_id = :categoryId AND p.id != :currentProductId AND p.status = 'active' AND p.status != 'delete' " +
+                                "WHERE p.category_id = :categoryId AND p.id != :currentProductId AND p.status = 'active' " +
                                 "GROUP BY p.id " +
                                 "ORDER BY p.created_at DESC " +
                                 "LIMIT :limit OFFSET :offset")
@@ -223,14 +221,14 @@ public class ProductDao {
                         .list()
         );
     }
-    
+
     public int countProductsByBrandId(int brandId) {
         return jdbi.withHandle(handle -> {
             QueryParts queryParts = buildQueryParts(null, null, null, brandId, null);
             return countTotalProducts(handle, queryParts, null);
         });
     }
-    
+
     public int countProductsByCategoryId(int categoryId) {
         return jdbi.withHandle(handle -> {
             QueryParts queryParts = buildQueryParts(categoryId, null, null, null, null);
@@ -278,7 +276,7 @@ public class ProductDao {
 
     public List<Product> getRandomProducts(int limit) {
         return jdbi.withHandle(handle ->
-                handle.createQuery("SELECT * FROM products WHERE status = 'active' AND status != 'delete' ORDER BY RAND() LIMIT :limit")
+                handle.createQuery("SELECT * FROM products WHERE status = 'active' ORDER BY RAND() LIMIT :limit")
                         .bind("limit", limit)
                         .mapToBean(Product.class)
                         .list()

@@ -291,14 +291,36 @@
                     <div class="rating-count">${reviewSummary.totalReviews} lượt đánh giá</div>
 
                     <c:choose>
-                        <c:when test="${not empty sessionScope.user}">
+                        <c:when test="${empty sessionScope.user}">
+                            <a href="${pageContext.request.contextPath}/login" class="btn-write-review">Viết đánh giá</a>
+                        </c:when>
+                        <c:when test="${hasReviewed}">
+                            <button class="btn-write-review btn-reviewed" id="btn-already-reviewed">
+                                Đã đánh giá
+                            </button>
+                        </c:when>
+                        <c:when test="${canReview}">
                             <button class="btn-write-review" id="btn-write-review">Viết đánh giá</button>
                         </c:when>
                         <c:otherwise>
-                            <a href="${pageContext.request.contextPath}/login" class="btn-write-review">Viết đánh
-                                giá</a>
+                            <button class="btn-write-review" id="btn-cannot-review">
+                                Viết đánh giá
+                            </button>
                         </c:otherwise>
                     </c:choose>
+
+                    <c:if test="${param.reviewError == 'not_purchased'}">
+                        <div class="review-error-msg">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            Bạn chỉ có thể đánh giá sản phẩm đã mua và đã nhận hàng.
+                        </div>
+                    </c:if>
+                    <c:if test="${param.reviewError == 'already_reviewed'}">
+                        <div class="review-error-msg">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            Bạn đã viết đánh giá cho sản phẩm này rồi.
+                        </div>
+                    </c:if>
                 </div>
 
                 <div class="rating-distribution">
@@ -443,6 +465,16 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="review-toast" class="review-toast">
+        Bạn cần mua sản phẩm để viết đánh giá góp ý
+        <button class="review-toast-close" id="review-toast-close">&times;</button>
+    </div>
+
+    <div id="reviewed-toast" class="review-toast reviewed-toast">
+        Bạn đã viết đánh giá cho sản phẩm này rồi
+        <button class="review-toast-close reviewed-toast-close" id="reviewed-toast-close">&times;</button>
     </div>
 
     <div class="bottom-bar">

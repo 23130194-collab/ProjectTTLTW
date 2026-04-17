@@ -111,6 +111,16 @@ public class ReviewDao {
         });
     }
 
+    public boolean hasUserReviewedProduct(int userId, int productId) {
+        return jdbi.withHandle(h ->
+                h.createQuery("SELECT COUNT(*) FROM reviews WHERE user_id = :userId AND product_id = :productId")
+                        .bind("userId", userId)
+                        .bind("productId", productId)
+                        .mapTo(Integer.class)
+                        .one() > 0
+        );
+    }
+
     public void addReview(int productId, int userId, int rating, String comment) {
         jdbi.useHandle(handle ->
                 handle.createUpdate("INSERT INTO reviews (product_id, user_id, rating, content, created_at, status) VALUES (:productId, :userId, :rating, :content, NOW(), 'active')")
