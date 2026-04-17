@@ -180,21 +180,36 @@
 
                         <c:if test="${order.orderStatus eq 'Chờ xác nhận'}">
                             <div class="action-footer">
-                                <form id="cancelOrderForm" action="${contextPath}/order-detail" method="post">
-                                    <input type="hidden" name="action" value="cancel">
-                                    <input type="hidden" name="id" value="${order.id}">
-                                    <button type="button" id="showCancelModalBtn" class="btn-cancel-order">Hủy đơn hàng</button>
-                                </form>
+                                <button type="button" id="showCancelModalBtn" class="btn-cancel-order">Hủy đơn hàng</button>
                             </div>
 
                             <div id="cancelOrderModal" class="cancel-modal-overlay">
                                 <div class="cancel-modal-content">
-                                    <h3>Xác nhận hủy đơn hàng</h3>
-                                    <p>Bạn có chắc chắn muốn hủy đơn hàng <strong>${order.orderCode}</strong>? Hành động này không thể hoàn tác.</p>
-                                    <div class="modal-actions">
-                                        <button id="confirmCancelBtn" class="modal-btn modal-btn-confirm">Xác nhận hủy</button>
-                                        <button id="closeModalBtn" class="modal-btn modal-btn-cancel">Không</button>
-                                    </div>
+                                    <form id="cancelOrderForm" action="${contextPath}/order-detail" method="post">
+                                        <div class="modal-header">
+                                            <h3>Lý do hủy đơn hàng</h3>
+                                            <p>Vui lòng cho chúng tôi biết lý do bạn muốn hủy đơn hàng này.</p>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="action" value="cancel">
+                                            <input type="hidden" name="id" value="${order.id}">
+                                            <div class="input-group">
+                                                <select name="cancellationReason" id="cancellationReason" class="form-control" required>
+                                                    <option value="" disabled selected>-- Chọn lý do --</option>
+                                                    <option value="Hết nhu cầu mua hàng">Hết nhu cầu mua hàng</option>
+                                                    <option value="Đặt nhầm sản phẩm">Đặt nhầm sản phẩm</option>
+                                                    <option value="Cần thay đổi phương thức thanh toán">Cần thay đổi phương thức thanh toán</option>
+                                                    <option value="Muốn thay đổi địa chỉ giao hàng">Muốn thay đổi địa chỉ giao hàng</option>
+                                                    <option value="Tìm thấy nơi khác giá tốt hơn">Tìm thấy nơi khác giá tốt hơn</option>
+                                                    <option value="Lý do khác">Lý do khác</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" id="confirmCancelBtn" class="modal-btn modal-btn-confirm">Xác nhận hủy</button>
+                                            <button type="button" id="closeModalBtn" class="modal-btn modal-btn-cancel">Không</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </c:if>
@@ -213,8 +228,6 @@
         const showModalBtn = document.getElementById('showCancelModalBtn');
         const modal = document.getElementById('cancelOrderModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
-        const confirmBtn = document.getElementById('confirmCancelBtn');
-        const cancelForm = document.getElementById('cancelOrderForm');
 
         if (showModalBtn) {
             showModalBtn.addEventListener('click', function () {
@@ -225,14 +238,6 @@
         if (closeModalBtn) {
             closeModalBtn.addEventListener('click', function () {
                 if(modal) modal.style.display = 'none';
-            });
-        }
-
-        if (confirmBtn) {
-            confirmBtn.addEventListener('click', function () {
-                if (cancelForm) {
-                    cancelForm.submit();
-                }
             });
         }
 

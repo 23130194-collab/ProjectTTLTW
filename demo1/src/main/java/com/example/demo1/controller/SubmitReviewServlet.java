@@ -5,6 +5,7 @@ import com.example.demo1.dao.ReviewDao;
 import com.example.demo1.model.Product;
 import com.example.demo1.model.User;
 
+import com.example.demo1.service.OrderService;
 import com.example.demo1.service.ReviewService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,6 +18,7 @@ import java.io.IOException;
 @WebServlet(name = "SubmitReviewServlet", value = "/submit-review")
 public class SubmitReviewServlet extends HttpServlet {
     private final ReviewService reviewService = new ReviewService();
+    private final OrderService orderService = new OrderService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -39,6 +41,16 @@ public class SubmitReviewServlet extends HttpServlet {
             int rating = Integer.parseInt(request.getParameter("rating"));
             String comment = request.getParameter("comment");
             int userId = user.getId();
+
+            if (!orderService.hasUserPurchasedProduct(userId, productId)) {
+                response.sendRedirect("product-detail?id=" + productId + "&reviewError=not_purchased");
+                return;
+            }
+
+            if (reviewService.hasUserReviewedProduct(userId, productId)) {
+                response.sendRedirect("product-detail?id=" + productId + "&reviewError=already_reviewed");
+                return;
+            }
 
             reviewService.addReview(productId, userId, rating, comment);
 

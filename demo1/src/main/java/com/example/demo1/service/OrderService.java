@@ -1,6 +1,7 @@
 package com.example.demo1.service;
 
 import com.example.demo1.dao.OrderDao;
+import com.example.demo1.dao.ProductDao;
 import com.example.demo1.model.*;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 public class OrderService {
     private final OrderDao orderDao = new OrderDao();
+    private final ProductDao productDao = new ProductDao();
 
     public OrderPage getPagedOrders(String keyword, int currentPage, int ordersPerPage) {
         List<Order> orders;
@@ -32,6 +34,18 @@ public class OrderService {
         boolean success = orderDao.updateOrderStatus(orderId, status);
         if (success) {
             recalculateAndSyncOrderTotals(orderId);
+            
+            if ("Đã giao".equals(status)) {
+                List<OrderItem> items = orderDao.getOrderItemsByOrderId(orderId);
+                for (OrderItem item : items) {
+                    productDao.incrementSoldQuantity(item.getProductId(), item.getQuantity());
+                }
+            } else if ("Đã hủy".equals(status)) {
+                List<OrderItem> items = orderDao.getOrderItemsByOrderId(orderId);
+                for (OrderItem item : items) {
+                    productDao.incrementStock(item.getProductId(), item.getQuantity());
+                }
+            }
         }
         return success;
     }
@@ -109,12 +123,23 @@ public class OrderService {
         return orderDao.createOrder(order, recipient, cart, payment);
     }
 
-    public boolean cancelOrder(int orderId) {
-        return orderDao.cancelOrder(orderId);
+    public boolean cancelOrder(int orderId, String reason) {
+        boolean success = orderDao.cancelOrder(orderId, reason);
+        if (success) {
+            List<OrderItem> items = orderDao.getOrderItemsByOrderId(orderId);
+            for (OrderItem item : items) {
+                productDao.incrementStock(item.getProductId(), item.getQuantity());
+            }
+        }
+        return success;
     }
 
     public RecipientInfo getRecipientInfoByOrderId(int orderId) {
         return orderDao.getRecipientInfoByOrderId(orderId);
+    }
+
+    public boolean hasUserPurchasedProduct(int userId, int productId) {
+        return orderDao.hasUserPurchasedProduct(userId, productId);
     }
 
 }

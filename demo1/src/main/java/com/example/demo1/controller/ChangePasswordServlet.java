@@ -42,7 +42,13 @@ public class ChangePasswordServlet extends HttpServlet {
         }
 
         if (!DataValidator.isPasswordValid(newPassword)) {
-            request.setAttribute("newPassword_error", "Mật khẩu mới phải dài ít nhất 8 ký tự, gồm chữ hoa, số và ký tự đặc biệt.");
+            request.setAttribute("newPassword_error", "Mật khẩu cần ít nhất 8 ký tự, gồm chữ hoa, số và ký tự đặc biệt.");
+            request.getRequestDispatcher("/thayDoiMK.jsp").forward(request, response);
+            return;
+        }
+
+        if (MD5.hash(newPassword).equals(userFromDb.getPassword())) {
+            request.setAttribute("newPassword_error", "Mật khẩu mới không được trùng với mật khẩu cũ.");
             request.getRequestDispatcher("/thayDoiMK.jsp").forward(request, response);
             return;
         }
@@ -54,11 +60,9 @@ public class ChangePasswordServlet extends HttpServlet {
         }
 
         String hashedNewPassword = MD5.hash(newPassword);
-
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         
         authService.updatePassword(userInSession.getEmail(), hashedNewPassword, currentTime);
-
 
         User updatedUser = authService.getUserByEmail(userInSession.getEmail());
         session.setAttribute("user", updatedUser);

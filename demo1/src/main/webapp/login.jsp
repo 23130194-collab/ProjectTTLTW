@@ -25,21 +25,15 @@
         </c:if>
 
         <form action="login" method="post">
-            <div class="input-group ${not empty errors.email ? 'has-error' : ''}">
-                <input type="email" name="email" placeholder="Nhập email" value="${email_value}" class="${not empty errors.email ? 'input-error' : ''}" required/>
-                <c:if test="${not empty errors.email}">
-                    <span class="error-message">${errors.email}</span>
-                </c:if>
+            <div class="input-group">
+                <input type="email" name="email" placeholder="Nhập email" value="${email_value}" required/>
             </div>
 
-            <div class="input-group ${not empty errors.password ? 'has-error' : ''}">
+            <div class="input-group">
                 <div class="password-container">
-                    <input type="password" name="password" id="password" placeholder="Nhập mật khẩu" class="${not empty errors.password ? 'input-error' : ''}" required/>
+                    <input type="password" name="password" id="password" placeholder="Nhập mật khẩu" required/>
                     <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
                 </div>
-                <c:if test="${not empty errors.password}">
-                    <span class="error-message">${errors.password}</span>
-                </c:if>
             </div>
 
             <div class="remember">

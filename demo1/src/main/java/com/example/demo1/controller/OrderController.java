@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.example.demo1.service.OrderService;
 
 import java.io.IOException;
 import java.util.List;
@@ -113,16 +114,18 @@ public class OrderController extends HttpServlet {
 
         String action = request.getParameter("action");
         String orderIdStr = request.getParameter("id");
+        String reason = request.getParameter("cancellationReason");
 
         if ("cancel".equals(action) && orderIdStr != null) {
             try {
                 int orderId = Integer.parseInt(orderIdStr);
                 OrderDao orderDao = new OrderDao();
                 Order order = orderDao.getOrderById(orderId);
+                OrderService orderService = new OrderService();
 
                 if (order != null && order.getUserId() == user.getId()) {
                     if ("Chờ xác nhận".equals(order.getOrderStatus())) {
-                        orderDao.cancelOrder(orderId);
+                        orderService.cancelOrder(orderId, reason);
                     }
                 }
                 response.sendRedirect(request.getContextPath() + "/order-detail?id=" + orderId);

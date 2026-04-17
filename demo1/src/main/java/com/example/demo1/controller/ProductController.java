@@ -7,6 +7,7 @@ import com.example.demo1.model.ReviewSummary;
 import com.example.demo1.model.User;
 import com.example.demo1.model.Category;
 import com.example.demo1.service.ProductService;
+import com.example.demo1.service.OrderService;
 import com.example.demo1.service.ReviewService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -36,6 +37,7 @@ public class ProductController extends HttpServlet {
             int id = Integer.parseInt(idStr);
             ProductService ps = new ProductService();
             ReviewService rs = new ReviewService();
+            OrderService os = new OrderService();
 
             Product p = ps.getPublicProduct(id);
 
@@ -77,6 +79,15 @@ public class ProductController extends HttpServlet {
             request.setAttribute("reviews", initialReviews);
             request.setAttribute("reviewSummary", summary);
             request.setAttribute("relatedProducts", relatedProducts);
+
+            boolean canReview = false;
+            boolean hasReviewed = false;
+            if (user != null) {
+                canReview = os.hasUserPurchasedProduct(user.getId(), id);
+                hasReviewed = rs.hasUserReviewedProduct(user.getId(), id);
+            }
+            request.setAttribute("canReview", canReview);
+            request.setAttribute("hasReviewed", hasReviewed);
 
             request.getRequestDispatcher("sanPham.jsp").forward(request, response);
 

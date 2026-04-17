@@ -259,10 +259,11 @@ public class OrderDao {
         );
     }
 
-    public boolean cancelOrder(int orderId) {
+    public boolean cancelOrder(int orderId, String reason) {
         return jdbi.withHandle(handle ->
-                handle.createUpdate("UPDATE orders SET order_status = 'Đã hủy' WHERE id = :orderId")
+                handle.createUpdate("UPDATE orders SET order_status = 'Đã hủy', cancellation_reason = :reason WHERE id = :orderId")
                         .bind("orderId", orderId)
+                        .bind("reason", reason)
                         .execute() > 0
         );
     }
@@ -310,6 +311,19 @@ public class OrderDao {
                 handle.createQuery("SELECT COUNT(*) FROM orders")
                         .mapTo(Integer.class)
                         .one()
+        );
+    }
+
+    public boolean hasUserPurchasedProduct(int userId, int productId) {
+        String sql = "SELECT COUNT(*) FROM orders o " +
+                "JOIN order_details od ON o.id = od.order_id " +
+                "WHERE o.user_id = :userId AND od.product_id = :productId AND o.order_status = 'Đã giao'";
+        return jdbi.withHandle(h ->
+                h.createQuery(sql)
+                        .bind("userId", userId)
+                        .bind("productId", productId)
+                        .mapTo(Integer.class)
+                        .one() > 0
         );
     }
 
