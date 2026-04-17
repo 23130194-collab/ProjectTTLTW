@@ -17,6 +17,9 @@
             <c:when test="${sessionScope.otp_flow == 'reset_password'}">
                 <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email <strong>${sessionScope.email_for_verification}</strong>. Vui lòng nhập mã để đặt lại mật khẩu.</p>
             </c:when>
+            <c:when test="${sessionScope.otp_flow == 'update_email'}">
+                <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email mới của bạn: <strong>${sessionScope.new_email_for_display}</strong>. Vui lòng nhập mã để hoàn tất thay đổi.</p>
+            </c:when>
             <c:otherwise>
                 <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email <strong>${sessionScope.email_for_verification}</strong>. Vui lòng nhập mã để kích hoạt tài khoản.</p>
             </c:otherwise>

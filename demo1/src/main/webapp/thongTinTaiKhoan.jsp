@@ -238,8 +238,7 @@
                                             </select>
                                         </div>
                                         <span>Email:</span>
-                                        <input type="email" name="email" value="${sessionScope.user.email}" readonly
-                                               style="background-color: #f1f1f1;">
+                                        <input type="email" name="email" value="${sessionScope.user.email}">
                                     </div>
                                     <div class="info-row">
                                         <span>Ngày sinh:</span>
@@ -319,7 +318,9 @@
         const alertMessages = document.querySelectorAll('.success-message, .error-message-form');
         alertMessages.forEach(function(message) {
             setTimeout(function() {
-                message.style.display = 'none';
+                if (message) {
+                    message.style.display = 'none';
+                }
             }, 5000);
 
             const closeBtn = message.querySelector('.close-btn');
