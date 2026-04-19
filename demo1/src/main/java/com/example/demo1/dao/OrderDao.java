@@ -308,11 +308,28 @@ public class OrderDao {
 
     public int getTotalOrdersCount() {
         return jdbi.withHandle(handle ->
-                handle.createQuery("SELECT COUNT(*) FROM orders")
+                handle.createQuery("SELECT COUNT(*) FROM orders WHERE order_status != 'Đã hủy'")
                         .mapTo(Integer.class)
                         .one()
         );
     }
+
+    public double getMonthlyRevenue() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT IFNULL(SUM(total_amount), 0) FROM orders WHERE order_status = 'Đã giao' AND MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())")
+                        .mapTo(Double.class)
+                        .one()
+        );
+    }
+
+    public int getPendingOrdersCount() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM orders WHERE order_status = 'Chờ xác nhận'")
+                        .mapTo(Integer.class)
+                        .one()
+        );
+    }
+
 
     public boolean hasUserPurchasedProduct(int userId, int productId) {
         String sql = "SELECT COUNT(*) FROM orders o " +
@@ -347,6 +364,65 @@ public class OrderDao {
                                         }
                                 )
                         )
+        );
+    }
+
+    public double getCancelRate() {
+        int total = jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM orders").mapTo(Integer.class).one()
+        );
+        if (total == 0) return 0.0;
+        int cancelled = jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM orders WHERE order_status = 'Đã hủy'").mapTo(Integer.class).one()
+        );
+        return Math.round(((double) cancelled / total) * 100.0 * 10) / 10.0;
+    }
+
+    public double getAverageOrderValue() {
+        int deliveredOrders = jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM orders WHERE order_status = 'Đã giao'").mapTo(Integer.class).one()
+        );
+        if (deliveredOrders == 0) return 0.0;
+        double totalRevenue = getTotalRevenue();
+        return Math.round(totalRevenue / deliveredOrders);
+    }
+
+    public int getTotalProductsSold() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT IFNULL(SUM(od.quantity), 0) FROM order_details od JOIN orders o ON od.order_id = o.id WHERE o.order_status = 'Đã giao'")
+                        .mapTo(Integer.class)
+                        .one()
+        );
+    }
+
+    public int getProductsSoldThisMonth() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT IFNULL(SUM(od.quantity), 0) FROM order_details od JOIN orders o ON od.order_id = o.id WHERE o.order_status = 'Đã giao' AND MONTH(o.created_at) = MONTH(CURDATE()) AND YEAR(o.created_at) = YEAR(CURDATE())")
+                        .mapTo(Integer.class).one()
+        );
+    }
+
+    public double getTodaysRevenue() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT IFNULL(SUM(total_amount), 0) FROM orders WHERE order_status = 'Đã giao' AND DATE(created_at) = CURDATE()")
+                        .mapTo(Double.class)
+                        .one()
+        );
+    }
+
+    public int getProcessingOrdersCount() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM orders WHERE order_status = 'Đang giao'")
+                        .mapTo(Integer.class)
+                        .one()
+        );
+    }
+
+    public int getDeliveredOrdersCount() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM orders WHERE order_status = 'Đã giao'")
+                        .mapTo(Integer.class)
+                        .one()
         );
     }
 }

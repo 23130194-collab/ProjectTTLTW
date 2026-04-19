@@ -171,11 +171,20 @@ public class UserDao {
 
     public int getTotalCustomersCount() {
         return jdbi.withHandle(handle ->
-                handle.createQuery("SELECT COUNT(*) FROM users WHERE role = 0")
+                handle.createQuery("SELECT COUNT(*) FROM users WHERE role = 0 AND status = 'active'")
                         .mapTo(Integer.class)
                         .one()
         );
     }
+
+    public int getNewCustomersThisMonth() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM users WHERE role = 0 AND status = 'active' AND MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())")
+                        .mapTo(Integer.class)
+                        .one()
+        );
+    }
+
 
     public void insertUser(String name, String email, String password) {
         jdbi.useHandle(h ->
