@@ -135,51 +135,63 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach var="product" items="${productList}" varStatus="loop">
-                    <tr>
-                        <td>${(currentPage - 1) * itemsPerPage + loop.index + 1}</td>
-                        <td class="td-image">
-                            <div class="img-wrapper">
-                                <img src="${product.image}" alt="${product.name}"
-                                     onerror="this.src='${contextPath}/assets/images/logo-2.png';"></div>
-                        </td>
-                        <td class="td-name">
-                            <span class="product-name" title="${product.name}">${product.name}</span>
-                        </td>
-                        <td class="td-price">
-                            <div class="price-group">
-                                <span class="current-price"><fmt:formatNumber value="${product.price}" type="number"
-                                                                              pattern="#,##0"/>đ</span>
-                                <c:if test="${product.oldPrice > 0 && product.oldPrice > product.price}">
-                                    <span class="old-price"><fmt:formatNumber value="${product.oldPrice}" type="number"
-                                                                              pattern="#,##0"/>đ</span>
-                                </c:if>
-                            </div>
-                        </td>
-                        <td><span class="stock-text">${product.stock}</span></td>
-                        <td>
-                            <c:choose>
-                                <c:when test="${product.status == 'active'}">
-                                    <span class="status status-active">Hoạt động</span>
-                                </c:when>
-                                <c:when test="${product.status == 'inactive'}">
-                                    <span class="status status-hidden">Ẩn</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="status status-other">${product.status}</span>
-                                </c:otherwise>
-                            </c:choose>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="${contextPath}/admin/upload-product?id=${product.id}" class="action-btn edit"
-                                   title="Sửa"><i class="fa-solid fa-pen"></i></a>
-                                <a href="#confirm-delete-modal-${product.id}" class="action-btn delete"
-                                   title="Xoá sản phẩm"><i class="fa-solid fa-trash-can"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                </c:forEach>
+                <c:choose>
+                    <c:when test="${empty productList and not empty selectedKeyword}">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px 20px; color: #6b7280;">
+                                <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
+                                Không tìm thấy kết quả phù hợp với từ khóa '<strong>${selectedKeyword}</strong>'
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="product" items="${productList}" varStatus="loop">
+                            <tr>
+                                <td>${(currentPage - 1) * itemsPerPage + loop.index + 1}</td>
+                                <td class="td-image">
+                                    <div class="img-wrapper">
+                                        <img src="${product.image}" alt="${product.name}"
+                                             onerror="this.src='${contextPath}/assets/images/logo-2.png';"></div>
+                                </td>
+                                <td class="td-name">
+                                    <span class="product-name" title="${product.name}">${product.name}</span>
+                                </td>
+                                <td class="td-price">
+                                    <div class="price-group">
+                                        <span class="current-price"><fmt:formatNumber value="${product.price}" type="number"
+                                                                                      pattern="#,##0"/>đ</span>
+                                        <c:if test="${product.oldPrice > 0 && product.oldPrice > product.price}">
+                                            <span class="old-price"><fmt:formatNumber value="${product.oldPrice}" type="number"
+                                                                                      pattern="#,##0"/>đ</span>
+                                        </c:if>
+                                    </div>
+                                </td>
+                                <td><span class="stock-text">${product.stock}</span></td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${product.status == 'active'}">
+                                            <span class="status status-active">Hoạt động</span>
+                                        </c:when>
+                                        <c:when test="${product.status == 'inactive'}">
+                                            <span class="status status-hidden">Ẩn</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="status status-other">${product.status}</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="${contextPath}/admin/upload-product?id=${product.id}" class="action-btn edit"
+                                           title="Sửa"><i class="fa-solid fa-pen"></i></a>
+                                        <a href="#confirm-delete-modal-${product.id}" class="action-btn delete"
+                                           title="Xoá sản phẩm"><i class="fa-solid fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
                 </tbody>
             </table>
         </div>

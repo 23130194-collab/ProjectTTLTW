@@ -171,36 +171,48 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach var="review" items="${reviewList}" varStatus="loop">
-                    <tr>
-                        <td>${(currentPage - 1) * 10 + loop.count}</td>
-                        <td class="col-product">
-                            <span class="truncate-text" title="${review.productName}">${review.productName}</span>
-                        </td>
-                        <td>${review.userName}</td>
-                        <td><span class="rating-star">${review.rating} <i class="fa-solid fa-star"></i></span></td>
-                        <td class="col-content text-left">
-                            <span class="truncate-text" title="${review.content}">${review.content}</span>
-                        </td>
-                        <td><fmt:formatDate value="${review.createdAt}" pattern="HH:mm dd/MM/yyyy"/></td>
-                        <td>
-                            <c:choose>
-                                <c:when test="${review.status.trim().equalsIgnoreCase('active')}">
-                                    <span class="status status-active">Hoạt động</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="status status-hidden">Ẩn</span>
-                                </c:otherwise>
-                            </c:choose>
-                        </td>
-                        <td class="col-actions">
-                            <div class="action-buttons">
-                                <a href="${contextPath}/admin/reviews?action=edit&id=${review.id}&page=${currentPage}&status=${selectedStatus}&searchKeyword=${searchKeyword}"
-                                   class="action-btn edit" title="Sửa trạng thái"><i class="fa-solid fa-pen"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                </c:forEach>
+                <c:choose>
+                    <c:when test="${empty reviewList and not empty searchKeyword}">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px 20px; color: #6b7280;">
+                                <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
+                                Không tìm thấy kết quả phù hợp với từ khóa '<strong>${searchKeyword}</strong>'
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="review" items="${reviewList}" varStatus="loop">
+                            <tr>
+                                <td>${(currentPage - 1) * 10 + loop.count}</td>
+                                <td class="col-product">
+                                    <span class="truncate-text" title="${review.productName}">${review.productName}</span>
+                                </td>
+                                <td>${review.userName}</td>
+                                <td><span class="rating-star">${review.rating} <i class="fa-solid fa-star"></i></span></td>
+                                <td class="col-content text-left">
+                                    <span class="truncate-text" title="${review.content}">${review.content}</span>
+                                </td>
+                                <td><fmt:formatDate value="${review.createdAt}" pattern="HH:mm dd/MM/yyyy"/></td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${review.status.trim().equalsIgnoreCase('active')}">
+                                            <span class="status status-active">Hoạt động</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="status status-hidden">Ẩn</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td class="col-actions">
+                                    <div class="action-buttons">
+                                        <a href="${contextPath}/admin/reviews?action=edit&id=${review.id}&page=${currentPage}&status=${selectedStatus}&searchKeyword=${searchKeyword}"
+                                           class="action-btn edit" title="Sửa trạng thái"><i class="fa-solid fa-pen"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
                 </tbody>
             </table>
         </div>

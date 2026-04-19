@@ -210,34 +210,46 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach var="b" items="${banners}" varStatus="status">
-                    <tr>
-                        <td>${(currentPage - 1) * 10 + status.count}</td>
-                        <td>
-                            <img src="${b.image}" class="banner-img-preview" alt="Banner"
-                                 onerror="this.src='https://via.placeholder.com/100x60?text=No+Image'">
-                        </td>
-                        <td style="text-align: left; font-weight: 600;">${b.name}</td>
-                        <td><span class="status status-active"
-                                  style="background: #f1f5f9; color: #334155;">${b.position}</span></td>
-                        <td>${b.display_order}</td>
-                        <td>
-                            <div class="time-range">
-                                <i class="fa-regular fa-calendar"></i> ${b.start_time}<br>
-                                <i class="fa-solid fa-arrow-down-long" style="font-size: 10px; margin: 2px 0;"></i><br>
-                                <i class="fa-regular fa-calendar-check"></i> ${b.end_time}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="${contextPath}/admin/banners?action=edit&id=${b.id}" class="action-btn edit"><i
-                                        class="fa-solid fa-pen"></i></a>
-                                <a href="#confirm-delete-modal-${b.id}" class="action-btn delete open-modal-btn"><i
-                                        class="fa-solid fa-trash"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                </c:forEach>
+                <c:choose>
+                    <c:when test="${empty banners and not empty param.keyword}">
+                        <tr>
+                            <td colspan="7" class="no-results-cell">
+                                <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
+                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword">${param.keyword}</span>'
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="b" items="${banners}" varStatus="status">
+                            <tr>
+                                <td>${(currentPage - 1) * 10 + status.count}</td>
+                                <td>
+                                    <img src="${b.image}" class="banner-img-preview" alt="Banner"
+                                         onerror="this.src='https://via.placeholder.com/100x60?text=No+Image'">
+                                </td>
+                                <td style="text-align: left; font-weight: 600;">${b.name}</td>
+                                <td><span class="status status-active"
+                                          style="background: #f1f5f9; color: #334155;">${b.position}</span></td>
+                                <td>${b.display_order}</td>
+                                <td>
+                                    <div class="time-range">
+                                        <i class="fa-regular fa-calendar"></i> ${b.start_time}<br>
+                                        <i class="fa-solid fa-arrow-down-long" style="font-size: 10px; margin: 2px 0;"></i><br>
+                                        <i class="fa-regular fa-calendar-check"></i> ${b.end_time}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="${contextPath}/admin/banners?action=edit&id=${b.id}" class="action-btn edit"><i
+                                                class="fa-solid fa-pen"></i></a>
+                                        <a href="#confirm-delete-modal-${b.id}" class="action-btn delete open-modal-btn"><i
+                                                class="fa-solid fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
                 </tbody>
             </table>
         </div>
