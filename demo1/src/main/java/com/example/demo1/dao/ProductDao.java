@@ -344,4 +344,29 @@ public class ProductDao {
             return query.mapTo(Integer.class).one() > 0;
         });
     }
+
+    public int getLowStockProductsCount(int threshold) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM products WHERE stock <= :threshold AND status = 'active'")
+                        .bind("threshold", threshold)
+                        .mapTo(Integer.class)
+                        .one()
+        );
+    }
+
+    public List<Product> getLowStockProductsList(int threshold) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT " + SELECT_PRODUCT_FIELDS +
+                                "FROM products p " +
+                                "LEFT JOIN discounts d ON p.discount_id = d.id " +
+                                "LEFT JOIN reviews r ON p.id = r.product_id " +
+                                "WHERE p.stock <= :threshold AND p.status = 'active' " +
+                                "GROUP BY p.id " +
+                                "ORDER BY p.stock ASC " +
+                                "LIMIT 20")
+                        .bind("threshold", threshold)
+                        .mapToBean(Product.class)
+                        .list()
+        );
+    }
 }

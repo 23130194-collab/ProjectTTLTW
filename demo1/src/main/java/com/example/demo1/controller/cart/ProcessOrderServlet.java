@@ -8,6 +8,8 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.IOException;
 import java.util.Map;
+import com.example.demo1.service.NotificationService;
+
 
 @WebServlet(name = "ProcessOrderServlet", value = "/ProcessOrderServlet")
 public class ProcessOrderServlet extends HttpServlet {
@@ -102,7 +104,26 @@ public class ProcessOrderServlet extends HttpServlet {
 
         boolean success = orderService.createOrder(order, recipient, cart, payment);
 
-        if(success) {
+        if (success) {
+            try {
+                NotificationService notiService = new NotificationService();
+
+                String content = "Đơn hàng " + order.getOrderCode() + " đặt thành công. Cảm ơn bạn!";
+                String link = "order-detail?id=" + order.getId();
+                Notification userNoti = new Notification(user.getId(), content, link, 0);
+                notiService.insert(userNoti);
+
+                String adminContent = "Đơn hàng mới " + order.getOrderCode() + " từ khách hàng " + fullName;
+                String adminLink = "admin/orders?action=view&id=" + order.getId();
+
+                Notification adminNoti = new Notification(null, adminContent, adminLink, 1);
+
+                new com.example.demo1.dao.NotificationDao().insert(adminNoti);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             session.removeAttribute("cart");
             response.sendRedirect("thankyouNotification.jsp");
         }else {

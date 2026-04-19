@@ -103,9 +103,9 @@
 
 <main>
     <section class="home-layout">
-        <!-- Cột trái: Danh mục sản phẩm -->
         <div class="home-left">
             <div class="content-category">
+                <h2>Sản phẩm</h2>
                 <c:forEach items="${applicationScope.categoryList}" var="cat">
                     <a href="list-product?id=${cat.id}" class="category-item">
                         <c:set var="imageSrc" value="${cat.image}"/>
@@ -151,7 +151,7 @@
             </div>
         </div>
 
-        <div class="home-right">
+       <div class="home-right">
             <div class="suggest-box">
                 <div class="suggest-welcome">
                     <div class="suggest-text">
@@ -161,9 +161,64 @@
                 </div>
 
                 <span id="openNotice" class="suggest-item" style="cursor:pointer;">
-                        <i class="fa-solid fa-bell"></i> Thông báo của bạn
-                        <i class="fa-solid fa-chevron-right"></i>
+                    <i class="fa-solid fa-bell"></i> Thông báo của bạn
+                    <i class="fa-solid fa-chevron-right"></i>
                 </span>
+
+                <div class="notice-overlay" id="noticeOverlay"></div>
+
+                <c:set var="unreadCount" value="0" />
+                <c:if test="${not empty notificationList}">
+                    <c:forEach var="n" items="${notificationList}">
+                        <c:if test="${n.isRead == 0}">
+                            <c:set var="unreadCount" value="${unreadCount + 1}" />
+                        </c:if>
+                    </c:forEach>
+                </c:if>
+
+                <div class="notice-box" id="noticeBox">
+                    <div class="notice-header">
+                        <span>
+                                Thông báo<span id="unreadBadge" style="display: ${unreadCount > 0 ? 'inline' : 'none'};">(${unreadCount})</span>
+                        </span>
+                    </div>
+
+                    <div class="notice-content">
+                        <c:choose>
+                            <c:when test="${empty sessionScope.user}">
+                                <div style="padding: 20px; text-align: center; font-size: 14px;">
+                                    Vui lòng <a href="login" style="color: #d70018; font-weight: bold;">đăng nhập</a> để xem.
+                                </div>
+                            </c:when>
+
+                            <c:when test="${empty notificationList}">
+                                <div style="padding: 20px; text-align: center; color: #666; font-size: 14px;">
+                                    Bạn chưa có thông báo nào.
+                                </div>
+                            </c:when>
+
+                            <c:otherwise>
+                                <c:forEach var="n" items="${notificationList}">
+                                    <div class="notice-item ${n.isRead == 0 ? 'unread' : ''}" data-id="${n.id}">
+                                        <i class="fa-solid fa-truck icon"></i>
+                                        <div>
+                                            <div>${n.content}</div>
+
+                                            <div class="notice-meta">
+                                        <span>
+                                            <fmt:formatDate value="${n.createdAt}" pattern="dd/MM HH:mm" />
+                                        </span>
+                                                <a class="notice-detail" href="${pageContext.request.contextPath}/${n.link}">Xem chi tiết</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+
+                    <div id="closeNoticeBtn" class="close-btn" style="text-align: center; padding: 10px; cursor: pointer; color: #d70018; font-weight: bold; border-top: 1px solid #eee;">Đóng</div>
+                </div>
 
                 <a href="${pageContext.request.contextPath}/contact" class="suggest-item">
                     <i class="fa-solid fa-phone-volume"></i> Liên hệ với chúng tôi
@@ -394,6 +449,7 @@
 <script src="${pageContext.request.contextPath}/js/flashSale.js"></script>
 <script src="${pageContext.request.contextPath}/js/dualBannerSlideshow.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
+<script src="${pageContext.request.contextPath}/js/Notification.js"></script>
 
 </body>
 
