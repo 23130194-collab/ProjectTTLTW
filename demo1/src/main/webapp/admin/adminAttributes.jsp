@@ -211,32 +211,43 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach var="attr" items="${attributes}" varStatus="loop">
-                    <tr>
-                        <td>${loop.index + 1 + (currentPage - 1) * 10}</td>
-                        <td><c:out value="${attr.name}"/></td>
-                        <td>
-                            <c:forEach var="cat" items="${categories}">
-                                <c:if test="${cat.id == attr.categoryId}">
-                                    ${cat.name}
-                                </c:if>
-                            </c:forEach>
-                        </td>
-
-                        <td>${attr.displayOrder}</td>
-                        <td>
-                            <span class="badge ${attr.status == 'active' ? 'active-status' : 'inactive-status'}">
-                                    ${attr.status == 'active' ? 'Hoạt động' : 'Ẩn'}
-                            </span>
-                        </td>
-                        <td class="actions">
-                            <a href="${contextPath}/admin/attributes?action=edit&id=${attr.id}" class="btn-edit"><i
-                                    class="fa-solid fa-pen"></i></a>
-                            <a href="#confirm-delete-modal-${attr.id}" class="btn-delete open-modal-btn"><i
-                                    class="fa-solid fa-trash"></i></a>
-                        </td>
-                    </tr>
-                </c:forEach>
+                <c:choose>
+                    <c:when test="${empty attributes and not empty keyword}">
+                        <tr>
+                            <td colspan="6" class="no-results-cell">
+                                <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
+                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword">${keyword}</span>'
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="attr" items="${attributes}" varStatus="loop">
+                            <tr>
+                                <td>${loop.index + 1 + (currentPage - 1) * 10}</td>
+                                <td><c:out value="${attr.name}"/></td>
+                                <td>
+                                    <c:forEach var="cat" items="${categories}">
+                                        <c:if test="${cat.id == attr.categoryId}">
+                                            ${cat.name}
+                                        </c:if>
+                                    </c:forEach>
+                                </td>
+                                <td>${attr.displayOrder}</td>
+                                <td>
+                                    <span class="badge ${attr.status == 'active' ? 'active-status' : 'inactive-status'}">
+                                        ${attr.status == 'active' ? 'Hoạt động' : 'Ẩn'}
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <a href="${contextPath}/admin/attributes?action=edit&id=${attr.id}" class="btn-edit"><i
+                                            class="fa-solid fa-pen"></i></a>
+                                    <a href="#confirm-delete-modal-${attr.id}" class="btn-delete open-modal-btn"><i
+                                            class="fa-solid fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
                 </tbody>
             </table>
         </div>
