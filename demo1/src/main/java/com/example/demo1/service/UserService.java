@@ -44,5 +44,9 @@ public class UserService {
         return userDao.getTotalCustomersCount();
     }
 
+    public int getNewCustomersThisMonth() {
+        return userDao.getNewCustomersThisMonth();
+    }
+
     public  void createUser(User user){ userDao.createUser(user);}
 }

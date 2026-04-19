@@ -151,4 +151,16 @@ public class ProductService {
     public List<ProductSuggestion> getSuggestions(String keyword, int limit) {
         return pdao.searchSuggestions(keyword, limit);
     }
+
+    public int getActiveProductsCount() {
+        return pdao.getActiveProductsCount();
+    }
+
+    public int getLowStockProductsCount(int threshold) {
+        return pdao.getLowStockProductsCount(threshold);
+    }
+
+    public List<Product> getLowStockProductsList(int threshold) {
+        return pdao.getLowStockProductsList(threshold);
+    }
 }
