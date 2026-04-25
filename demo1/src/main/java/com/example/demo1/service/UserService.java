@@ -49,4 +49,8 @@ public class UserService {
     }
 
     public  void createUser(User user){ userDao.createUser(user);}
+
+    public User getUserById(int id) {
+        return userDao.getUserById(id);
+    }
 }
