@@ -168,6 +168,9 @@
                     <c:if test="${p.discountValue > 0}">
                         <div class="old-price"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
                     </c:if>
+                    <c:if test="${p.stock == 0}">
+                        <span class="out-of-stock-badge">Hết hàng</span>
+                    </c:if>
                 </div>
 
                 <div class="shipping-box">
@@ -246,10 +249,13 @@
                                 </div>
                                 <c:if test="${rp.discountValue > 0}">
                                     <div class="original-price"><fmt:formatNumber value="${rp.oldPrice}"
-                                                                                  pattern="#,###"/>đ
+                                                                                      pattern="#,###"/>đ
                                     </div>
                                 </c:if>
                             </div>
+                            <c:if test="${rp.stock == 0}">
+                                <span class="out-of-stock-badge">Hết hàng</span>
+                            </c:if>
                         </a>
 
                         <div class="product-footer-interaction">
@@ -489,6 +495,9 @@
                     <div class="price-current"><fmt:formatNumber value="${p.price}" pattern="#,###"/>đ</div>
                     <c:if test="${p.discountValue > 0}">
                         <div class="price-old"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
+                    </c:if>
+                    <c:if test="${p.stock == 0}">
+                        <span class="out-of-stock-badge">Hết hàng</span>
                     </c:if>
                 </div>
                 <a href="AddCart?action=buyNow&id=${p.id}"

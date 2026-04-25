@@ -180,6 +180,7 @@
                     <label>Ngày bắt đầu giảm giá</label>
                     <c:if test="${not empty product.discountStart}">
                         <c:set var="formattedStart" value="${fn:substring(product.discountStart, 0, 16)}"/>
+                        <c:set var="formattedStart" value="${fn:replace(formattedStart, ' ', 'T')}"/>
                     </c:if>
                     <input type="datetime-local" id="discount-start" name="discountStart" class="form-input"
                            value="${formattedStart}">
@@ -188,6 +189,7 @@
                     <label>Ngày kết thúc giảm giá</label>
                     <c:if test="${not empty product.discountEnd}">
                         <c:set var="formattedEnd" value="${fn:substring(product.discountEnd, 0, 16)}"/>
+                        <c:set var="formattedEnd" value="${fn:replace(formattedEnd, ' ', 'T')}"/>
                     </c:if>
                     <input type="datetime-local" id="discount-end" name="discountEnd" class="form-input"
                            value="${formattedEnd}">

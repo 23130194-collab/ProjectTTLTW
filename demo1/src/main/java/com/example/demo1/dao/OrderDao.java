@@ -221,10 +221,6 @@ public class OrderDao {
                             .bind("quantity", item.getQuantity())
                             .bind("productId", item.getProduct().getId())
                             .execute();
-
-                    handle.createUpdate("UPDATE products SET status = 'inactive' WHERE id = :productId AND stock <= 0")
-                            .bind("productId", item.getProduct().getId())
-                            .execute();
                 }
 
                 return true;
