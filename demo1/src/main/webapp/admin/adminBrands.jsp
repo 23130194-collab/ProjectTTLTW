@@ -186,39 +186,51 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach var="brand" items="${brands}" varStatus="loop">
-                    <tr>
-                        <td>${(currentPage - 1) * 10 + loop.count}</td>
-                        <td>
-                            <c:set var="logoUrl" value="${brand.logo}"/>
-                            <c:choose>
-                                <c:when test="${logoUrl.startsWith('http')}">
-                                    <img src="${logoUrl}" width="55" alt="${brand.name}"
-                                         onerror="this.style.display='none'">
-                                </c:when>
-                                <c:when test="${not empty logoUrl}">
-                                    <img src="${contextPath}/${logoUrl}" width="55" alt="${brand.name}"
-                                         onerror="this.style.display='none'">
-                                </c:when>
-                            </c:choose>
-                        </td>
-                        <td><c:out value="${brand.name}"/></td>
-                        <td><c:out value="${brand.displayOrder}"/></td>
-                        <td>
-                            <span class="status ${brand.status == 'Hoạt động' ? 'status-active' : 'status-hidden'}">
-                                <c:out value="${brand.status}"/>
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="${contextPath}/admin/brands?action=edit&id=${brand.id}"
-                                   class="action-btn edit"><i class="fa-solid fa-pen"></i></a>
-                                <a href="#confirm-delete-modal-${brand.id}" class="action-btn delete"><i
-                                        class="fa-solid fa-trash"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                </c:forEach>
+                <c:choose>
+                    <c:when test="${empty brands and not empty keyword}">
+                        <tr>
+                            <td colspan="6" class="no-results-cell">
+                                <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
+                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword">${keyword}</span>'
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="brand" items="${brands}" varStatus="loop">
+                            <tr>
+                                <td>${(currentPage - 1) * 10 + loop.count}</td>
+                                <td>
+                                    <c:set var="logoUrl" value="${brand.logo}"/>
+                                    <c:choose>
+                                        <c:when test="${logoUrl.startsWith('http')}">
+                                            <img src="${logoUrl}" width="55" alt="${brand.name}"
+                                                 onerror="this.style.display='none'">
+                                        </c:when>
+                                        <c:when test="${not empty logoUrl}">
+                                            <img src="${contextPath}/${logoUrl}" width="55" alt="${brand.name}"
+                                                 onerror="this.style.display='none'">
+                                        </c:when>
+                                    </c:choose>
+                                </td>
+                                <td><c:out value="${brand.name}"/></td>
+                                <td><c:out value="${brand.displayOrder}"/></td>
+                                <td>
+                                    <span class="status ${brand.status == 'Hoạt động' ? 'status-active' : 'status-hidden'}">
+                                        <c:out value="${brand.status}"/>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="${contextPath}/admin/brands?action=edit&id=${brand.id}"
+                                           class="action-btn edit"><i class="fa-solid fa-pen"></i></a>
+                                        <a href="#confirm-delete-modal-${brand.id}" class="action-btn delete"><i
+                                                class="fa-solid fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
                 </tbody>
             </table>
         </div>

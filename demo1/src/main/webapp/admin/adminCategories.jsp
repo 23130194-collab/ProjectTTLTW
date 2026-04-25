@@ -126,7 +126,7 @@
                 <div class="input-group" style="flex: 1;">
                     <label class="input-label">Đường dẫn hình ảnh</label>
                     <input type="text" name="imageUrl" class="input-field"
-                           placeholder="Dán đường dẫn hình ảnh mới tại đây" value="">
+                           placeholder="https://example.com/image.png" value="${categoryToEdit.image}">
                 </div>
                 <div class="button-group" style="margin-left: 15px; width: auto;">
                     <a href="#confirm-save-modal" class="add-category-btn open-modal-btn">
@@ -179,43 +179,54 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach items="${categoryList}" var="cat" varStatus="loop">
-                    <tr>
-                        <td>${loop.index + 1}</td>
-                        <td>
-                            <c:set var="imageSrc" value="${cat.image}"/>
-                            <c:choose>
-                                <c:when test="${imageSrc.startsWith('http')}">
-                                    <img src="${imageSrc}" alt="${cat.name}" class="table-image">
-                                </c:when>
-                                <c:otherwise>
-                                    <img src="${contextPath}/${imageSrc}" alt="${cat.name}" class="table-image">
-                                </c:otherwise>
-                            </c:choose>
-                        </td>
-                        <td>${cat.name}</td>
-                        <td>${cat.display_order}</td>
-                        <td>
-                            <c:choose>
-                                <c:when test="${cat.status.trim().equalsIgnoreCase('active')}">
-                                    <span class="status status-active">Hoạt động</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="status status-hidden">Ẩn</span>
-                                </c:otherwise>
-                            </c:choose>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="${contextPath}/admin/categories?action=edit&id=${cat.id}"
-                                   class="action-btn edit" title="Sửa"><i class="fa-solid fa-pen"></i></a>
-                                <a href="#confirm-delete-modal-${cat.id}" class="action-btn delete open-modal-btn"
-                                   title="Xóa"><i
-                                        class="fa-solid fa-trash-can"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                </c:forEach>
+                <c:choose>
+                    <c:when test="${empty categoryList and not empty searchKeyword}">
+                        <tr>
+                            <td colspan="6" class="no-results-cell">
+                                <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
+                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword">${searchKeyword}</span>'
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach items="${categoryList}" var="cat" varStatus="loop">
+                            <tr>
+                                <td>${loop.index + 1}</td>
+                                <td>
+                                    <c:set var="imageSrc" value="${cat.image}"/>
+                                    <c:choose>
+                                        <c:when test="${imageSrc.startsWith('http')}">
+                                            <img src="${imageSrc}" alt="${cat.name}" class="table-image">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <img src="${contextPath}/${imageSrc}" alt="${cat.name}" class="table-image">
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>${cat.name}</td>
+                                <td>${cat.display_order}</td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${cat.status.trim().equalsIgnoreCase('active')}">
+                                            <span class="status status-active">Hoạt động</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="status status-hidden">Ẩn</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="${contextPath}/admin/categories?action=edit&id=${cat.id}"
+                                           class="action-btn edit" title="Sửa"><i class="fa-solid fa-pen"></i></a>
+                                        <a href="#confirm-delete-modal-${cat.id}" class="action-btn delete open-modal-btn"
+                                           title="Xóa"><i class="fa-solid fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
                 </tbody>
             </table>
         </div>

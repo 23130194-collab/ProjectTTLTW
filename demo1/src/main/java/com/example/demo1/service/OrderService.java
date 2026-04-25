@@ -142,4 +142,43 @@ public class OrderService {
         return orderDao.hasUserPurchasedProduct(userId, productId);
     }
 
+    public double getTotalRevenue() {
+        return orderDao.getTotalRevenue();
+    }
+
+    public double getMonthlyRevenue() {
+        return orderDao.getMonthlyRevenue();
+    }
+
+    public int getPendingOrdersCount() {
+        return orderDao.getPendingOrdersCount();
+    }
+
+    public double getCancelRate() {
+        return orderDao.getCancelRate();
+    }
+
+    public double getTodaysRevenue() {
+        return orderDao.getTodaysRevenue();
+    }
+
+    public int getTotalProductsSold() {
+        return orderDao.getTotalProductsSold();
+    }
+
+    public int getProductsSoldThisMonth() {
+        return orderDao.getProductsSoldThisMonth();
+    }
+
+    public int getProcessingOrdersCount() {
+        return orderDao.getProcessingOrdersCount();
+    }
+
+    public int getDeliveredOrdersCount() {
+        return orderDao.getDeliveredOrdersCount();
+    }
+
+    public Map<String, Double> getDailyRevenueForLast7Days() {
+        return orderDao.getDailyRevenueForLast7Days();
+    }
 }

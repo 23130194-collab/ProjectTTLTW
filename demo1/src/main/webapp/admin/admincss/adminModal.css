@@ -26,7 +26,7 @@
     width: 90%;
     max-width: 400px;
     text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     transform: scale(0.9);
     transition: transform 0.3s;
 }
@@ -75,6 +75,7 @@
     background-color: #ef4444;
     color: white;
 }
+
 .modal-confirm:hover {
     background-color: #d9534f;
 }
@@ -83,6 +84,26 @@
     background-color: #e2e8f0;
     color: #334155;
 }
+
 .modal-cancel:hover {
     background-color: #cbd5e1;
+}
+
+.no-results-cell {
+    text-align: center !important;
+    padding: 48px 20px;
+    color: #6b7280;
+    font-size: 14.5px;
+}
+
+.no-results-icon {
+    font-size: 2.2rem;
+    color: #d1d5db;
+    display: block;
+    margin-bottom: 14px;
+}
+
+.no-results-cell .no-results-keyword {
+    color: #374151;
+    font-weight: 600;
 }
