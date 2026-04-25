@@ -12,6 +12,44 @@ public class EmailService {
     private static final int SMTP_PORT = 587;
 
     public static void sendOtpEmail(String toEmail, String otp) {
+        sendHtmlEmail(toEmail, "Mã OTP xác thực tài khoản TechNova",
+                "<h1>Chào mừng bạn đến với TechNova!</h1>"
+                        + "<p>Mã OTP để kích hoạt tài khoản của bạn là:</p>"
+                        + "<h2 style='color: #ff4e00; font-size: 24px;'>" + otp + "</h2>"
+                        + "<p>Mã này sẽ hết hạn sau 2 phút.</p>"
+                        + "<p>Trân trọng,<br>Đội ngũ TechNova</p>");
+    }
+
+    public static void sendContactResponseEmail(String toEmail, String customerName, String originalContent, String responseContent) {
+        String safeName = escapeHtml(customerName == null || customerName.trim().isEmpty() ? "bạn" : customerName.trim());
+        String safeOriginalContent = escapeHtml(originalContent == null ? "" : originalContent.trim()).replace("\n", "<br>");
+        String safeResponseContent = escapeHtml(responseContent == null ? "" : responseContent.trim()).replace("\n", "<br>");
+
+        String emailContent = "<h2>TechNova đã phản hồi liên hệ của bạn</h2>"
+                + "<p>Xin chào <strong>" + safeName + "</strong>,</p>"
+                + "<p>Chúng tôi đã nhận được nội dung liên hệ của bạn:</p>"
+                + "<blockquote style='margin: 16px 0; padding: 12px 16px; background: #f8fafc; border-left: 4px solid #5b86e5;'>"
+                + safeOriginalContent
+                + "</blockquote>"
+                + "<p>Nội dung phản hồi từ TechNova:</p>"
+                + "<div style='margin: 16px 0; padding: 12px 16px; background: #eff6ff; border-radius: 8px; line-height: 1.7;'>"
+                + safeResponseContent
+                + "</div>"
+                + "<p>Trân trọng,<br>Đội ngũ TechNova</p>";
+
+        sendHtmlEmail(toEmail, "Phản hồi liên hệ từ TechNova", emailContent);
+    }
+
+    private static String escapeHtml(String value) {
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+
+    private static void sendHtmlEmail(String toEmail, String subject, String emailContent) {
         Properties props = new Properties();
         props.put("mail.smtp.host", HOST_NAME);
         props.put("mail.smtp.port", String.valueOf(SMTP_PORT));
@@ -28,18 +66,11 @@ public class EmailService {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(FROM_EMAIL));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
-            message.setSubject("Mã OTP xác thực tài khoản TechNova");
-
-            String emailContent = "<h1>Chào mừng bạn đến với TechNova!</h1>"
-                                + "<p>Mã OTP để kích hoạt tài khoản của bạn là:</p>"
-                                + "<h2 style='color: #ff4e00; font-size: 24px;'>" + otp + "</h2>"
-                                + "<p>Mã này sẽ hết hạn sau 2 phút.</p>"
-                                + "<p>Trân trọng,<br>Đội ngũ TechNova</p>";
-            
+            message.setSubject(subject);
             message.setContent(emailContent, "text/html; charset=utf-8");
 
             Transport.send(message);
-            System.out.println("Email OTP đã được gửi thành công!");
+            System.out.println("Email đã được gửi thành công!");
 
         } catch (MessagingException e) {
             e.printStackTrace();
