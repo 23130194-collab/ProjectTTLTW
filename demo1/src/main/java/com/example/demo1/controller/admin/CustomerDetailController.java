@@ -8,6 +8,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.example.demo1.model.User;
+import com.example.demo1.service.UserService;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -32,6 +35,11 @@ public class CustomerDetailController extends HttpServlet {
         if (idStr != null) {
             try {
                 int userId = Integer.parseInt(idStr);
+
+                UserService userService = new UserService();
+                User customer = userService.getUserById(userId);
+
+                request.setAttribute("customer", customer);
 
                 int page = 1;
                 String pageStr = request.getParameter("page");
