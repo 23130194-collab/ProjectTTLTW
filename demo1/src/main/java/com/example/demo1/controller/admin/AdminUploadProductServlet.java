@@ -92,8 +92,6 @@ public class AdminUploadProductServlet extends HttpServlet {
 
         if (status == null || status.trim().isEmpty()) status = "active";
 
-        if (stock == 0) status = "inactive";
-
         List<String> missingFields = new ArrayList<>();
         if (name == null || name.trim().isEmpty()) missingFields.add("Tên sản phẩm");
         if (categoryId == 0) missingFields.add("Danh mục");
@@ -103,6 +101,15 @@ public class AdminUploadProductServlet extends HttpServlet {
         String mainImage = request.getParameter("mainImage");
         if (isNew && (mainImage == null || mainImage.trim().isEmpty())) {
             missingFields.add("Ảnh đại diện");
+        }
+
+        Double discountValue = getDiscountValue(request);
+        Timestamp discountStart = parseTimestamp(request.getParameter("discountStart"));
+        Timestamp discountEnd = parseTimestamp(request.getParameter("discountEnd"));
+
+        if (discountValue != null && discountValue > 0) {
+            if (discountStart == null) missingFields.add("Ngày bắt đầu giảm giá");
+            if (discountEnd == null) missingFields.add("Ngày kết thúc giảm giá");
         }
 
         if (!missingFields.isEmpty()) {
@@ -118,10 +125,6 @@ public class AdminUploadProductServlet extends HttpServlet {
         }
 
         List<Product_Image> detailImages = getImagesFromRequest(request);
-        Double discountValue = getDiscountValue(request);
-        Timestamp discountStart = parseTimestamp(request.getParameter("discountStart"));
-        Timestamp discountEnd = parseTimestamp(request.getParameter("discountEnd"));
-
         try {
             if (isNew) {
                 Product newProduct = new Product();

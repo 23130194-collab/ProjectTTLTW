@@ -139,6 +139,9 @@
                                     <div class="original-price"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
                                 </c:if>
                             </div>
+                            <c:if test="${p.stock == 0}">
+                                <span class="out-of-stock-badge">Hết hàng</span>
+                            </c:if>
                         </a>
                         <div class="product-footer-interaction">
                             <div class="action-item rating">
