@@ -200,43 +200,49 @@
             <div class="pagination-container">
                 <c:url var="prevUrl" value="/admin/products">
                     <c:param name="page" value="${currentPage - 1}"/>
-                    <c:if test="${not empty selectedCategoryId}"><c:param name="categoryId"
-                                                                          value="${selectedCategoryId}"/></c:if>
+                    <c:if test="${not empty selectedCategoryId}"><c:param name="categoryId" value="${selectedCategoryId}"/></c:if>
                     <c:if test="${not empty selectedStatus}"><c:param name="status" value="${selectedStatus}"/></c:if>
-                    <c:if test="${not empty selectedKeyword}"><c:param name="keyword"
-                                                                       value="${selectedKeyword}"/></c:if>
+                    <c:if test="${not empty selectedKeyword}"><c:param name="keyword" value="${selectedKeyword}"/></c:if>
                     <c:if test="${not empty selectedSort}"><c:param name="sort" value="${selectedSort}"/></c:if>
                 </c:url>
-                <a href="${currentPage > 1 ? prevUrl : '#'}"
-                   class="pagination-btn ${currentPage == 1 ? 'disabled' : ''}">
+                <a href="${currentPage > 1 ? prevUrl : '#'}" class="pagination-btn ${currentPage == 1 ? 'disabled' : ''}">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
 
                 <c:forEach begin="1" end="${totalPages}" var="i">
-                    <c:url var="pageUrl" value="/admin/products">
-                        <c:param name="page" value="${i}"/>
-                        <c:if test="${not empty selectedCategoryId}"><c:param name="categoryId"
-                                                                              value="${selectedCategoryId}"/></c:if>
-                        <c:if test="${not empty selectedStatus}"><c:param name="status"
-                                                                          value="${selectedStatus}"/></c:if>
-                        <c:if test="${not empty selectedKeyword}"><c:param name="keyword"
-                                                                           value="${selectedKeyword}"/></c:if>
-                        <c:if test="${not empty selectedSort}"><c:param name="sort" value="${selectedSort}"/></c:if>
-                    </c:url>
-                    <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}">${i}</a>
+                    <c:set var="show" value="false"/>
+                    <c:if test="${i == 1 || i == 2}"><c:set var="show" value="true"/></c:if>
+                    <c:if test="${i >= currentPage - 2 && i <= currentPage + 2}"><c:set var="show" value="true"/></c:if>
+                    <c:if test="${i == totalPages - 1 || i == totalPages}"><c:set var="show" value="true"/></c:if>
+
+                    <c:if test="${show}">
+                        <c:set var="prevShow" value="false"/>
+                        <c:if test="${i - 1 == 1 || i - 1 == 2}"><c:set var="prevShow" value="true"/></c:if>
+                        <c:if test="${i - 1 >= currentPage - 2 && i - 1 <= currentPage + 2}"><c:set var="prevShow" value="true"/></c:if>
+                        <c:if test="${i - 1 == totalPages - 1 || i - 1 == totalPages}"><c:set var="prevShow" value="true"/></c:if>
+                        <c:if test="${i > 1 && !prevShow}">
+                            <span class="page-ellipsis">...</span>
+                        </c:if>
+
+                        <c:url var="pageUrl" value="/admin/products">
+                            <c:param name="page" value="${i}"/>
+                            <c:if test="${not empty selectedCategoryId}"><c:param name="categoryId" value="${selectedCategoryId}"/></c:if>
+                            <c:if test="${not empty selectedStatus}"><c:param name="status" value="${selectedStatus}"/></c:if>
+                            <c:if test="${not empty selectedKeyword}"><c:param name="keyword" value="${selectedKeyword}"/></c:if>
+                            <c:if test="${not empty selectedSort}"><c:param name="sort" value="${selectedSort}"/></c:if>
+                        </c:url>
+                        <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}">${i}</a>
+                    </c:if>
                 </c:forEach>
 
                 <c:url var="nextUrl" value="/admin/products">
                     <c:param name="page" value="${currentPage + 1}"/>
-                    <c:if test="${not empty selectedCategoryId}"><c:param name="categoryId"
-                                                                          value="${selectedCategoryId}"/></c:if>
+                    <c:if test="${not empty selectedCategoryId}"><c:param name="categoryId" value="${selectedCategoryId}"/></c:if>
                     <c:if test="${not empty selectedStatus}"><c:param name="status" value="${selectedStatus}"/></c:if>
-                    <c:if test="${not empty selectedKeyword}"><c:param name="keyword"
-                                                                       value="${selectedKeyword}"/></c:if>
+                    <c:if test="${not empty selectedKeyword}"><c:param name="keyword" value="${selectedKeyword}"/></c:if>
                     <c:if test="${not empty selectedSort}"><c:param name="sort" value="${selectedSort}"/></c:if>
                 </c:url>
-                <a href="${currentPage < totalPages ? nextUrl : '#'}"
-                   class="pagination-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                <a href="${currentPage < totalPages ? nextUrl : '#'}" class="pagination-btn ${currentPage == totalPages ? 'disabled' : ''}">
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </div>

@@ -113,7 +113,7 @@
                     <c:if test="${not empty startDate && startDate.length() > 10}">
                         <c:set var="startDate" value="${startDate.substring(0, 10)}"/>
                     </c:if>
-                    <input type="date" name="start_time" value="${startDate}" required>
+                    <input type="date" id="banner-start-time" name="start_time" value="${startDate}" required>
                 </div>
 
                 <div class="form-group col-span-1">
@@ -122,7 +122,7 @@
                     <c:if test="${not empty endDate && endDate.length() > 10}">
                         <c:set var="endDate" value="${endDate.substring(0, 10)}"/>
                     </c:if>
-                    <input type="date" name="end_time" value="${endDate}" required>
+                    <input type="date" id="banner-end-time" name="end_time" value="${endDate}" required>
                 </div>
 
                 <div class="form-group col-span-2">
@@ -395,6 +395,32 @@
                     logoutConfirmModal.classList.remove('show');
                 }
             });
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const todayStr = today.getFullYear() + '-' + pad(today.getMonth() + 1) + '-' + pad(today.getDate());
+
+        const startInput = document.getElementById('banner-start-time');
+        const endInput   = document.getElementById('banner-end-time');
+
+        if (startInput) {
+            startInput.setAttribute('min', todayStr);
+            startInput.addEventListener('change', function () {
+                if (endInput) {
+                    endInput.setAttribute('min', this.value || todayStr);
+                    if (endInput.value && endInput.value < this.value) {
+                        endInput.value = this.value;
+                    }
+                }
+            });
+        }
+        if (endInput) {
+            const startVal = startInput && startInput.value ? startInput.value : todayStr;
+            endInput.setAttribute('min', startVal);
         }
     });
 </script>
