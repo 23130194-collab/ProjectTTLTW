@@ -8,6 +8,9 @@ public class Contact {
     private String email;
     private String content;
     private Timestamp createdAt;
+    private boolean processed;
+    private String responseContent;
+    private Timestamp respondedAt;
 
     public Contact() {
     }
@@ -56,5 +59,29 @@ public class Contact {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isProcessed() {
+        return processed;
+    }
+
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
+    }
+
+    public String getResponseContent() {
+        return responseContent;
+    }
+
+    public void setResponseContent(String responseContent) {
+        this.responseContent = responseContent;
+    }
+
+    public Timestamp getRespondedAt() {
+        return respondedAt;
+    }
+
+    public void setRespondedAt(Timestamp respondedAt) {
+        this.respondedAt = respondedAt;
     }
 }

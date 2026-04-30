@@ -298,9 +298,6 @@ public class ProductDao {
                     .bind("qty", quantity)
                     .bind("id", productId)
                     .execute();
-            handle.createUpdate("UPDATE products SET status = 'active' WHERE id = :id AND stock > 0 AND status = 'inactive'")
-                    .bind("id", productId)
-                    .execute();
         });
     }
 

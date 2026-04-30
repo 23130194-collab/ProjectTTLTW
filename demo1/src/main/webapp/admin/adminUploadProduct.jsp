@@ -45,6 +45,8 @@
                 class="fa-solid fa-clipboard-list"></i></span>Đơn hàng</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/reviews" class="nav-link"><span class="nav-icon"><i
                 class="fa-solid fa-star"></i></span>Đánh giá</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/contacts" class="nav-link"><span class="nav-icon"><i
+                class="fa-solid fa-envelope"></i></span>Liên hệ</a></li>
 
     </ul>
     <div class="logout-section"><a href="${contextPath}/logout" class="nav-link logout-link" id="logoutLink"><span
@@ -180,16 +182,18 @@
                     <label>Ngày bắt đầu giảm giá</label>
                     <c:if test="${not empty product.discountStart}">
                         <c:set var="formattedStart" value="${fn:substring(product.discountStart, 0, 16)}"/>
+                        <c:set var="formattedStart" value="${fn:replace(formattedStart, ' ', 'T')}"/>
                     </c:if>
-                    <input type="datetime-local" name="discountStart" class="form-input"
+                    <input type="datetime-local" id="discount-start" name="discountStart" class="form-input"
                            value="${formattedStart}">
                 </div>
                 <div class="form-group">
                     <label>Ngày kết thúc giảm giá</label>
                     <c:if test="${not empty product.discountEnd}">
                         <c:set var="formattedEnd" value="${fn:substring(product.discountEnd, 0, 16)}"/>
+                        <c:set var="formattedEnd" value="${fn:replace(formattedEnd, ' ', 'T')}"/>
                     </c:if>
-                    <input type="datetime-local" name="discountEnd" class="form-input"
+                    <input type="datetime-local" id="discount-end" name="discountEnd" class="form-input"
                            value="${formattedEnd}">
                 </div>
             </div>
@@ -354,6 +358,33 @@
                     logoutConfirmModal.classList.remove('show');
                 }
             });
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const nowStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
+                       + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+
+        const startInput = document.getElementById('discount-start');
+        const endInput   = document.getElementById('discount-end');
+
+        if (startInput) {
+            startInput.setAttribute('min', nowStr);
+            startInput.addEventListener('change', function () {
+                if (endInput) {
+                    endInput.setAttribute('min', this.value || nowStr);
+                    if (endInput.value && endInput.value < this.value) {
+                        endInput.value = this.value;
+                    }
+                }
+            });
+        }
+        if (endInput) {
+            const startVal = startInput && startInput.value ? startInput.value : nowStr;
+            endInput.setAttribute('min', startVal);
         }
     });
 </script>
