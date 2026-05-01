@@ -29,13 +29,6 @@ public class UserDao {
                 .stream().findFirst().orElse(null));
     }
 
-    public User getUserById(int id) {
-        return jdbi.withHandle(h -> h.createQuery("SELECT * FROM users WHERE id = :id")
-                .bind("id", id)
-                .mapToBean(User.class)
-                .stream().findFirst().orElse(null));
-    }
-
     public void insertUser(String name, String email, String password, String otp, Timestamp otpExpiry) {
         jdbi.useHandle(h ->
                 h.createUpdate("INSERT INTO users(name, email, password, role, status, otp_code, otp_expiry) VALUES (:name, :email, :password, :role, :status, :otp_code, :otp_expiry)")
