@@ -560,6 +560,27 @@ body {
     text-decoration: line-through;
 }
 
+.out-of-stock-badge {
+    display: inline-block;
+    background: #fde8ea;
+    color: #c0392b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+}
+
+.price-box .out-of-stock-badge {
+    font-size: 0.85rem;
+    padding: 4px 14px;
+    margin-top: 8px;
+    display: block;
+    width: fit-content;
+}
+
+
 .product-footer-interaction {
     display: flex;
     justify-content: space-between;

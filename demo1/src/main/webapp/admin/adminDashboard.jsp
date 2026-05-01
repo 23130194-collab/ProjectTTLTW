@@ -74,19 +74,35 @@
         <div class="breadcrumb">
             <a href="adminDashboard.html">Trang chủ</a> / <span>Dashboard</span>
         </div>
-
         <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-label">Doanh thu hôm nay</h3>
+                    <p class="stat-value">
+                        <fmt:formatNumber value="${todaysRevenue}" type="number" pattern="#,##0"/>đ
+                    </p>
+
+                    <div class="stat-sub">Cập nhật lúc 00:00</div>
+                </div>
+            </div>
+
             <div class="stat-card">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #00c9a7 0%, #5b86e5 100%);">
                     <i class="fa-solid fa-hand-holding-dollar"></i>
                 </div>
                 <div class="stat-info">
-                    <h3 class="stat-label">Tổng doanh thu</h3>
+                    <h3 class="stat-label">Doanh thu tháng này</h3>
                     <p class="stat-value">
-                        <fmt:formatNumber value="${revenue}" type="number" pattern="#,##0"/>đ
+                        <fmt:formatNumber value="${monthlyRevenue}" type="number" pattern="#,##0"/>đ
                     </p>
+
+                    <div class="stat-sub">Tổng tích lũy: <fmt:formatNumber value="${revenue}" type="number" pattern="#,##0"/>đ</div>
                 </div>
             </div>
+
 
             <div class="stat-card">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
@@ -95,6 +111,12 @@
                 <div class="stat-info">
                     <h3 class="stat-label">Tổng đơn hàng</h3>
                     <p class="stat-value">${totalOrders}</p>
+
+                    <div class="stat-sub">
+                        <a href="${contextPath}/admin/orders?status=Chờ+xác+nhận" class="stat-pending-link">
+                            <i class="fa-solid fa-clock"></i> ${pendingOrders} đơn chờ xác nhận
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -103,8 +125,10 @@
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <div class="stat-info">
-                    <h3 class="stat-label">Tổng khách hàng</h3>
+                    <h3 class="stat-label">Khách hàng hoạt động</h3>
                     <p class="stat-value">${totalCustomers}</p>
+
+                    <div class="stat-sub">+${newCustomersThisMonth} khách mới tháng này</div>
                 </div>
             </div>
 
@@ -115,6 +139,94 @@
                 <div class="stat-info">
                     <h3 class="stat-label">Sản phẩm đang bán</h3>
                     <p class="stat-value">${activeProducts}</p>
+                    <div class="stat-secondary">
+                        <span class="stat-change positive">
+                            <i class="fa-solid fa-circle-check"></i> Đang hoạt động
+                        </span>
+                    </div>
+                    <div class="stat-sub"><a href="${contextPath}/admin/products" class="stat-pending-link">Xem tất cả sản phẩm</a></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-label">Đã bán tháng này</h3>
+                    <p class="stat-value"><fmt:formatNumber value="${productsSoldThisMonth}" type="number" pattern="#,##0"/></p>
+
+                    <div class="stat-sub">Tổng tích lũy: <fmt:formatNumber value="${totalProductsSold}" type="number" pattern="#,##0"/> sản phẩm</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-label">Sắp hết hàng</h3>
+                    <p class="stat-value">${lowStockProducts}</p>
+                    <div class="stat-secondary">
+                        <span class="stat-change ${lowStockProducts > 0 ? 'negative' : 'positive'}">
+                            <i class="fa-solid ${lowStockProducts > 0 ? 'fa-circle-exclamation' : 'fa-check'}"></i>
+                            ${lowStockProducts > 0 ? 'Cần nhập hàng' : 'Tồn kho ổn định'}
+                        </span>
+                    </div>
+                    <div class="stat-sub">
+                        <a href="javascript:void(0);" onclick="openLowStockModal()" class="stat-pending-link">
+                            <i class="fa-solid fa-list-ul"></i> Xem sản phẩm
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f43b47 0%, #453a94 100%);">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-label">Tỷ lệ hủy đơn</h3>
+                    <p class="stat-value">${cancelRate}%</p>
+                    <div class="stat-secondary">
+                        <span class="stat-change ${cancelRate > 10 ? 'negative' : 'positive'}">
+                            <i class="fa-solid ${cancelRate > 10 ? 'fa-arrow-trend-up' : 'fa-thumbs-up'}"></i>
+                            ${cancelRate > 10 ? 'Cảnh báo cao' : 'Mức bình thường'}
+                        </span>
+                    </div>
+                    <div class="stat-sub">Tỷ lệ đơn hàng bị hủy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-cards-row">
+            <div class="status-card">
+                <div class="status-icon-wrapper pending-icon">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-label">Đơn chờ xử lý</div>
+                    <div class="status-value">${pendingOrders}</div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-icon-wrapper processing-icon">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-label">Đơn đang giao</div>
+                    <div class="status-value">${processingOrders}</div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-icon-wrapper delivered-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-label">Đơn đã giao</div>
+                    <div class="status-value">${deliveredOrders}</div>
                 </div>
             </div>
         </div>
@@ -202,7 +314,54 @@
     </div>
 </div>
 
+<div id="lowStockModal" class="modal-overlay">
+    <div class="modal-content low-stock-modal-content">
+        <div class="modal-header">
+            <h3>Sản phẩm sắp hết hàng</h3>
+            <button class="close-modal-btn" onclick="closeLowStockModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="low-stock-list">
+            <c:choose>
+                <c:when test="${not empty lowStockProductsList}">
+                    <c:forEach var="item" items="${lowStockProductsList}">
+                        <a href="${contextPath}/admin/upload-product?id=${item.id}" class="low-stock-item">
+                            <img src="${item.image}" alt="${item.name}" class="item-img">
+                            <div class="item-details">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-price-stock">
+                                    <span class="item-price"><fmt:formatNumber value="${item.price}" type="number" pattern="#,##0"/>đ</span>
+                                    <span class="item-stock">Còn lại: ${item.stock}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <div class="empty-state">Không có sản phẩm nào sắp hết hàng.</div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-cancel" onclick="closeLowStockModal()">Quay lại</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    function openLowStockModal() {
+        document.getElementById('lowStockModal').classList.add('show');
+    }
+
+    function closeLowStockModal() {
+        document.getElementById('lowStockModal').classList.remove('show');
+    }
+
+    document.getElementById('lowStockModal').addEventListener('click', function(e) {
+        if(e.target === this) {
+            closeLowStockModal();
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         const logoutLink = document.getElementById('logoutLink');
         const logoutConfirmModal = document.getElementById('logoutConfirmModal');

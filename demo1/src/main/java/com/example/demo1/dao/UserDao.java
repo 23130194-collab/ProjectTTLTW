@@ -10,16 +10,21 @@ import java.util.List;
 public class UserDao {
     private Jdbi jdbi = DatabaseDao.get();
 
+    public User getUserById(int id) {
+        return jdbi.withHandle(h ->
+                h.createQuery("SELECT * FROM users WHERE id = :id")
+                        .bind("id", id)
+                        .mapToBean(User.class)
+                        .stream()
+                        .findFirst()
+                        .orElse(null)
+        );
+    }
+
+
     public User getUserByEmail(String email) {
         return jdbi.withHandle(h -> h.createQuery("SELECT * FROM users WHERE email = :email")
                 .bind("email", email)
-                .mapToBean(User.class)
-                .stream().findFirst().orElse(null));
-    }
-
-    public User getUserById(int id) {
-        return jdbi.withHandle(h -> h.createQuery("SELECT * FROM users WHERE id = :id")
-                .bind("id", id)
                 .mapToBean(User.class)
                 .stream().findFirst().orElse(null));
     }

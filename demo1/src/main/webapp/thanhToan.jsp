@@ -145,15 +145,23 @@
                        title="Số điện thoại phải có 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09">
 
                 <input name="email" class="input-box" value="${sessionScope.user.email}"
-                       placeholder="Email*" type="email" required
-                       pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                       title="Vui lòng nhập đúng định dạng email (Ví dụ: example@gmail.com)">
+                       placeholder="Email*" type="email" required>
             </div>
 
             <div class="section">
                 <div class="section-title">ĐỊA CHỈ NHẬN HÀNG</div>
-                <textarea name="province" placeholder="Tỉnh/thành phố*" required></textarea>
-                <textarea name="district" placeholder="Quận/huyện*" required></textarea>
+
+                <select name="province" id="province" required>
+                    <option value="">Chọn Tỉnh/Thành phố*</option>
+                </select>
+
+                <select name="district" id="district" required>
+                    <option value="">Chọn Quận/Huyện*</option>
+                </select>
+
+                <select name="ward" id="ward" required>
+                    <option value="">Chọn Phường/Xã*</option>
+                </select>
                 <textarea name="address" placeholder="Số nhà, tên đường*" required></textarea>
                 <textarea name="note" placeholder="Ghi chú (nếu có)"></textarea>
             </div>
@@ -219,6 +227,62 @@
             event.preventDefault();
             return false;
         }
+    });
+</script>
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        fetch('https://provinces.open-api.vn/api/p/')
+            .then(response => response.json())
+            .then(data => {
+                let html = '<option value="">Chọn Tỉnh/Thành phố*</option>';
+                data.forEach(item => {
+                    html += '<option data-code="' + item.code + '" value="' + item.name + '">' + item.name + '</option>';
+                });
+                $('#province').html(html);
+            })
+            .catch(err => console.error("Lỗi tải Tỉnh/Thành:", err));
+
+        $('#province').change(function() {
+            const code = $(this).find(':selected').data('code');
+            if (code) {
+                fetch('https://provinces.open-api.vn/api/p/' + code + '?depth=2')
+                    .then(response => response.json())
+                    .then(data => {
+                        let html = '<option value="">Chọn Quận/Huyện*</option>';
+                        if (data.districts) {
+                            data.districts.forEach(item => {
+                                html += '<option data-code="' + item.code + '" value="' + item.name + '">' + item.name + '</option>';
+                            });
+                        }
+                        $('#district').html(html);
+                        $('#ward').html('<option value="">Chọn Phường/Xã*</option>');
+                    });
+            } else {
+                $('#district').html('<option value="">Chọn Quận/Huyện*</option>');
+                $('#ward').html('<option value="">Chọn Phường/Xã*</option>');
+            }
+        });
+
+        $('#district').change(function() {
+            const code = $(this).find(':selected').data('code');
+            if (code) {
+                fetch('https://provinces.open-api.vn/api/d/' + code + '?depth=2')
+                    .then(response => response.json())
+                    .then(data => {
+                        let html = '<option value="">Chọn Phường/Xã*</option>';
+                        if (data.wards) {
+                            data.wards.forEach(item => {
+                                html += '<option data-code="' + item.code + '" value="' + item.name + '">' + item.name + '</option>';
+                            });
+                        }
+                        $('#ward').html(html);
+                    });
+            } else {
+                $('#ward').html('<option value="">Chọn Phường/Xã*</option>');
+            }
+        });
     });
 </script>
 </html>
