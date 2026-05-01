@@ -421,4 +421,139 @@ public class OrderDao {
                         .one()
         );
     }
+
+    public Map<String, Double> getRevenueByTimeRange(int days) {
+        String sql = "SELECT DATE_FORMAT(created_at, '%d/%m/%Y') as order_date, SUM(total_amount) as daily_revenue " +
+                "FROM orders " +
+                "WHERE order_status = 'Đã giao' AND created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY DATE(created_at) " +
+                "ORDER BY DATE(created_at) ASC";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("order_date").toString(),
+                                        m -> {
+                                            Object revenue = m.get("daily_revenue");
+                                            return (revenue instanceof Number) ? ((Number) revenue).doubleValue() : 0.0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
+
+    public Map<String, Double> getRevenueByCategory(int days) {
+        String sql = "SELECT c.name as category_name, SUM(od.quantity * od.unit_price) as category_revenue " +
+                "FROM order_details od " +
+                "JOIN orders o ON od.order_id = o.id " +
+                "JOIN products p ON od.product_id = p.id " +
+                "JOIN categories c ON p.category_id = c.id " +
+                "WHERE o.order_status = 'Đã giao' AND o.created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY c.id, c.name " +
+                "ORDER BY category_revenue DESC";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("category_name").toString(),
+                                        m -> {
+                                            Object revenue = m.get("category_revenue");
+                                            return (revenue instanceof Number) ? ((Number) revenue).doubleValue() : 0.0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
+
+    public Map<String, Integer> getOrdersCountByTimeRange(int days) {
+         String sql = "SELECT DATE_FORMAT(created_at, '%d/%m/%Y') as order_date, COUNT(*) as daily_orders " +
+                "FROM orders " +
+                "WHERE created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY DATE(created_at) " +
+                "ORDER BY DATE(created_at) ASC";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("order_date").toString(),
+                                        m -> {
+                                            Object count = m.get("daily_orders");
+                                            return (count instanceof Number) ? ((Number) count).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
+
+    public Map<String, Integer> getOrderStatusRatio(int days) {
+         String sql = "SELECT order_status, COUNT(*) as status_count " +
+                "FROM orders " +
+                "WHERE created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY order_status";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("order_status").toString(),
+                                        m -> {
+                                            Object count = m.get("status_count");
+                                            return (count instanceof Number) ? ((Number) count).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
+
+    public Map<String, Integer> getOrderSuccessVsFailRatio(int days) {
+         String sql = "SELECT " +
+                "CASE WHEN order_status = 'Đã giao' THEN 'Thành công' " +
+                "     WHEN order_status = 'Đã hủy' THEN 'Thất bại' " +
+                "     ELSE 'Khác' END as final_status, " +
+                "COUNT(*) as status_count " +
+                "FROM orders " +
+                "WHERE order_status IN ('Đã giao', 'Đã hủy') AND created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY final_status";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("final_status").toString(),
+                                        m -> {
+                                            Object count = m.get("status_count");
+                                            return (count instanceof Number) ? ((Number) count).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
 }

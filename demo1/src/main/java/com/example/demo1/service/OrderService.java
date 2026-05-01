@@ -181,4 +181,24 @@ public class OrderService {
     public Map<String, Double> getDailyRevenueForLast7Days() {
         return orderDao.getDailyRevenueForLast7Days();
     }
+
+    public Map<String, Double> getRevenueByTimeRange(int days) {
+        return orderDao.getRevenueByTimeRange(days);
+    }
+
+    public Map<String, Double> getRevenueByCategory(int days) {
+        return orderDao.getRevenueByCategory(days);
+    }
+
+    public Map<String, Integer> getOrdersCountByTimeRange(int days) {
+        return orderDao.getOrdersCountByTimeRange(days);
+    }
+
+    public Map<String, Integer> getOrderStatusRatio(int days) {
+        return orderDao.getOrderStatusRatio(days);
+    }
+
+    public Map<String, Integer> getOrderSuccessVsFailRatio(int days) {
+        return orderDao.getOrderSuccessVsFailRatio(days);
+    }
 }
