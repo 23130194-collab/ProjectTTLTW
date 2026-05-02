@@ -142,6 +142,17 @@
     margin-bottom: 24px;
 }
 
+.invoice-items-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 24px;
+}
+
+.invoice-items-table-wrap .invoice-items-table {
+    min-width: 820px;
+    margin-bottom: 0;
+}
+
 .invoice-items-table th,
 .invoice-items-table td {
     padding: 12px;
@@ -157,7 +168,47 @@
 
 .invoice-items-table td {
     color: #334155;
-    vertical-align: top;
+    vertical-align: middle;
+}
+
+.product-name-cell {
+    min-width: 190px;
+    text-align: left !important;
+}
+
+.order-product-image-box {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.order-product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: #fff;
+}
+
+.order-product-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 22px;
+}
+
+.order-product-image-placeholder.is-visible {
+    display: flex;
 }
 
 .invoice-summary {
