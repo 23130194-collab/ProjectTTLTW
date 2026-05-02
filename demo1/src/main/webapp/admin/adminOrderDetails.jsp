@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <fmt:setLocale value="vi_VN"/>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
@@ -136,30 +137,72 @@
                     </form>
                 </section>
 
-                <table class="invoice-items-table">
-                    <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Giá gốc</th>
-                        <th>% Giảm giá</th>
-                        <th>Số lượng</th>
-                        <th>Tổng tiền</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <c:forEach var="item" items="${orderDetail.items}" varStatus="loop">
+                <div class="invoice-items-table-wrap">
+                    <table class="invoice-items-table">
+                        <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Giá gốc</th>
+                            <th>% Giảm giá</th>
+                            <th>Số lượng</th>
+                            <th>Tổng tiền</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <c:forEach var="item" items="${orderDetail.items}" varStatus="loop">
                         <tr>
                             <td>${loop.count}</td>
-                            <td><strong>${item.productName}</strong></td>
+                            <td>
+                                <div class="order-product-image-box">
+                                    <c:choose>
+                                        <c:when test="${not empty item.productImage}">
+                                            <c:set var="productImage" value="${fn:trim(item.productImage)}"/>
+                                            <c:choose>
+                                                <c:when test="${fn:startsWith(productImage, 'http')}">
+                                                    <img src="${productImage}" alt="${item.productName}" class="order-product-image"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                </c:when>
+                                                <c:when test="${fn:startsWith(productImage, '//')}">
+                                                    <img src="${productImage}" alt="${item.productName}" class="order-product-image"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                </c:when>
+                                                <c:when test="${not empty contextPath and fn:startsWith(productImage, contextPath)}">
+                                                    <img src="${productImage}" alt="${item.productName}" class="order-product-image"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                </c:when>
+                                                <c:when test="${fn:startsWith(productImage, '/')}">
+                                                    <img src="${contextPath}${productImage}" alt="${item.productName}" class="order-product-image"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <img src="${contextPath}/${productImage}" alt="${item.productName}" class="order-product-image"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <span class="order-product-image-placeholder">
+                                                <i class="fa-regular fa-image"></i>
+                                            </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="order-product-image-placeholder is-visible">
+                                                <i class="fa-regular fa-image"></i>
+                                            </span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </td>
+                            <td class="product-name-cell"><strong>${item.productName}</strong></td>
                             <td><fmt:formatNumber value="${item.originalPrice}" type="currency" currencySymbol="đ"/></td>
                             <td><fmt:formatNumber value="${item.discountPercentage / 100}" type="percent"/></td>
                             <td>${item.quantity}</td>
                             <td><fmt:formatNumber value="${item.total}" type="currency" currencySymbol="đ"/></td>
                         </tr>
-                    </c:forEach>
-                    </tbody>
-                </table>
+                        </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
 
                 <section class="invoice-summary">
                     <div class="summary-details">
