@@ -58,25 +58,7 @@ public class AdminDashboardController extends HttpServlet {
         request.setAttribute("processingOrders", processingOrders);
         request.setAttribute("deliveredOrders", deliveredOrders);
 
-        Map<String, Double> dailyRevenue = orderService.getDailyRevenueForLast7Days();
-        List<String> chartLabels = new ArrayList<>();
-        List<Double> chartData = new ArrayList<>();
 
-        DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter chartFormatter = DateTimeFormatter.ofPattern("dd/MM");
-
-        for (int i = 6; i >= 0; i--) {
-            LocalDate date = LocalDate.now().minusDays(i);
-            String dateStrDb = date.format(dbFormatter);
-            String dateStrChart = date.format(chartFormatter);
-
-            chartLabels.add(dateStrChart);
-            chartData.add(dailyRevenue.getOrDefault(dateStrDb, 0.0));
-        }
-
-        Gson gson = new Gson();
-        request.setAttribute("chartLabels", gson.toJson(chartLabels));
-        request.setAttribute("chartData", gson.toJson(chartData));
 
         request.getRequestDispatcher("/admin/adminDashboard.jsp").forward(request, response);
     }

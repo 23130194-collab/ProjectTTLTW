@@ -163,4 +163,12 @@ public class ProductService {
     public List<Product> getLowStockProductsList(int threshold) {
         return pdao.getLowStockProductsList(threshold);
     }
+
+    public Map<String, Integer> getStockByCategory() {
+        return pdao.getStockByCategory();
+    }
+
+    public Map<String, Integer> getProductRatioByBrand() {
+        return pdao.getProductRatioByBrand();
+    }
 }
