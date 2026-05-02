@@ -4,17 +4,21 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <fmt:setLocale value="vi_VN"/>
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
+<c:set var="formattedStart" value="${fn:replace(formattedStart, ' ', 'T')}"/>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechNova Admin - ${not empty product ? 'Chỉnh sửa' : 'Thêm'} sản phẩm</title>
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminUploadProduct.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${contextPath}/admin/admincss/headerAndSidebar.css">
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminModal.css">
 </head>
+
 <body>
 
 <aside class="sidebar">
@@ -27,30 +31,33 @@
         </a>
     </div>
     <ul class="nav-menu">
-        <li class="nav-item"><a href="${contextPath}/admin/dashboard" class="nav-link"><span class="nav-icon"><i
-                class="fa-solid fa-border-all"></i></span>Dashboard</a></li>
-        <li class="nav-item"><a href="${contextPath}/admin/customers" class="nav-link"><span class="nav-icon"><i
-                class="fa-solid fa-users"></i></span>Khách hàng</a></li>
-        <li class="nav-item"><a href="${contextPath}/admin/categories" class="nav-link"><span class="nav-icon"><i
-                class="fa-solid fa-list"></i></span>Mục sản phẩm</a></li>
-        <li class="nav-item"><a href="${contextPath}/admin/brands" class="nav-link"><span class="nav-icon"><i
-                class="fa-solid fa-certificate"></i></span>Thương hiệu</a></li>
-        <li class="nav-item"><a href="${contextPath}/admin/attributes" class="nav-link"><span class="nav-icon"><i
-                class="fa-solid fa-sliders"></i></span>Thuộc tính</a></li>
-        <li class="nav-item"><a href="${contextPath}/admin/banners" class="nav-link"><span class="nav-icon"><i
-                class="fa-solid fa-images"></i></span>Banner</a></li>
-        <li class="nav-item"><a href="${contextPath}/admin/products" class="nav-link active"><span class="nav-icon"><i
-                class="fa-solid fa-box-open"></i></span>Sản phẩm</a></li>
-        <li class="nav-item"><a href="${contextPath}/admin/orders" class="nav-link"><span class="nav-icon"><i
-                class="fa-solid fa-clipboard-list"></i></span>Đơn hàng</a></li>
-        <li class="nav-item"><a href="${contextPath}/admin/reviews" class="nav-link"><span class="nav-icon"><i
-                class="fa-solid fa-star"></i></span>Đánh giá</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/dashboard" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-border-all"></i></span>Dashboard</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/customers" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-users"></i></span>Khách hàng</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/categories" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-list"></i></span>Mục sản phẩm</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/brands" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-certificate"></i></span>Thương hiệu</a>
+        </li>
+        <li class="nav-item"><a href="${contextPath}/admin/attributes" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-sliders"></i></span>Thuộc tính</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/banners" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-images"></i></span>Banner</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/products" class="nav-link active"><span
+                class="nav-icon"><i class="fa-solid fa-box-open"></i></span>Sản phẩm</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/orders" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>Đơn hàng</a>
+        </li>
+        <li class="nav-item"><a href="${contextPath}/admin/reviews" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-star"></i></span>Đánh giá</a>
+        </li>
         <li class="nav-item"><a href="${contextPath}/admin/contacts" class="nav-link"><span class="nav-icon"><i
                 class="fa-solid fa-envelope"></i></span>Liên hệ</a></li>
 
     </ul>
-    <div class="logout-section"><a href="${contextPath}/logout" class="nav-link logout-link" id="logoutLink"><span
-            class="nav-icon"><i
+    <div class="logout-section"><a href="${contextPath}/logout" class="nav-link logout-link"
+                                   id="logoutLink"><span class="nav-icon"><i
             class="fa-solid fa-right-from-bracket"></i></span>Đăng xuất</a></div>
 </aside>
 
@@ -77,13 +84,14 @@
         </div>
 
         <c:if test="${not empty errorMessage}">
-            <div style="background-color: #ffebee; color: #c62828; padding: 15px; margin: 20px 0; border: 1px solid #ef9a9a; border-radius: 4px;">
+            <div
+                    style="background-color: #ffebee; color: #c62828; padding: 15px; margin: 20px 0; border: 1px solid #ef9a9a; border-radius: 4px;">
                     ${errorMessage}
             </div>
         </c:if>
 
-        <form action="${contextPath}/admin/upload-product" method="post" class="upload-product-container"
-              id="productForm">
+        <form action="${contextPath}/admin/upload-product" method="post"
+              class="upload-product-container" id="productForm">
             <c:if test="${not empty product}">
             <input type="hidden" name="productId" value="${product.id}">
             </c:if>
@@ -91,25 +99,31 @@
             <div class="form-section">
                 <div class="form-group">
                     <h3>Tên sản phẩm</h3>
-                    <input type="text" name="name" placeholder="Nhập tên sản phẩm" class="form-input"
-                           value="${product.name}" required>
+                    <input type="text" name="name" placeholder="Nhập tên sản phẩm"
+                           class="form-input" value="${product.name}" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <h3>Danh mục</h3>
                         <select class="form-select" name="categoryId" id="category-select" required>
-                            <option value="" disabled ${empty product ? 'selected' : ''}>Chọn danh mục</option>
+                            <option value="" disabled ${empty product ? 'selected' : '' }>Chọn danh
+                                mục
+                            </option>
                             <c:forEach var="category" items="${categoryList}">
-                                <option value="${category.id}" ${product.categoryId == category.id ? 'selected' : ''}>${category.name}</option>
+                                <option value="${category.id}" ${product.categoryId==category.id
+                                        ? 'selected' : '' }>${category.name}</option>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="form-group">
                         <h3>Thương hiệu</h3>
                         <select class="form-select" name="brandId" required>
-                            <option value="" disabled ${empty product ? 'selected' : ''}>Chọn thương hiệu</option>
+                            <option value="" disabled ${empty product ? 'selected' : '' }>Chọn
+                                thương hiệu
+                            </option>
                             <c:forEach var="brand" items="${brandList}">
-                                <option value="${brand.id}" ${product.brandId == brand.id ? 'selected' : ''}>${brand.name}</option>
+                                <option value="${brand.id}" ${product.brandId==brand.id ? 'selected'
+                                        : '' }>${brand.name}</option>
                             </c:forEach>
                         </select>
                     </div>
@@ -119,8 +133,8 @@
             <div class="form-section">
                 <h3>Giới thiệu sản phẩm:</h3>
                 <div class="form-group">
-                    <textarea id="product-description" name="description" rows="15"><c:out
-                            value="${product.description}" escapeXml="false"/></textarea>
+                                        <textarea id="product-description" name="description" rows="15"><c:out
+                                                value="${product.description}" escapeXml="false"/></textarea>
                 </div>
             </div>
 
@@ -128,7 +142,8 @@
                 <div class="attribute-header"
                      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h3>Thông số kỹ thuật</h3>
-                    <select id="attribute-select" class="form-select attribute-select" style="width: 200px;">
+                    <select id="attribute-select" class="form-select attribute-select"
+                            style="width: 200px;">
                         <option value="">Chọn thuộc tính</option>
                     </select>
                 </div>
@@ -151,8 +166,8 @@
                                 </div>
                                 <div class="attr-row">
                                     <span class="attr-label">Giá trị:</span>
-                                    <input type="text" name="specValues" class="form-input" value="${spec.specValue}"
-                                           placeholder="Nhập giá trị...">
+                                    <input type="text" name="specValues" class="form-input"
+                                           value="${spec.specValue}" placeholder="Nhập giá trị...">
                                 </div>
                             </div>
                         </div>
@@ -165,49 +180,54 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Giá gốc (VND)</label>
-                        <input type="text" name="oldPrice" placeholder="Nhập giá sản phẩm" class="form-input"
-                               value="${product.oldPrice}">
+                        <input type="text" name="oldPrice" placeholder="Nhập giá sản phẩm"
+                               class="form-input" value="${product.oldPrice}">
                     </div>
                     <div class="form-group">
                         <label>Giảm giá (%)</label>
                         <input type="number" name="discountValue"
-                               placeholder="Nhập giá trị giảm giá"
-                               class="form-input"
-                               value="${product.discountValue}"
-                               min="0" max="100" step="1.0"></div>
+                               placeholder="Nhập giá trị giảm giá" class="form-input"
+                               value="${product.discountValue}" min="0" max="100" step="1.0">
+                    </div>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Ngày bắt đầu giảm giá</label>
                     <c:if test="${not empty product.discountStart}">
-                        <c:set var="formattedStart" value="${fn:substring(product.discountStart, 0, 16)}"/>
-                        <c:set var="formattedStart" value="${fn:replace(formattedStart, ' ', 'T')}"/>
+                        <c:set var="formattedStart"
+                               value="${fn:substring(product.discountStart, 0, 16)}"/>
+                        <c:set var="formattedStart"
+                               value="${fn:replace(formattedStart, ' ', 'T')}"/>
                     </c:if>
-                    <input type="datetime-local" id="discount-start" name="discountStart" class="form-input"
-                           value="${formattedStart}">
+                    <input type="datetime-local" id="discount-start" name="discountStart"
+                           class="form-input" value="${formattedStart}">
                 </div>
                 <div class="form-group">
                     <label>Ngày kết thúc giảm giá</label>
                     <c:if test="${not empty product.discountEnd}">
-                        <c:set var="formattedEnd" value="${fn:substring(product.discountEnd, 0, 16)}"/>
+                        <c:set var="formattedEnd"
+                               value="${fn:substring(product.discountEnd, 0, 16)}"/>
                         <c:set var="formattedEnd" value="${fn:replace(formattedEnd, ' ', 'T')}"/>
                     </c:if>
-                    <input type="datetime-local" id="discount-end" name="discountEnd" class="form-input"
-                           value="${formattedEnd}">
+                    <input type="datetime-local" id="discount-end" name="discountEnd"
+                           class="form-input" value="${formattedEnd}">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Số lượng tồn kho</label>
-                    <input type="text" name="stock" placeholder="Nhập số lượng sản phẩm" class="form-input"
-                           value="${product.stock}">
+                    <input type="text" name="stock" placeholder="Nhập số lượng sản phẩm"
+                           class="form-input" value="${product.stock}">
                 </div>
                 <div class="form-group">
                     <label>Trạng thái</label>
                     <select class="form-select" name="status">
-                        <option value="active" ${product.status == 'active' ? 'selected' : ''}>Hoạt động</option>
-                        <option value="inactive" ${product.status == 'inactive' ? 'selected' : ''}>Ẩn</option>
+                        <option value="active" ${product.status=='active' ? 'selected' : '' }>Hoạt
+                            động
+                        </option>
+                        <option value="inactive" ${product.status=='inactive' ? 'selected' : '' }>Ẩn
+                        </option>
                     </select>
                 </div>
             </div>
@@ -217,7 +237,8 @@
                 <div class="form-group">
                     <label for="main-image-input">URL ảnh đại diện</label>
                     <input type="text" id="main-image-input" name="mainImage"
-                           placeholder="Dán URL ảnh đại diện ở đây..." class="form-input" value="${product.image}">
+                           placeholder="Dán URL ảnh đại diện ở đây..." class="form-input"
+                           value="${product.image}">
                     <c:if test="${not empty product.image}">
                         <div style="margin-top: 10px;">
                             <c:set var="imageUrl" value="${product.image}"/>
@@ -243,15 +264,19 @@
                         <div class="form-group" style="flex: 1;">
                             <label for="image-url-input">Hình ảnh chi tiết</label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" id="image-url-input" placeholder="https://example.com/image.png"
-                                       class="form-input" style="flex: 1;">
+                                <input type="text" id="image-url-input"
+                                       placeholder="https://example.com/image.png" class="form-input"
+                                       style="flex: 1;">
                             </div>
                         </div>
                         <div class="form-group" style="width: 100px;">
                             <label for="image-order-input">Thứ tự</label>
-                            <input type="number" id="image-order-input" placeholder="1" class="form-input">
+                            <input type="number" id="image-order-input" placeholder="1"
+                                   class="form-input">
                         </div>
-                        <button type="button" id="btn-add-image" class="btn-add-img" style="height: 38px;">Thêm</button>
+                        <button type="button" id="btn-add-image" class="btn-add-img"
+                                style="height: 38px;">Thêm
+                        </button>
                     </div>
                     <div id="image-data-container" style="display: none;">
                         <c:forEach var="image" items="${images}">
@@ -278,7 +303,9 @@
         <p>Bạn có chắc chắn muốn xóa thuộc tính <strong id="modal-spec-name"></strong> không?</p>
         <div class="modal-buttons">
             <button type="button" class="modal-btn modal-cancel" id="btn-cancel-delete">Hủy</button>
-            <button type="button" class="modal-btn modal-confirm" id="btn-confirm-delete">Xóa</button>
+            <button type="button" class="modal-btn modal-confirm"
+                    id="btn-confirm-delete">Xóa
+            </button>
         </div>
     </div>
 </div>
@@ -305,7 +332,8 @@
     </div>
 </div>
 
-<script src="https://cdn.tiny.cloud/1/3ed7uep3wrojhgtffcu69d19t08h1k9sikr7x4myygwkmrju/tinymce/6/tinymce.min.js"
+<script
+        src="https://cdn.tiny.cloud/1/3ed7uep3wrojhgtffcu69d19t08h1k9sikr7x4myygwkmrju/tinymce/6/tinymce.min.js"
         referrerpolicy="origin" defer></script>
 
 <script>
@@ -366,10 +394,10 @@
         const now = new Date();
         const pad = n => String(n).padStart(2, '0');
         const nowStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
-                       + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+            + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
 
         const startInput = document.getElementById('discount-start');
-        const endInput   = document.getElementById('discount-end');
+        const endInput = document.getElementById('discount-end');
 
         if (startInput) {
             startInput.setAttribute('min', nowStr);
@@ -389,4 +417,5 @@
     });
 </script>
 </body>
+
 </html>
