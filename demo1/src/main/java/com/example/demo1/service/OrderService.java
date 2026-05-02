@@ -201,4 +201,8 @@ public class OrderService {
     public Map<String, Integer> getOrderSuccessVsFailRatio(int days) {
         return orderDao.getOrderSuccessVsFailRatio(days);
     }
+
+    public Map<String, Integer> getTopSellingProducts(int days, int limit) {
+        return orderDao.getTopSellingProducts(days, limit);
+    }
 }
