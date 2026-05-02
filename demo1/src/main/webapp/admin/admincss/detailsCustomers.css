@@ -510,41 +510,33 @@ body {
     text-decoration: none;
 }
 
-  .alert-box {
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 4px;
-      border: 1px solid transparent;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      opacity: 1;
-  }
 
-.success-message {
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    position: relative;
+    transition: opacity 0.5s ease-out;
+}
+.alert-success {
     color: #155724;
     background-color: #d4edda;
     border-color: #c3e6cb;
 }
-
-.error-message {
+.alert-danger {
     color: #721c24;
     background-color: #f8d7da;
     border-color: #f5c6cb;
 }
-
 .close-btn {
-    margin-left: 15px;
+    position: absolute;
+    top: 10px;
+    right: 15px;
     color: inherit;
-    font-weight: bold;
-    font-size: 20px;
-    line-height: 20px;
     cursor: pointer;
-    transition: 0.3s;
-}
-
-.close-btn:hover {
-    color: #000;
-    opacity: 0.7;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
 }
 

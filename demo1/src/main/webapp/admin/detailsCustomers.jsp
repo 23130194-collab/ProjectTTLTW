@@ -50,10 +50,12 @@
                 class="fa-solid fa-star"></i></span>Đánh giá</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/contacts" class="nav-link"><span class="nav-icon"><i
                 class="fa-solid fa-envelope"></i></span>Liên hệ</a></li>
-
     </ul>
-    <div class="logout-section"><a href="${contextPath}/logout" class="nav-link logout-link" id="logoutLink"><span
-            class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span>Đăng xuất</a></div>
+    <div class="logout-section">
+        <a href="${contextPath}/logout" class="nav-link logout-link" id="logoutLink">
+            <span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span>Đăng xuất
+        </a>
+    </div>
 </aside>
 
 <header class="header">
@@ -61,7 +63,6 @@
         <button class="notification-btn" id="notificationBtn">
             <i class="fa-solid fa-bell"></i>
         </button>
-
         <div class="user-profile">
             <img src="https://www.shutterstock.com/image-vector/admin-icon-strategy-collection-thin-600nw-2307398667.jpg"
                  alt="User Profile">
@@ -73,36 +74,104 @@
     <div class="content-area">
         <h1 class="page-title">Chi tiết khách hàng</h1>
         <div class="breadcrumb">
-            <a href="${pageContext.request.contextPath}/admin/adminDashboard">Trang chủ</a> / <a
-                href="${pageContext.request.contextPath}/admin/customers">Danh sách khách hàng</a> / <span>Chi tiết khách hàng</span>
+            <a href="${pageContext.request.contextPath}/admin/adminDashboard">Trang chủ</a> /
+            <a href="${pageContext.request.contextPath}/admin/customers">Danh sách khách hàng</a> /
+            <span>Chi tiết khách hàng</span>
         </div>
+
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div class="alert alert-success">
+                <span><i class="fa-solid fa-circle-check"></i> <c:out value="${sessionScope.successMessage}"
+                                                                      escapeXml="false"/></span>
+                <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+            </div>
+            <c:remove var="successMessage" scope="session"/>
+        </c:if>
+
+        <c:if test="${not empty sessionScope.errorMessage}">
+            <div class="alert alert-danger">
+                <span><i class="fa-solid fa-circle-exclamation"></i> <c:out value="${sessionScope.errorMessage}"
+                                                                            escapeXml="false"/></span>
+                <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+            </div>
+            <c:remove var="errorMessage" scope="session"/>
+        </c:if>
+
+        <c:if test="${not empty requestScope.errorMessage}">
+            <div class="alert alert-danger">
+                <span><i class="fa-solid fa-circle-exclamation"></i> <c:out value="${requestScope.errorMessage}"
+                                                                            escapeXml="false"/></span>
+                <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+            </div>
+        </c:if>
 
         <c:if test="${not empty customer}">
             <section class="personal-info">
                 <div class="info-card" id="infoView">
                     <div class="info-header">
                         <h2>Thông tin cá nhân</h2>
+                        <button type="button" class="update-btn" onclick="toggleEditMode()">
+                             Cập nhật thông tin
+                        </button>
                     </div>
                     <div class="info-body">
                         <div class="info-row">
                             <span>Họ và tên:</span>
-                            <p id="name">${customer.name}</p>
+                            <p>${customer.name}</p>
                             <span>Số điện thoại:</span>
-                            <p id="phone">${customer.phone}</p>
+                            <p>${customer.phone}</p>
                         </div>
                         <div class="info-row">
                             <span>Giới tính:</span>
-                            <p id="gender">${customer.gender}</p>
+                            <p>${customer.gender}</p>
                             <span>Email:</span>
-                            <p id="email">${customer.email}</p>
+                            <p>${customer.email}</p>
                         </div>
                         <div class="info-row">
                             <span>Ngày sinh:</span>
-                            <p id="dob">${customer.birthday}</p>
+                            <p>${customer.birthday}</p>
                             <span>Địa chỉ:</span>
-                            <p id="address">${customer.address}</p>
+                            <p>${customer.address}</p>
                         </div>
                     </div>
+                </div>
+
+                <div class="info-card hidden" id="infoEdit">
+                    <form id="customerUpdateForm" action="${pageContext.request.contextPath}/admin/customer-detail"
+                          method="POST">
+                        <input type="hidden" name="id" value="${customer.id}">
+                        <div class="info-header">
+                            <h2>Cập nhật thông tin</h2>
+                        </div>
+                        <div class="info-body">
+                            <div class="info-row">
+                                <span>Họ và tên:</span>
+                                <input type="text" name="name" value="${customer.name}" required>
+                                <span>Số điện thoại:</span>
+                                <input type="text" name="phone" id="phoneInput" value="${customer.phone}" required>
+                            </div>
+                            <div class="info-row">
+                                <span>Giới tính:</span>
+                                <select name="gender">
+                                    <option value="Nam" ${customer.gender == 'Nam' ? 'selected' : ''}>Nam</option>
+                                    <option value="Nữ" ${customer.gender == 'Nữ' ? 'selected' : ''}>Nữ</option>
+                                    <option value="Khác" ${customer.gender == 'Khác' ? 'selected' : ''}>Khác</option>
+                                </select>
+                                <span>Email:</span>
+                                <input type="email" name="email" value="${customer.email}" required>
+                            </div>
+                            <div class="info-row">
+                                <span>Ngày sinh:</span>
+                                <input type="date" name="birthday" value="${customer.birthday}">
+                                <span>Địa chỉ:</span>
+                                <input type="text" name="address" value="${customer.address}">
+                            </div>
+                        </div>
+                        <div class="info-actions">
+                            <button type="button" class="cancel-btn" onclick="toggleEditMode()">Hủy</button>
+                            <button type="button" class="save-btn" id="saveChangeBtn">Lưu thay đổi</button>
+                        </div>
+                    </form>
                 </div>
             </section>
 
@@ -111,7 +180,6 @@
                     <div class="orders-header">
                         <h3>Lịch sử đơn hàng</h3>
                     </div>
-
                     <table class="orders-table">
                         <thead>
                         <tr>
@@ -127,19 +195,14 @@
                                 <td colspan="4" style="text-align: center;">Khách hàng chưa có đơn hàng nào.</td>
                             </tr>
                         </c:if>
-
                         <c:forEach var="order" items="${orderList}">
                             <tr>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/admin/orders?action=view&id=${order.id}">
-                                            ${order.orderCode}
-                                    </a>
+                                    <a href="${pageContext.request.contextPath}/admin/orders?action=view&id=${order.id}">${order.orderCode}</a>
                                 </td>
-
                                 <td>
                                     <fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
                                 </td>
-
                                 <td>
                                     <c:choose>
                                         <c:when test="${order.orderStatus == 'Hoàn thành'}">
@@ -153,7 +216,6 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
-
                                 <td>
                                     <fmt:formatNumber value="${order.totalAmount}" type="currency" currencySymbol="đ"/>
                                 </td>
@@ -162,6 +224,7 @@
                         </tbody>
                     </table>
                 </div>
+
                 <c:if test="${totalPages > 1}">
                     <div class="pagination-container">
                         <c:if test="${currentPage > 1}">
@@ -170,14 +233,10 @@
                                 <i class="fa-solid fa-chevron-left"></i>
                             </a>
                         </c:if>
-
                         <c:forEach var="i" begin="1" end="${totalPages}">
                             <a href="${pageContext.request.contextPath}/admin/customer-detail?id=${customer.id}&page=${i}"
-                               class="page-number ${i == currentPage ? 'active' : ''}">
-                                    ${i}
-                            </a>
+                               class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
                         </c:forEach>
-
                         <c:if test="${currentPage < totalPages}">
                             <a href="${pageContext.request.contextPath}/admin/customer-detail?id=${customer.id}&page=${currentPage + 1}"
                                class="pagination-btn">
@@ -188,11 +247,10 @@
                 </c:if>
             </div>
         </c:if>
+
         <c:if test="${empty customer}">
             <p>Không tìm thấy khách hàng.</p>
         </c:if>
-
-
     </div>
 </main>
 
@@ -207,10 +265,32 @@
     </div>
 </div>
 
+<div id="updateConfirmModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>Xác nhận cập nhật</h3>
+        <p>Bạn có chắc chắn muốn thay đổi thông tin cá nhân của khách hàng này không?</p>
+        <div class="modal-buttons">
+            <button type="button" class="modal-btn modal-cancel" id="cancelUpdateBtn">Hủy</button>
+            <button type="button" class="modal-btn modal-confirm" id="confirmUpdateBtn"
+                    style="background-color: #3b82f6;">Xác nhận
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="${pageContext.request.contextPath}/admin/adminjs/adminHoaDon.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.alert').forEach(function (alert) {
+            setTimeout(function () {
+                alert.style.opacity = '0';
+                setTimeout(function () {
+                    alert.style.display = 'none';
+                }, 500);
+            }, 5000);
+        });
+
         const logoutLink = document.getElementById('logoutLink');
         const logoutConfirmModal = document.getElementById('logoutConfirmModal');
         const cancelLogoutBtn = document.getElementById('cancelLogout');
@@ -220,20 +300,97 @@
                 e.preventDefault();
                 logoutConfirmModal.classList.add('show');
             });
-
             cancelLogoutBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 logoutConfirmModal.classList.remove('show');
             });
-
             logoutConfirmModal.addEventListener('click', function (e) {
-                if (e.target === logoutConfirmModal) {
-                    logoutConfirmModal.classList.remove('show');
+                if (e.target === logoutConfirmModal) logoutConfirmModal.classList.remove('show');
+            });
+        }
+
+        const updateModal = document.getElementById('updateConfirmModal');
+        const saveChangeBtn = document.getElementById('saveChangeBtn');
+        const cancelUpdateBtn = document.getElementById('cancelUpdateBtn');
+        const confirmUpdateBtn = document.getElementById('confirmUpdateBtn');
+        const updateForm = document.getElementById('customerUpdateForm');
+
+        if (saveChangeBtn) {
+            saveChangeBtn.addEventListener('click', function () {
+                const phoneInput = document.getElementById('phoneInput');
+                const phoneValue = phoneInput.value.trim();
+                const phonePattern = /^\d{10}$/;
+
+                if (!phonePattern.test(phoneValue)) {
+                    alert("Số điện thoại phải có đúng 10 chữ số!");
+                    phoneInput.focus();
+                    return;
                 }
+
+                const emailInput = document.querySelector('input[name="email"]');
+                const emailValue = emailInput.value.trim();
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(emailValue)) {
+                    alert("Email không đúng định dạng (Ví dụ: example@gmail.com)!");
+                    emailInput.focus();
+                    return;
+                }
+
+                const nameInput = document.querySelector('input[name="name"]');
+                const nameValue = nameInput.value.trim();
+                if (!nameValue.includes(' ')) {
+                    alert("Họ và tên phải bao gồm ít nhất hai từ và có dấu cách giữa chúng!");
+                    nameInput.focus();
+                    return;
+                }
+
+                const dobInput = document.querySelector('input[name="birthday"]');
+                if (dobInput.value) {
+                    const dobValue = new Date(dobInput.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    if (dobValue > today) {
+                        alert("Ngày sinh không được lớn hơn ngày hiện tại!");
+                        dobInput.focus();
+                        return;
+                    }
+                }
+
+                updateModal.classList.add('show');
+            });
+        }
+
+        if (cancelUpdateBtn) {
+            cancelUpdateBtn.addEventListener('click', function () {
+                updateModal.classList.remove('show');
+            });
+        }
+
+        if (confirmUpdateBtn) {
+            confirmUpdateBtn.addEventListener('click', function () {
+                updateForm.submit();
+            });
+        }
+
+        if (updateModal) {
+            updateModal.addEventListener('click', function (e) {
+                if (e.target === updateModal) updateModal.classList.remove('show');
             });
         }
     });
+
+    function toggleEditMode() {
+        const viewDiv = document.getElementById('infoView');
+        const editDiv = document.getElementById('infoEdit');
+        if (viewDiv.classList.contains('hidden')) {
+            viewDiv.classList.remove('hidden');
+            editDiv.classList.add('hidden');
+        } else {
+            viewDiv.classList.add('hidden');
+            editDiv.classList.remove('hidden');
+        }
+    }
 </script>
 </body>
-
 </html>
