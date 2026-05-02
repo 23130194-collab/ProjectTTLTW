@@ -556,4 +556,33 @@ public class OrderDao {
                         )
         );
     }
+    public Map<String, Integer> getTopSellingProducts(int days, int limit) {
+        String sql = "SELECT p.name as product_name, SUM(od.quantity) as total_sold " +
+                "FROM order_details od " +
+                "JOIN orders o ON od.order_id = o.id " +
+                "JOIN products p ON od.product_id = p.id " +
+                "WHERE o.order_status = 'Đã giao' AND o.created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY p.id, p.name " +
+                "ORDER BY total_sold DESC " +
+                "LIMIT :limit";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .bind("limit", limit)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("product_name").toString(),
+                                        m -> {
+                                            Object count = m.get("total_sold");
+                                            return (count instanceof Number) ? ((Number) count).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
 }

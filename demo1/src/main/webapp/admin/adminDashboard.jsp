@@ -262,6 +262,7 @@
                 <div class="tabs-container">
                     <button class="tab-btn active" data-tab="finance">Tài chính & Doanh thu</button>
                     <button class="tab-btn" data-tab="orders">Đơn hàng</button>
+                    <button class="tab-btn" data-tab="products">Sản phẩm & Kho</button>
                 </div>
                 <div class="time-filter">
                     <select id="timeRangeSelect" onchange="fetchChartData(this.value)">
@@ -326,6 +327,61 @@
                     </div>
                 </div>
             </div>
+
+            <div id="products-tab" class="tab-content">
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Top 10 Sản phẩm bán chạy nhất</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="topProductsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Tồn kho theo danh mục</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="stockCategoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Tỷ lệ sản phẩm theo thương hiệu</h3>
+                        </div>
+                        <div class="chart-container pie-container">
+                            <canvas id="brandRatioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Sản phẩm sắp hết hàng</h3>
+                        </div>
+                        <div class="low-stock-table-container">
+                            <table class="low-stock-table" id="lowStockTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">Ảnh</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Giá</th>
+                                        <th style="width: 100px;">Tồn kho</th>
+                                        <th style="width: 200px;">Mức độ cảnh báo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
@@ -372,6 +428,11 @@
                 renderOrdersTimeChart(data.ordersTime);
                 renderOrderStatusChart(data.orderStatus);
                 renderOrderSuccessChart(data.orderSuccess);
+                
+                renderTopProductsChart(data.topProducts);
+                renderStockCategoryChart(data.stockByCategory);
+                renderBrandRatioChart(data.brandRatio);
+                renderLowStockTable(data.lowStockList);
             })
             .catch(error => console.error('Error fetching chart data:', error));
     }
@@ -524,6 +585,105 @@
                 responsive: true, maintainAspectRatio: false,
                 plugins: {legend: {position: 'right'}}
             }
+        });
+    }
+
+    function renderTopProductsChart(data) {
+        destroyChartIfExists('topProductsChart');
+        const ctx = document.getElementById('topProductsChart').getContext('2d');
+        charts['topProductsChart'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    label: 'Số lượng bán',
+                    data: Object.values(data),
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true, maintainAspectRatio: false,
+                scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderStockCategoryChart(data) {
+        destroyChartIfExists('stockCategoryChart');
+        const ctx = document.getElementById('stockCategoryChart').getContext('2d');
+        charts['stockCategoryChart'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    label: 'Tồn kho',
+                    data: Object.values(data),
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderBrandRatioChart(data) {
+        destroyChartIfExists('brandRatioChart');
+        const ctx = document.getElementById('brandRatioChart').getContext('2d');
+        charts['brandRatioChart'] = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    data: Object.values(data),
+                    backgroundColor: pastelColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'right' } }
+            }
+        });
+    }
+
+    function renderLowStockTable(list) {
+        const tbody = document.querySelector('#lowStockTable tbody');
+        tbody.innerHTML = '';
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Không có sản phẩm nào sắp hết hàng.</td></tr>';
+            return;
+        }
+
+        list.forEach(item => {
+            const formatPrice = new Intl.NumberFormat('vi-VN').format(item.price) + ' đ';
+            const progressPercent = Math.min((item.stock / 5) * 100, 100);
+            let colorClass = 'danger';
+            if (item.stock > 2) colorClass = 'warning';
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = 
+                '<td><img src="' + item.image + '" alt="' + item.name + '" class="table-img"></td>' +
+                '<td class="item-name-cell">' + item.name + '</td>' +
+                '<td class="item-price-cell">' + formatPrice + '</td>' +
+                '<td><span class="stock-badge ' + colorClass + '">' + item.stock + '</span></td>' +
+                '<td>' +
+                    '<div class="stock-progress-bg">' +
+                        '<div class="stock-progress-fill ' + colorClass + '" style="width: ' + progressPercent + '%"></div>' +
+                    '</div>' +
+                '</td>';
+            tbody.appendChild(tr);
         });
     }
 </script>

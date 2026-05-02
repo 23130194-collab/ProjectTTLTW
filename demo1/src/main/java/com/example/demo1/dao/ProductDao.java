@@ -366,4 +366,55 @@ public class ProductDao {
                         .list()
         );
     }
+    public Map<String, Integer> getStockByCategory() {
+        String sql = "SELECT c.name as category_name, SUM(p.stock) as total_stock " +
+                "FROM products p " +
+                "JOIN categories c ON p.category_id = c.id " +
+                "WHERE p.status != 'delete' " +
+                "GROUP BY c.id, c.name " +
+                "ORDER BY total_stock DESC";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("category_name").toString(),
+                                        m -> {
+                                            Object stock = m.get("total_stock");
+                                            return (stock instanceof Number) ? ((Number) stock).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
+
+    public Map<String, Integer> getProductRatioByBrand() {
+        String sql = "SELECT b.name as brand_name, COUNT(p.id) as product_count " +
+                "FROM products p " +
+                "JOIN brands b ON p.brand_id = b.id " +
+                "WHERE p.status != 'delete' " +
+                "GROUP BY b.id, b.name " +
+                "ORDER BY product_count DESC";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("brand_name").toString(),
+                                        m -> {
+                                            Object count = m.get("product_count");
+                                            return (count instanceof Number) ? ((Number) count).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
 }
