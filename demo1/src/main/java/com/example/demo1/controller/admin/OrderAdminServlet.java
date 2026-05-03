@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 @WebServlet(name = "OrderAdminServlet", value = "/admin/orders")
@@ -17,6 +18,13 @@ public class OrderAdminServlet extends HttpServlet {
     private static final String SERVLET_PATH = "/admin/orders";
     private static final String JSP_LIST_PATH = "/admin/adminOrders.jsp";
     private static final String JSP_DETAIL_PATH = "/admin/adminOrderDetails.jsp";
+    private static final List<String> ORDER_STATUSES = Arrays.asList(
+            "Chờ xác nhận",
+            "Đang xử lý",
+            "Đang giao",
+            "Đã giao",
+            "Đã hủy"
+    );
 
     private final OrderService orderService = new OrderService();
     private static final int ORDERS_PER_PAGE = 10;
@@ -50,18 +58,30 @@ public class OrderAdminServlet extends HttpServlet {
 
     private void listOrders(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
+        String statusFilter = getValidStatusFilter(request.getParameter("status"));
         String pageStr = request.getParameter("page");
         int currentPage = (pageStr == null || pageStr.isEmpty()) ? 1 : Integer.parseInt(pageStr);
 
-        OrderPage orderPage = orderService.getPagedOrders(keyword, currentPage, ORDERS_PER_PAGE);
+        OrderPage orderPage = orderService.getPagedOrders(keyword, statusFilter, currentPage, ORDERS_PER_PAGE);
         int totalPages = (int) Math.ceil((double) orderPage.getTotalOrders() / ORDERS_PER_PAGE);
 
         request.setAttribute("orders", orderPage.getOrders());
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("keyword", keyword);
+        request.setAttribute("statusFilter", statusFilter);
+        request.setAttribute("orderStatuses", ORDER_STATUSES);
 
         request.getRequestDispatcher(JSP_LIST_PATH).forward(request, response);
+    }
+
+    private String getValidStatusFilter(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return null;
+        }
+
+        String trimmedStatus = status.trim();
+        return ORDER_STATUSES.contains(trimmedStatus) ? trimmedStatus : null;
     }
 
     private void viewOrder(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
