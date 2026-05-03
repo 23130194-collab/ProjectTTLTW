@@ -13,17 +13,32 @@ public class OrderService {
     private final ProductDao productDao = new ProductDao();
 
     public OrderPage getPagedOrders(String keyword, int currentPage, int ordersPerPage) {
+        return getPagedOrders(keyword, null, currentPage, ordersPerPage);
+    }
+
+    public OrderPage getPagedOrders(String keyword, String status, int currentPage, int ordersPerPage) {
         List<Order> orders;
         int totalOrders;
+        String normalizedKeyword = normalizeFilter(keyword);
+        String normalizedStatus = normalizeFilter(status);
 
-        if (keyword != null && !keyword.isEmpty()) {
-            orders = orderDao.searchOrders(keyword, currentPage, ordersPerPage);
-            totalOrders = orderDao.getSearchOrderCount(keyword);
+        if (normalizedKeyword != null || normalizedStatus != null) {
+            orders = orderDao.searchOrders(normalizedKeyword, normalizedStatus, currentPage, ordersPerPage);
+            totalOrders = orderDao.getSearchOrderCount(normalizedKeyword, normalizedStatus);
         } else {
             orders = orderDao.getAllOrders(currentPage, ordersPerPage);
             totalOrders = orderDao.getTotalOrderCount();
         }
         return new OrderPage(orders, totalOrders);
+    }
+
+    private String normalizeFilter(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmedValue = value.trim();
+        return trimmedValue.isEmpty() ? null : trimmedValue;
     }
 
     public OrderDetail getOrderDetailById(int orderId) {
