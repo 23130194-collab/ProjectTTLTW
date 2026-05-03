@@ -90,7 +90,16 @@
                                 class="search-form">
                                 <input type="text" name="keyword" placeholder="Tìm kiếm theo mã đơn..."
                                     value="${keyword}" class="search-input" />
+                                <select name="status" class="status-filter" onchange="this.form.submit()">
+                                    <option value="" ${empty statusFilter ? 'selected' : ''}>Tất cả trạng thái</option>
+                                    <c:forEach var="status" items="${orderStatuses}">
+                                        <option value="${status}" ${status == statusFilter ? 'selected' : ''}>${status}</option>
+                                    </c:forEach>
+                                </select>
                                 <button type="submit" class="search-button">Tìm kiếm</button>
+                                <c:if test="${not empty keyword || not empty statusFilter}">
+                                    <a href="${pageContext.request.contextPath}/admin/orders" class="reset-filter-button">Xóa lọc</a>
+                                </c:if>
                             </form>
                         </div>
 
@@ -152,8 +161,14 @@
                                         <tr>
                                             <td colspan="5" class="no-results-cell">
                                                 <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
-                                                Không tìm thấy đơn hàng nào phù hợp với từ khóa '<span
-                                                    class="no-results-keyword">${keyword}</span>'.
+                                                <c:choose>
+                                                    <c:when test="${not empty keyword || not empty statusFilter}">
+                                                        Không tìm thấy đơn hàng nào phù hợp với bộ lọc hiện tại.
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        Chưa có đơn hàng nào.
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </td>
                                         </tr>
                                     </c:if>
@@ -164,15 +179,15 @@
                         <c:if test="${totalPages > 1}">
                             <div class="pagination-container">
                                 <c:if test="${currentPage > 1}">
-                                    <a href="${pageContext.request.contextPath}/admin/orders?page=${currentPage - 1}&keyword=${keyword}"
+                                    <a href="${pageContext.request.contextPath}/admin/orders?page=${currentPage - 1}&keyword=${keyword}&status=${statusFilter}"
                                         class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></a>
                                 </c:if>
                                 <c:forEach var="i" begin="1" end="${totalPages}">
-                                    <a href="${pageContext.request.contextPath}/admin/orders?page=${i}&keyword=${keyword}"
+                                    <a href="${pageContext.request.contextPath}/admin/orders?page=${i}&keyword=${keyword}&status=${statusFilter}"
                                         class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
                                 </c:forEach>
                                 <c:if test="${currentPage < totalPages}">
-                                    <a href="${pageContext.request.contextPath}/admin/orders?page=${currentPage + 1}&keyword=${keyword}"
+                                    <a href="${pageContext.request.contextPath}/admin/orders?page=${currentPage + 1}&keyword=${keyword}&status=${statusFilter}"
                                         class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></a>
                                 </c:if>
                             </div>
