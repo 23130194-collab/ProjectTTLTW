@@ -77,5 +77,42 @@ public class CustomerDetailController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+     request.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession();
+
+        String idStr = request.getParameter("id");
+
+        try {
+            int userId = Integer.parseInt(idStr);
+            UserService userService = new UserService();
+
+            User customer = userService.getUserById(userId);
+
+            if (customer != null) {
+                customer.setName(request.getParameter("name"));
+                customer.setPhone(request.getParameter("phone"));
+                customer.setGender(request.getParameter("gender"));
+                customer.setEmail(request.getParameter("email"));
+                customer.setAddress(request.getParameter("address"));
+
+                String birthdayStr = request.getParameter("birthday");
+                if (birthdayStr != null && !birthdayStr.trim().isEmpty()) {
+                    try {
+                        customer.setBirthday(java.sql.Date.valueOf(birthdayStr));
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("Lỗi định dạng ngày sinh: " + birthdayStr);
+                    }
+                }
+
+                userService.updateUser(customer);
+
+                session.setAttribute("successMessage", "Cập nhật thông tin khách hàng thành công!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.setAttribute("errorMessage", "Cập nhật thất bại: " + e.getMessage());
+        }
+
+        response.sendRedirect(request.getContextPath() + "/admin/customer-detail?id=" + idStr);
     }
 }

@@ -16,11 +16,12 @@ import java.util.Map;
 @WebServlet(name = "AdminChartDataController", value = "/admin/chart-data")
 public class AdminChartDataController extends HttpServlet {
     private final OrderService orderService = new OrderService();
+    private final com.example.demo1.service.ProductService productService = new com.example.demo1.service.ProductService();
     private final Gson gson = new Gson();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int days = 30; // default
+        int days = 30;
         String daysParam = request.getParameter("days");
         if (daysParam != null && !daysParam.isEmpty()) {
             try {
@@ -36,12 +37,22 @@ public class AdminChartDataController extends HttpServlet {
         Map<String, Integer> orderStatus = orderService.getOrderStatusRatio(days);
         Map<String, Integer> orderSuccess = orderService.getOrderSuccessVsFailRatio(days);
 
+        Map<String, Integer> topProducts = orderService.getTopSellingProducts(days, 10);
+        Map<String, Integer> stockByCategory = productService.getStockByCategory();
+        Map<String, Integer> brandRatio = productService.getProductRatioByBrand();
+        java.util.List<com.example.demo1.model.Product> lowStockList = productService.getLowStockProductsList(4);
+
         Map<String, Object> data = new HashMap<>();
         data.put("revenueTime", revenueTime);
         data.put("revenueCategory", revenueCategory);
         data.put("ordersTime", ordersTime);
         data.put("orderStatus", orderStatus);
         data.put("orderSuccess", orderSuccess);
+        
+        data.put("topProducts", topProducts);
+        data.put("stockByCategory", stockByCategory);
+        data.put("brandRatio", brandRatio);
+        data.put("lowStockList", lowStockList);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
