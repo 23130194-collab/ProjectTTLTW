@@ -85,10 +85,9 @@
         </div>
 
         <c:if test="${not empty sessionScope.successMessage}">
-            <div class="alert alert-success">
-                                <span class="close-btn"
-                                      onclick="this.parentElement.style.display='none';">&times;</span>
-                    ${sessionScope.successMessage}
+            <div class="alert alert-success" id="successAlert">
+                <span class="alert-text">${sessionScope.successMessage}</span>
+                <span class="close-btn" onclick="closeAlert('successAlert')">&times;</span>
             </div>
             <c:remove var="successMessage" scope="session"/>
         </c:if>
@@ -303,7 +302,25 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    function closeAlert(alertId) {
+        const alertBox = document.getElementById(alertId);
+        if (alertBox) {
+            alertBox.classList.add('fade-out');
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const successAlert = document.getElementById('successAlert');
+        if (successAlert) {
+            setTimeout(function() {
+                closeAlert('successAlert');
+            }, 5000);
+        }
+
         const logoutLink = document.getElementById('logoutLink');
         const logoutConfirmModal = document.getElementById('logoutConfirmModal');
         const cancelLogoutBtn = document.getElementById('cancelLogout');
@@ -325,6 +342,7 @@
                 }
             });
         }
+
     });
 </script>
 </body>
