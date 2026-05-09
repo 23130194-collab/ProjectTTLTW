@@ -4,6 +4,7 @@ import com.example.demo1.model.User;
 import com.example.demo1.service.AuthService;
 import com.example.demo1.service.EmailService;
 import com.example.demo1.service.OtpService;
+import com.example.demo1.service.VietnamAddressService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -32,12 +33,18 @@ public class UpdateProfileServlet extends HttpServlet {
         try {
             String name = request.getParameter("name");
             String phone = request.getParameter("phone");
-            String address = request.getParameter("address");
+            String address = buildAddressFromRequest(request, currentUser);
             String gender = request.getParameter("gender");
             String birthdayStr = request.getParameter("birthday");
             String newEmail = request.getParameter("email");
 
             AuthService authService = new AuthService();
+
+            if (address == null) {
+                session.setAttribute("updateProfileError", "Vui lòng chọn đầy đủ Tỉnh/Thành phố và Phường/Xã.");
+                response.sendRedirect(request.getContextPath() + "/account?mode=edit");
+                return;
+            }
 
             if (newEmail != null && !newEmail.equalsIgnoreCase(currentUser.getEmail())) {
                 if (authService.emailExists(newEmail)) {
@@ -93,5 +100,47 @@ public class UpdateProfileServlet extends HttpServlet {
             session.setAttribute("updateProfileError", "Đã xảy ra lỗi. Vui lòng thử lại.");
             response.sendRedirect(request.getContextPath() + "/account?mode=edit");
         }
+    }
+
+    private String buildAddressFromRequest(HttpServletRequest request, User currentUser) {
+        String addressDetail = trim(request.getParameter("addressDetail"));
+        String provinceOption = trim(request.getParameter("province"));
+        String wardOption = trim(request.getParameter("ward"));
+
+        boolean hasAddressChange = !addressDetail.isEmpty() || !provinceOption.isEmpty() || !wardOption.isEmpty();
+        if (!hasAddressChange) {
+            return currentUser.getAddress();
+        }
+
+        if (provinceOption.isEmpty() || wardOption.isEmpty()) {
+            return null;
+        }
+
+        String provinceName = VietnamAddressService.getNameFromOptionValue(provinceOption);
+        String wardName = VietnamAddressService.getNameFromOptionValue(wardOption);
+
+        StringBuilder address = new StringBuilder();
+        if (!addressDetail.isEmpty()) {
+            address.append(addressDetail);
+        }
+        if (!wardName.isEmpty()) {
+            appendAddressPart(address, wardName);
+        }
+        if (!provinceName.isEmpty()) {
+            appendAddressPart(address, provinceName);
+        }
+
+        return address.toString();
+    }
+
+    private void appendAddressPart(StringBuilder address, String part) {
+        if (address.length() > 0) {
+            address.append(", ");
+        }
+        address.append(part);
+    }
+
+    private String trim(String value) {
+        return value == null ? "" : value.trim();
     }
 }

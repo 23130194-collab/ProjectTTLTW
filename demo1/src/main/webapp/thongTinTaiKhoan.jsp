@@ -12,7 +12,7 @@
     <title>Thông tin tài khoản | TechNova</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user.css?v=address-server-2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/header.css">
 </head>
 <body>
@@ -214,38 +214,86 @@
                             <div class="info-header">
                                 <h2>Cập nhật thông tin</h2>
                             </div>
-                            <form action="${pageContext.request.contextPath}/update-profile" method="post">
+                            <fmt:formatDate var="currentBirthday" value="${sessionScope.user.birthday}" pattern="yyyy-MM-dd"/>
+                            <c:set var="formName" value="${not empty param.name ? param.name : sessionScope.user.name}"/>
+                            <c:set var="formPhone" value="${not empty param.phone ? param.phone : sessionScope.user.phone}"/>
+                            <c:set var="formGender" value="${not empty param.gender ? param.gender : sessionScope.user.gender}"/>
+                            <c:set var="formEmail" value="${not empty param.email ? param.email : sessionScope.user.email}"/>
+                            <c:set var="formBirthday" value="${not empty param.birthday ? param.birthday : currentBirthday}"/>
+                            <c:set var="formAddressDetail" value="${not empty param.addressDetail ? param.addressDetail : addressDetail}"/>
+                            <form action="${pageContext.request.contextPath}/update-profile" method="post" id="accountProfileForm">
+                                <input type="hidden" name="mode" value="edit">
                                 <div class="info-body">
                                     <div class="info-row">
                                         <span>Họ và tên:</span>
-                                        <input type="text" name="name" value="${sessionScope.user.name}" required>
+                                        <input type="text" name="name"
+                                               value="${fn:escapeXml(formName)}"
+                                               required>
                                         <span>Số điện thoại:</span>
-                                        <input type="text" name="phone" value="${sessionScope.user.phone}" required>
+                                        <input type="text" name="phone"
+                                               value="${fn:escapeXml(formPhone)}"
+                                               required>
                                     </div>
                                     <div class="info-row">
                                         <span>Giới tính:</span>
                                         <div class="custom-select-wrapper">
                                             <select name="gender">
-                                                <option value="Nam" ${sessionScope.user.gender == 'Nam' ? 'selected' : ''}>
+                                                <option value="Nam" ${formGender == 'Nam' ? 'selected' : ''}>
                                                     Nam
                                                 </option>
-                                                <option value="Nữ" ${sessionScope.user.gender == 'Nữ' ? 'selected' : ''}>
+                                                <option value="Nữ" ${formGender == 'Nữ' ? 'selected' : ''}>
                                                     Nữ
                                                 </option>
-                                                <option value="Khác" ${sessionScope.user.gender == 'Khác' ? 'selected' : ''}>
+                                                <option value="Khác" ${formGender == 'Khác' ? 'selected' : ''}>
                                                     Khác
                                                 </option>
                                             </select>
                                         </div>
                                         <span>Email:</span>
-                                        <input type="email" name="email" value="${sessionScope.user.email}">
+                                        <input type="email" name="email"
+                                               value="${fn:escapeXml(formEmail)}">
                                     </div>
                                     <div class="info-row">
                                         <span>Ngày sinh:</span>
                                         <input type="date" name="birthday"
-                                               value="<fmt:formatDate value='${sessionScope.user.birthday}' pattern='yyyy-MM-dd' />">
+                                               value="${fn:escapeXml(formBirthday)}">
+                                    </div>
+                                    <div class="info-row address-edit-row">
                                         <span>Địa chỉ:</span>
-                                        <input type="text" name="address" value="${sessionScope.user.address}">
+                                        <div class="account-address-fields">
+                                            <c:if test="${not empty addressLoadError}">
+                                                <small class="address-load-error"><c:out value="${addressLoadError}"/></small>
+                                            </c:if>
+                                            <input type="text" name="addressDetail" class="address-detail-input"
+                                                   value="${fn:escapeXml(formAddressDetail)}"
+                                                   placeholder="Số nhà, tên đường">
+                                            <div class="address-select-grid">
+                                                <select name="province" id="accountProvinceSelect">
+                                                    <option value="">Chọn Tỉnh/Thành phố</option>
+                                                    <c:forEach items="${addressProvinces}" var="province">
+                                                        <option value="${province.optionValue}" ${selectedProvinceValue == province.optionValue ? 'selected' : ''}>
+                                                            <c:out value="${province.name}"/>
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+                                                <select name="ward" class="ward-select" ${empty addressWards ? 'disabled' : ''}>
+                                                    <option value="">Chọn Phường/Xã</option>
+                                                    <c:forEach items="${addressWards}" var="ward">
+                                                        <option value="${ward.optionValue}" ${selectedWardValue == ward.optionValue ? 'selected' : ''}>
+                                                            <c:out value="${ward.name}"/>
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
+                                            <button type="submit" id="accountLoadWardsButton"
+                                                    formaction="${pageContext.request.contextPath}/account"
+                                                    formmethod="post"
+                                                    name="addressAction"
+                                                    value="loadWards"
+                                                    formnovalidate
+                                                    hidden>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="info-actions">
@@ -330,6 +378,23 @@
                 });
             }
         });
+
+        const accountProfileForm = document.getElementById('accountProfileForm');
+        const provinceSelect = document.getElementById('accountProvinceSelect');
+        const loadWardsButton = document.getElementById('accountLoadWardsButton');
+
+        if (accountProfileForm && provinceSelect && loadWardsButton) {
+            provinceSelect.addEventListener('change', function () {
+                if (accountProfileForm.requestSubmit) {
+                    accountProfileForm.requestSubmit(loadWardsButton);
+                    return;
+                }
+
+                accountProfileForm.action = loadWardsButton.formAction;
+                accountProfileForm.method = loadWardsButton.formMethod || 'post';
+                accountProfileForm.submit();
+            });
+        }
     });
 </script>
 </body>

@@ -15,15 +15,25 @@
 
 .search-form {
     display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-.search-input {
+.search-input,
+.status-filter {
     width: 250px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     padding: 8px 12px;
     font-size: 14px;
+    color: #334155;
+    background: white;
+}
+
+.status-filter {
+    width: 190px;
 }
 
 .search-button {
@@ -38,6 +48,26 @@
 }
 .search-button:hover {
     background: #4a6fcc;
+}
+
+.reset-filter-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 35px;
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.reset-filter-button:hover {
+    background: #e2e8f0;
+    text-decoration: none;
 }
 
 table {

@@ -3,6 +3,7 @@ package com.example.demo1.dao;
 import com.example.demo1.model.*;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.reflect.BeanMapper;
+import org.jdbi.v3.core.statement.Query;
 
 import java.util.List;
 import java.util.Map;
@@ -99,25 +100,54 @@ public class OrderDao {
     }
 
     public List<Order> searchOrders(String keyword, int page, int pageSize) {
-        String searchKeyword = "%" + keyword + "%";
-        return jdbi.withHandle(handle ->
-                handle.createQuery("SELECT * FROM orders WHERE order_code LIKE :keyword ORDER BY order_code DESC LIMIT :limit OFFSET :offset")
-                        .bind("keyword", searchKeyword)
-                        .bind("limit", pageSize)
-                        .bind("offset", (page - 1) * pageSize)
-                        .mapToBean(Order.class)
-                        .list()
-        );
+        return searchOrders(keyword, null, page, pageSize);
     }
 
     public int getSearchOrderCount(String keyword) {
-        String searchKeyword = "%" + keyword + "%";
-        return jdbi.withHandle(handle ->
-                handle.createQuery("SELECT COUNT(*) FROM orders WHERE order_code LIKE :keyword")
-                        .bind("keyword", searchKeyword)
-                        .mapTo(Integer.class)
-                        .one()
-        );
+        return getSearchOrderCount(keyword, null);
+    }
+
+    public List<Order> searchOrders(String keyword, String status, int page, int pageSize) {
+        String sql = buildOrderFilterSql("SELECT * FROM orders", keyword, status)
+                + " ORDER BY order_code DESC LIMIT :limit OFFSET :offset";
+
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(sql)
+                    .bind("limit", pageSize)
+                    .bind("offset", (page - 1) * pageSize);
+            bindOrderFilters(query, keyword, status);
+            return query.mapToBean(Order.class).list();
+        });
+    }
+
+    public int getSearchOrderCount(String keyword, String status) {
+        String sql = buildOrderFilterSql("SELECT COUNT(*) FROM orders", keyword, status);
+
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(sql);
+            bindOrderFilters(query, keyword, status);
+            return query.mapTo(Integer.class).one();
+        });
+    }
+
+    private String buildOrderFilterSql(String baseSql, String keyword, String status) {
+        StringBuilder sql = new StringBuilder(baseSql).append(" WHERE 1 = 1");
+        if (keyword != null) {
+            sql.append(" AND order_code LIKE :keyword");
+        }
+        if (status != null) {
+            sql.append(" AND order_status = :status");
+        }
+        return sql.toString();
+    }
+
+    private void bindOrderFilters(Query query, String keyword, String status) {
+        if (keyword != null) {
+            query.bind("keyword", "%" + keyword + "%");
+        }
+        if (status != null) {
+            query.bind("status", status);
+        }
     }
 
     public List<Order> getOrdersByUserId(int userId) {
