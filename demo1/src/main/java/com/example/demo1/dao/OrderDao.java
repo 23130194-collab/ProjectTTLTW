@@ -667,4 +667,31 @@ public class OrderDao {
                         )
         );
     }
+
+    public Map<String, Double> getOrderCancellationRate(int days) {
+        String sql = "SELECT DATE(created_at) as order_date, " +
+                "SUM(CASE WHEN order_status = 'Đã hủy' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as cancel_rate " +
+                "FROM orders " +
+                "WHERE created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY DATE(created_at) " +
+                "ORDER BY order_date ASC";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("order_date").toString(),
+                                        m -> {
+                                            Object rate = m.get("cancel_rate");
+                                            return (rate instanceof Number) ? ((Number) rate).doubleValue() : 0.0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
 }

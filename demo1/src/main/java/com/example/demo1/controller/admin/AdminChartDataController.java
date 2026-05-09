@@ -17,6 +17,7 @@ import java.util.Map;
 public class AdminChartDataController extends HttpServlet {
     private final OrderService orderService = new OrderService();
     private final com.example.demo1.service.ProductService productService = new com.example.demo1.service.ProductService();
+    private final com.example.demo1.service.ReviewService reviewService = new com.example.demo1.service.ReviewService();
     private final Gson gson = new Gson();
 
     @Override
@@ -44,6 +45,9 @@ public class AdminChartDataController extends HttpServlet {
         Map<String, Integer> unsoldProducts = productService.getOldestUnsoldProducts(20);
         Map<String, Integer> paymentMethodRatio = orderService.getPaymentMethodRatio(days);
         Map<String, Double> revenueByPaymentMethod = orderService.getRevenueByPaymentMethod(days);
+        Map<String, Double> averageRatingByCategory = reviewService.getAverageRatingByCategory(days);
+        Map<String, Integer> ratingDistribution = reviewService.getRatingDistribution(days);
+        Map<String, Double> cancellationRate = orderService.getOrderCancellationRate(days);
 
         Map<String, Object> data = new HashMap<>();
         data.put("revenueTime", revenueTime);
@@ -59,6 +63,9 @@ public class AdminChartDataController extends HttpServlet {
         data.put("unsoldProducts", unsoldProducts);
         data.put("paymentMethodRatio", paymentMethodRatio);
         data.put("revenueByPaymentMethod", revenueByPaymentMethod);
+        data.put("averageRatingByCategory", averageRatingByCategory);
+        data.put("ratingDistribution", ratingDistribution);
+        data.put("cancellationRate", cancellationRate);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
