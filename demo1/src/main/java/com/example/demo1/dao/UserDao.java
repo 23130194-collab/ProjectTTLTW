@@ -219,4 +219,18 @@ public class UserDao {
 
         });
     }
+
+    public void insertUserByAdmin(String name, String email, String password) {
+        jdbi.useHandle(h ->
+                h.createUpdate("INSERT INTO users(name, email, password, role, status, created_at) " +
+                                "VALUES (:name, :email, :password, :role, :status, :created_at)")
+                        .bind("name", name)
+                        .bind("email", email)
+                        .bind("password", password)
+                        .bind("role", 0)
+                        .bind("status", "active")
+                        .bind("created_at", new java.sql.Timestamp(System.currentTimeMillis()))
+                        .execute()
+        );
+    }
 }
