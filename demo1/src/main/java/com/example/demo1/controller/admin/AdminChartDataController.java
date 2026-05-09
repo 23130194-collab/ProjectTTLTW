@@ -41,6 +41,7 @@ public class AdminChartDataController extends HttpServlet {
         Map<String, Integer> stockByCategory = productService.getStockByCategory();
         Map<String, Integer> brandRatio = productService.getProductRatioByBrand();
         java.util.List<com.example.demo1.model.Product> lowStockList = productService.getLowStockProductsList(4);
+        Map<String, Integer> unsoldProducts = productService.getOldestUnsoldProducts(20);
 
         Map<String, Object> data = new HashMap<>();
         data.put("revenueTime", revenueTime);
@@ -53,6 +54,7 @@ public class AdminChartDataController extends HttpServlet {
         data.put("stockByCategory", stockByCategory);
         data.put("brandRatio", brandRatio);
         data.put("lowStockList", lowStockList);
+        data.put("unsoldProducts", unsoldProducts);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

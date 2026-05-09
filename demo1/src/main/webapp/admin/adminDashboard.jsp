@@ -381,6 +381,21 @@
                         </div>
                     </div>
                 </div>
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="chart-title">Sản phẩm chưa bán được (theo ngày tồn)</h3>
+                            <select id="unsoldLimitSelect" onchange="updateUnsoldChart(this.value)" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ddd; outline: none; cursor: pointer;">
+                                <option value="5">5 sản phẩm</option>
+                                <option value="10">10 sản phẩm</option>
+                                <option value="20" selected>20 sản phẩm</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="unsoldProductsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -388,6 +403,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     let charts = {};
+    let fullUnsoldProductsData = {};
 
     const pastelColors = [
         'rgba(255, 182, 193, 0.7)',
@@ -433,6 +449,10 @@
                 renderStockCategoryChart(data.stockByCategory);
                 renderBrandRatioChart(data.brandRatio);
                 renderLowStockTable(data.lowStockList);
+                
+                fullUnsoldProductsData = data.unsoldProducts || {};
+                const limitSelect = document.getElementById('unsoldLimitSelect');
+                updateUnsoldChart(limitSelect ? limitSelect.value : 20);
             })
             .catch(error => console.error('Error fetching chart data:', error));
     }
@@ -608,6 +628,48 @@
                 indexAxis: 'y',
                 responsive: true, maintainAspectRatio: false,
                 scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function updateUnsoldChart(limit) {
+        if (!fullUnsoldProductsData) return;
+        const keys = Object.keys(fullUnsoldProductsData).slice(0, limit);
+        const slicedData = {};
+        keys.forEach(k => {
+            slicedData[k] = fullUnsoldProductsData[k];
+        });
+        renderUnsoldProductsChart(slicedData);
+    }
+
+    function renderUnsoldProductsChart(data) {
+        destroyChartIfExists('unsoldProductsChart');
+        const ctx = document.getElementById('unsoldProductsChart');
+        if (!ctx) return;
+        
+        charts['unsoldProductsChart'] = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    label: 'Số ngày chưa bán',
+                    data: Object.values(data),
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true, maintainAspectRatio: false,
+                scales: { 
+                    x: { 
+                        beginAtZero: true, 
+                        title: { display: true, text: 'Số ngày lưu kho' }
+                    } 
+                },
                 plugins: { legend: { display: false } }
             }
         });
