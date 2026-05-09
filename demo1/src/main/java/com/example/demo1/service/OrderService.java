@@ -228,4 +228,8 @@ public class OrderService {
     public Map<String, Double> getRevenueByPaymentMethod(int days) {
         return orderDao.getRevenueByPaymentMethod(days);
     }
+
+    public Map<String, Double> getOrderCancellationRate(int days) {
+        return orderDao.getOrderCancellationRate(days);
+    }
 }

@@ -264,6 +264,7 @@
                     <button class="tab-btn" data-tab="orders">Đơn hàng</button>
                     <button class="tab-btn" data-tab="products">Sản phẩm & Kho</button>
                     <button class="tab-btn" data-tab="payment">Thanh toán</button>
+                    <button class="tab-btn" data-tab="reviews">Đánh giá & Dịch vụ</button>
                 </div>
                 <div class="time-filter">
                     <select id="timeRangeSelect" onchange="fetchChartData(this.value)">
@@ -421,6 +422,39 @@
                     </div>
                 </div>
             </div>
+
+            <div id="reviews-tab" class="tab-content">
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Phân bố số sao đánh giá</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="ratingDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Điểm đánh giá trung bình theo danh mục</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="averageRatingByCategoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Tỷ lệ hủy đơn (Theo ngày)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="cancellationRateChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
@@ -480,6 +514,10 @@
 
                 renderPaymentMethodRatioChart(data.paymentMethodRatio);
                 renderRevenueByPaymentMethodChart(data.revenueByPaymentMethod);
+                
+                renderAverageRatingByCategoryChart(data.averageRatingByCategory);
+                renderRatingDistributionChart(data.ratingDistribution);
+                renderCancellationRateChart(data.cancellationRate);
             })
             .catch(error => console.error('Error fetching chart data:', error));
     }
@@ -833,6 +871,119 @@
                                 style: 'currency',
                                 currency: 'VND'
                             }).format(context.parsed.y)
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderAverageRatingByCategoryChart(data) {
+        destroyChartIfExists('averageRatingByCategoryChart');
+        const ctx = document.getElementById('averageRatingByCategoryChart');
+        if (!ctx || !data) return;
+        charts['averageRatingByCategoryChart'] = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    label: 'Điểm trung bình (Sao)',
+                    data: Object.values(data),
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        max: 5,
+                        ticks: { stepSize: 1 }
+                    } 
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderRatingDistributionChart(data) {
+        destroyChartIfExists('ratingDistributionChart');
+        const ctx = document.getElementById('ratingDistributionChart');
+        if (!ctx || !data) return;
+        
+        const fullData = {};
+        for(let i=1; i<=5; i++) {
+            fullData[i + " Sao"] = data[i + " Sao"] || 0;
+        }
+
+        charts['ratingDistributionChart'] = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(fullData),
+                datasets: [{
+                    label: 'Số lượt đánh giá',
+                    data: Object.values(fullData),
+                    backgroundColor: 'rgba(153, 102, 255, 0.7)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                indexAxis: 'x',
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    } 
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderCancellationRateChart(data) {
+        destroyChartIfExists('cancellationRateChart');
+        const ctx = document.getElementById('cancellationRateChart');
+        if (!ctx || !data) return;
+        
+        charts['cancellationRateChart'] = new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: Object.keys(data).map(dateStr => {
+                    const d = new Date(dateStr);
+                    return d.getDate() + '/' + (d.getMonth() + 1);
+                }),
+                datasets: [{
+                    label: 'Tỷ lệ hủy đơn (%)',
+                    data: Object.values(data),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: value => value + '%'
+                        }
+                    } 
+                },
+                plugins: { 
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: context => context.parsed.y.toFixed(2) + '%'
                         }
                     }
                 }

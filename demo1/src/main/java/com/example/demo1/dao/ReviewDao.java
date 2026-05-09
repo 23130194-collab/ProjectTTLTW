@@ -193,4 +193,57 @@ public class ReviewDao {
             return query.mapTo(Integer.class).one();
         });
     }
+
+    public Map<String, Double> getAverageRatingByCategory(int days) {
+        String sql = "SELECT c.name as category_name, AVG(r.rating) as avg_rating " +
+                "FROM reviews r " +
+                "JOIN products p ON r.product_id = p.id " +
+                "JOIN categories c ON p.category_id = c.id " +
+                "WHERE r.created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY c.name";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("category_name").toString(),
+                                        m -> {
+                                            Object avg = m.get("avg_rating");
+                                            return (avg instanceof Number) ? ((Number) avg).doubleValue() : 0.0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
+
+    public Map<String, Integer> getRatingDistribution(int days) {
+        String sql = "SELECT r.rating, COUNT(*) as rating_count " +
+                "FROM reviews r " +
+                "WHERE r.created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY r.rating " +
+                "ORDER BY r.rating ASC";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("rating").toString() + " Sao",
+                                        m -> {
+                                            Object count = m.get("rating_count");
+                                            return (count instanceof Number) ? ((Number) count).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
 }
