@@ -53,4 +53,9 @@ public class UserService {
     public User getUserById(int id) {
         return userDao.getUserById(id);
     }
+
+    public void addCustomerByAdmin(String name, String email, String hashedPassword) {
+        userDao.insertUserByAdmin(name, email, hashedPassword);
+
+    }
 }
