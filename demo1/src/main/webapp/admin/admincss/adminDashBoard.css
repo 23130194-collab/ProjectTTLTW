@@ -490,6 +490,7 @@
     .charts-row {
         grid-template-columns: 1fr;
     }
+
     .product-card-vertical {
         min-width: 180px;
         width: 180px;
@@ -554,7 +555,7 @@
 .low-stock-item:hover {
     border-color: #3b82f6;
     background-color: #f8fafc;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .low-stock-item .item-img {
@@ -683,8 +684,15 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .chart-card.half-width {
@@ -705,7 +713,8 @@
     border-collapse: collapse;
 }
 
-.low-stock-table th, .low-stock-table td {
+.low-stock-table th,
+.low-stock-table td {
     padding: 12px 16px;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
