@@ -263,6 +263,7 @@
                     <button class="tab-btn active" data-tab="finance">Tài chính & Doanh thu</button>
                     <button class="tab-btn" data-tab="orders">Đơn hàng</button>
                     <button class="tab-btn" data-tab="products">Sản phẩm & Kho</button>
+                    <button class="tab-btn" data-tab="payment">Thanh toán</button>
                 </div>
                 <div class="time-filter">
                     <select id="timeRangeSelect" onchange="fetchChartData(this.value)">
@@ -397,6 +398,29 @@
                     </div>
                 </div>
             </div>
+
+            <div id="payment-tab" class="tab-content">
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Tỷ lệ phương thức thanh toán</h3>
+                        </div>
+                        <div class="chart-container pie-container">
+                            <canvas id="paymentMethodRatioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Doanh thu theo phương thức thanh toán</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="revenueByPaymentMethodChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
@@ -453,6 +477,9 @@
                 fullUnsoldProductsData = data.unsoldProducts || {};
                 const limitSelect = document.getElementById('unsoldLimitSelect');
                 updateUnsoldChart(limitSelect ? limitSelect.value : 20);
+
+                renderPaymentMethodRatioChart(data.paymentMethodRatio);
+                renderRevenueByPaymentMethodChart(data.revenueByPaymentMethod);
             })
             .catch(error => console.error('Error fetching chart data:', error));
     }
@@ -746,6 +773,70 @@
                     '</div>' +
                 '</td>';
             tbody.appendChild(tr);
+        });
+    }
+
+    function renderPaymentMethodRatioChart(data) {
+        destroyChartIfExists('paymentMethodRatioChart');
+        const ctx = document.getElementById('paymentMethodRatioChart');
+        if (!ctx || !data) return;
+        charts['paymentMethodRatioChart'] = new Chart(ctx.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    data: Object.values(data),
+                    backgroundColor: pastelColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'right' } }
+            }
+        });
+    }
+
+    function renderRevenueByPaymentMethodChart(data) {
+        destroyChartIfExists('revenueByPaymentMethodChart');
+        const ctx = document.getElementById('revenueByPaymentMethodChart');
+        if (!ctx || !data) return;
+        charts['revenueByPaymentMethodChart'] = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: Object.values(data),
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => new Intl.NumberFormat('vi-VN').format(value) + ' đ'
+                        }
+                    } 
+                },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: context => new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            }).format(context.parsed.y)
+                        }
+                    }
+                }
+            }
         });
     }
 </script>
