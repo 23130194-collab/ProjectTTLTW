@@ -417,4 +417,30 @@ public class ProductDao {
                         )
         );
     }
+
+    public Map<String, Integer> getOldestUnsoldProducts(int limit) {
+        String sql = "SELECT name, DATEDIFF(NOW(), created_at) as days_in_stock " +
+                "FROM products " +
+                "WHERE sold_quantity = 0 AND status = 'active' " +
+                "ORDER BY created_at ASC " +
+                "LIMIT :limit";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("limit", limit)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("name").toString(),
+                                        m -> {
+                                            Object days = m.get("days_in_stock");
+                                            return (days instanceof Number) ? ((Number) days).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
 }

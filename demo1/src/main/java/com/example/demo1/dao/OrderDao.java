@@ -615,4 +615,56 @@ public class OrderDao {
                         )
         );
     }
+
+    public Map<String, Integer> getPaymentMethodRatio(int days) {
+        String sql = "SELECT p.payment_method, COUNT(*) as method_count " +
+                "FROM payment p " +
+                "JOIN orders o ON p.order_id = o.id " +
+                "WHERE o.created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY p.payment_method";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("payment_method").toString(),
+                                        m -> {
+                                            Object count = m.get("method_count");
+                                            return (count instanceof Number) ? ((Number) count).intValue() : 0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
+
+    public Map<String, Double> getRevenueByPaymentMethod(int days) {
+        String sql = "SELECT p.payment_method, SUM(o.total_amount) as method_revenue " +
+                "FROM payment p " +
+                "JOIN orders o ON p.order_id = o.id " +
+                "WHERE o.order_status = 'Đã giao' AND o.created_at >= CURDATE() - INTERVAL :days DAY " +
+                "GROUP BY p.payment_method";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("days", days)
+                        .mapToMap()
+                        .list()
+                        .stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        m -> m.get("payment_method").toString(),
+                                        m -> {
+                                            Object revenue = m.get("method_revenue");
+                                            return (revenue instanceof Number) ? ((Number) revenue).doubleValue() : 0.0;
+                                        },
+                                        (e1, e2) -> e1,
+                                        java.util.LinkedHashMap::new
+                                )
+                        )
+        );
+    }
 }
