@@ -72,6 +72,9 @@
     <div class="content-area">
         <div class="page-header">
             <h1 class="page-title">Danh sách khách hàng</h1>
+            <button class="add-customer-btn" id="openAddCustomerBtn" onclick="window.location.href='${pageContext.request.contextPath}/admin/add-customer'">
+                <i class="fa-solid fa-plus"></i> Thêm khách hàng
+            </button>
         </div>
 
         <div class="breadcrumb">
