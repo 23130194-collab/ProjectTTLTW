@@ -4,8 +4,10 @@ import com.example.demo1.dao.OrderDao;
 import com.example.demo1.model.Order;
 import com.example.demo1.model.OrderItem;
 import com.example.demo1.model.User;
+import com.example.demo1.model.UserAddress;
 import com.example.demo1.model.VietnamAddressUnit;
 import com.example.demo1.service.OrderService;
+import com.example.demo1.service.UserAddressService;
 import com.example.demo1.service.VietnamAddressService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,13 +18,13 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.text.Normalizer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @WebServlet(name = "OrderController", urlPatterns = {"/my-orders", "/order-detail", "/account"})
 public class OrderController extends HttpServlet {
     private final VietnamAddressService vietnamAddressService = new VietnamAddressService();
+    private final UserAddressService userAddressService = new UserAddressService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -164,57 +166,85 @@ public class OrderController extends HttpServlet {
     }
 
     private void handleAccount(HttpServletRequest request, User user) {
-        if (!"edit".equals(request.getParameter("mode"))) {
+        userAddressService.ensureDefaultAddressForUser(user);
+
+        List<UserAddress> userAddresses = userAddressService.getAddressesByUserId(user.getId());
+        UserAddress defaultAddress = null;
+        for (UserAddress address : userAddresses) {
+            if (address.isDefaultAddress()) {
+                defaultAddress = address;
+                break;
+            }
+        }
+
+        if (defaultAddress == null && !userAddresses.isEmpty()) {
+            userAddressService.setDefaultAddress(user.getId(), userAddresses.get(0).getId());
+            userAddresses = userAddressService.getAddressesByUserId(user.getId());
+            defaultAddress = userAddressService.getDefaultAddressByUserId(user.getId());
+        }
+
+        if (defaultAddress != null) {
+            user.setAddress(defaultAddress.getFullAddress());
+        }
+
+        request.setAttribute("userAddresses", userAddresses);
+        request.setAttribute("defaultAddress", defaultAddress);
+        prepareAddressForm(request, user);
+    }
+
+    private void prepareAddressForm(HttpServletRequest request, User user) {
+        String addressMode = request.getParameter("addressMode");
+        if (!"add".equals(addressMode) && !"edit".equals(addressMode)) {
             return;
+        }
+
+        UserAddress editingAddress = null;
+        if ("edit".equals(addressMode)) {
+            try {
+                int addressId = Integer.parseInt(valueOrEmpty(request.getParameter("addressId")));
+                editingAddress = userAddressService.getAddressById(user.getId(), addressId);
+                request.setAttribute("editingAddress", editingAddress);
+                if (editingAddress == null) {
+                    request.setAttribute("addressFormError", "Không tìm thấy địa chỉ cần sửa.");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("addressFormError", "Địa chỉ cần sửa không hợp lệ.");
+            }
         }
 
         try {
             List<VietnamAddressUnit> provinces = vietnamAddressService.getProvinces();
-            request.setAttribute("addressProvinces", provinces);
+            request.setAttribute("addressFormProvinces", provinces);
 
-            String currentAddress = user.getAddress();
             String selectedProvinceValue = request.getParameter("province");
             Integer selectedProvinceCode = VietnamAddressService.getCodeFromOptionValue(selectedProvinceValue);
-
             VietnamAddressUnit selectedProvince = selectedProvinceCode == null
-                    ? findByAddress(provinces, currentAddress)
+                    ? findByName(provinces, editingAddress == null ? null : editingAddress.getProvince())
                     : findByCode(provinces, selectedProvinceCode);
 
             if (selectedProvince != null) {
                 selectedProvinceValue = selectedProvince.getOptionValue();
-                request.setAttribute("selectedProvinceValue", selectedProvinceValue);
+                request.setAttribute("selectedAddressProvinceValue", selectedProvinceValue);
 
                 List<VietnamAddressUnit> wards = vietnamAddressService.getWardsByProvinceCode(selectedProvince.getCode());
-                request.setAttribute("addressWards", wards);
+                request.setAttribute("addressFormWards", wards);
 
                 String selectedWardValue = request.getParameter("ward");
                 Integer selectedWardCode = VietnamAddressService.getCodeFromOptionValue(selectedWardValue);
-
                 VietnamAddressUnit selectedWard = selectedWardCode == null
-                        ? findByAddress(wards, currentAddress)
+                        ? findByName(wards, editingAddress == null ? null : editingAddress.getWard())
                         : findByCode(wards, selectedWardCode);
 
                 if (selectedWard != null) {
-                    selectedWardValue = selectedWard.getOptionValue();
-                    request.setAttribute("selectedWardValue", selectedWardValue);
+                    request.setAttribute("selectedAddressWardValue", selectedWard.getOptionValue());
                 }
-
-                String addressDetail = request.getParameter("addressDetail");
-                if (addressDetail == null) {
-                    addressDetail = selectedWard == null
-                            ? ""
-                            : extractAddressDetail(currentAddress, selectedProvince.getName(), selectedWard.getName());
-                }
-                request.setAttribute("addressDetail", addressDetail);
             } else {
-                request.setAttribute("addressWards", Collections.emptyList());
-                request.setAttribute("addressDetail", valueOrEmpty(request.getParameter("addressDetail")));
+                request.setAttribute("addressFormWards", Collections.emptyList());
             }
         } catch (IOException e) {
-            request.setAttribute("addressLoadError", "Không tải được dữ liệu Tỉnh/Thành phố, Phường/Xã. Vui lòng thử lại sau.");
-            request.setAttribute("addressProvinces", Collections.emptyList());
-            request.setAttribute("addressWards", Collections.emptyList());
-            request.setAttribute("addressDetail", valueOrEmpty(request.getParameter("addressDetail")));
+            request.setAttribute("addressFormLoadError", "Không tải được dữ liệu Tỉnh/Thành phố, Phường/Xã. Vui lòng thử lại sau.");
+            request.setAttribute("addressFormProvinces", Collections.emptyList());
+            request.setAttribute("addressFormWards", Collections.emptyList());
         }
     }
 
@@ -232,42 +262,19 @@ public class OrderController extends HttpServlet {
         return null;
     }
 
-    private VietnamAddressUnit findByAddress(List<VietnamAddressUnit> units, String address) {
-        String normalizedAddress = normalize(address);
-        if (units == null || normalizedAddress.isEmpty()) {
+    private VietnamAddressUnit findByName(List<VietnamAddressUnit> units, String name) {
+        String normalizedName = normalize(name);
+        if (units == null || normalizedName.isEmpty()) {
             return null;
         }
 
         for (VietnamAddressUnit unit : units) {
-            if (!normalize(unit.getName()).isEmpty() && normalizedAddress.contains(normalize(unit.getName()))) {
+            if (normalizedName.equals(normalize(unit.getName()))) {
                 return unit;
             }
         }
 
         return null;
-    }
-
-    private String extractAddressDetail(String address, String provinceName, String wardName) {
-        if (address == null || address.trim().isEmpty()) {
-            return "";
-        }
-
-        List<String> selectedParts = new ArrayList<>();
-        selectedParts.add(normalize(provinceName));
-        selectedParts.add(normalize(wardName));
-        selectedParts.add("viet nam");
-
-        List<String> detailParts = new ArrayList<>();
-        String[] parts = address.split(",");
-        for (String part : parts) {
-            String trimmed = part.trim();
-            String normalizedPart = normalize(trimmed);
-            if (!trimmed.isEmpty() && !selectedParts.contains(normalizedPart)) {
-                detailParts.add(trimmed);
-            }
-        }
-
-        return String.join(", ", detailParts);
     }
 
     private String normalize(String value) {
