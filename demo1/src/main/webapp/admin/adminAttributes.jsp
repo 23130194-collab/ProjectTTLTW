@@ -175,7 +175,7 @@
 
         <form action="${contextPath}/admin/attributes" method="get">
             <div class="form-search-row">
-                <select name="filterCategoryId" onchange="this.form.submit()" class="filter-select">
+                <select name="filterCategoryId" onchange="this.form.submit()" class="form-select filter-select">
                     <option value="0">Tất cả danh mục</option>
                     <c:forEach var="cat" items="${categories}">
                         <option value="${cat.id}" ${cat.id == filterCategoryId ? 'selected' : ''}>

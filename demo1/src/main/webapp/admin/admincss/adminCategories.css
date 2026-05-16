@@ -18,15 +18,18 @@
 }
 
 .page-title {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin: 0 0 6px 0;
     color: #1e293b;
 }
 
 .breadcrumb {
     font-size: 14px;
-    color: #6b7280;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
     margin-bottom: 24px;
 }
 
