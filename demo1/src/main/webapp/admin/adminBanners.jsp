@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="${contextPath}/admin/admincss/headerAndSidebar.css">
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminBanners.css">
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminModal.css">
+    <link rel="stylesheet" href="${contextPath}/admin/admincss/adminForm.css">
 </head>
 <body>
 
@@ -45,7 +46,6 @@
                 class="fa-solid fa-star"></i></span>Đánh giá</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/contacts" class="nav-link"><span class="nav-icon"><i
                 class="fa-solid fa-envelope"></i></span>Liên hệ</a></li>
-
     </ul>
     <div class="logout-section"><a href="${contextPath}/logout" class="nav-link logout-link" id="logoutLink"><span
             class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span>Đăng xuất</a></div>
@@ -56,7 +56,6 @@
         <button class="notification-btn" id="notificationBtn">
             <i class="fa-solid fa-bell"></i>
         </button>
-
         <div class="user-profile">
             <img src="https://www.shutterstock.com/image-vector/admin-icon-strategy-collection-thin-600nw-2307398667.jpg"
                  alt="User Profile">
@@ -84,57 +83,62 @@
             </div>
             <c:remove var="message" scope="session"/>
         </c:if>
-
         <c:if test="${not empty errorMessage}">
-            <div class="alert alert-danger"
-                 style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+            <div class="alert alert-danger">
                 <span>${errorMessage}</span>
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
             </div>
-            <c:remove var="message" scope="session"/>
         </c:if>
 
-        <form id="bannerForm" action="${contextPath}/admin/banners" method="post">
+        <form id="bannerForm" action="${contextPath}/admin/banners" method="post" class="admin-form-card">
             <input type="hidden" name="force" value="false">
             <input type="hidden" name="action"
                    value="${(not empty bannerToEdit && bannerToEdit.id > 0) ? 'update' : 'create'}">
-
             <c:if test="${not empty bannerToEdit && bannerToEdit.id > 0}">
                 <input type="hidden" name="id" value="${bannerToEdit.id}">
             </c:if>
 
-            <div class="banner-form-grid">
-                <div class="form-group col-span-1">
-                    <label>Tên banner</label>
-                    <input type="text" name="name" placeholder="Nhập tên banner" value="${bannerToEdit.name}" required>
+            <div class="admin-form-header">
+                <div class="admin-form-header-icon">
+                    <i class="fa-solid ${(not empty bannerToEdit && bannerToEdit.id > 0) ? 'fa-pen' : 'fa-plus'}"></i>
                 </div>
+                <h2 class="admin-form-title-text">
+                    <c:choose>
+                        <c:when test="${not empty bannerToEdit && bannerToEdit.id > 0}">Chỉnh sửa banner</c:when>
+                        <c:otherwise>Thêm banner mới</c:otherwise>
+                    </c:choose>
+                </h2>
+            </div>
 
-                <div class="form-group col-span-1">
-                    <label>Thời gian bắt đầu</label>
+            <div class="admin-form-grid">
+                <div class="form-field form-span-1">
+                    <label class="admin-form-label">Tên banner <span class="required">*</span></label>
+                    <input type="text" name="name" class="form-input"
+                           placeholder="Nhập tên banner" value="${bannerToEdit.name}" required>
+                </div>
+                <div class="form-field form-span-1">
+                    <label class="admin-form-label">Thời gian bắt đầu <span class="required">*</span></label>
                     <c:set var="startDate" value="${bannerToEdit.start_time}"/>
                     <c:if test="${not empty startDate && startDate.length() > 10}">
                         <c:set var="startDate" value="${startDate.substring(0, 10)}"/>
                     </c:if>
-                    <input type="date" id="banner-start-time" name="start_time" value="${startDate}" required>
+                    <input type="date" id="banner-start-time" name="start_time" class="form-input"
+                           value="${startDate}" required>
                 </div>
-
-                <div class="form-group col-span-1">
-                    <label>Thời gian kết thúc</label>
+                <div class="form-field form-span-1">
+                    <label class="admin-form-label">Thời gian kết thúc <span class="required">*</span></label>
                     <c:set var="endDate" value="${bannerToEdit.end_time}"/>
                     <c:if test="${not empty endDate && endDate.length() > 10}">
                         <c:set var="endDate" value="${endDate.substring(0, 10)}"/>
                     </c:if>
-                    <input type="date" id="banner-end-time" name="end_time" value="${endDate}" required>
+                    <input type="date" id="banner-end-time" name="end_time" class="form-input"
+                           value="${endDate}" required>
                 </div>
-
-                <div class="form-group col-span-2">
-                    <label>Vị trí hiển thị</label>
-                    <select name="position" required>
+                <div class="form-field form-span-2">
+                    <label class="admin-form-label">Vị trí hiển thị <span class="required">*</span></label>
+                    <select name="position" class="form-select" required>
                         <option value="">Chọn vị trí</option>
-
-                        <option value="Trang chủ" ${bannerToEdit.position == 'Trang chủ' ? 'selected' : ''}>Trang chủ
-                        </option>
-
+                        <option value="Trang chủ" ${bannerToEdit.position == 'Trang chủ' ? 'selected' : ''}>Trang chủ</option>
                         <c:forEach var="category" items="${categories}">
                             <option value="${category.id}"
                                 ${String.valueOf(category.id) == bannerToEdit.position ? 'selected' : ''}>
@@ -143,32 +147,33 @@
                         </c:forEach>
                     </select>
                 </div>
-
-                <div class="form-group col-span-1">
-                    <label>Thứ tự hiển thị</label>
-                    <input type="number"
-                           name="display_order"
-                           placeholder="Nhập thứ tự"
+                <div class="form-field form-span-1">
+                    <label class="admin-form-label">Thứ tự hiển thị <span class="required">*</span></label>
+                    <input type="number" name="display_order" class="form-input"
+                           placeholder="VD: 1"
                            value="${not empty bannerToEdit ? bannerToEdit.display_order : ''}"
                            min="1" required>
                 </div>
-
-                <div class="form-action-row">
-                    <div class="form-group link-group">
-                        <label>Đường dẫn hình ảnh</label>
-                        <input type="text" name="image" placeholder="Nhập link ảnh online..."
-                               value="${bannerToEdit.image.startsWith('http') ? bannerToEdit.image : ''}">
-                    </div>
-
-                    <a href="#confirm-save-modal" class="btn-add-banner open-modal-btn">
-                        <i class="fa-solid ${not empty bannerToEdit && bannerToEdit.id > 0 ? 'fa-save' : 'fa-plus'}"></i>
-                        ${(not empty bannerToEdit && bannerToEdit.id > 0) ? 'Cập Nhật' : 'Thêm Banner mới'}
+                <div class="form-field form-span-3">
+                    <label class="admin-form-label">Đường dẫn hình ảnh</label>
+                    <c:set var="imgVal" value=""/>
+                    <c:if test="${not empty bannerToEdit.image and bannerToEdit.image.startsWith('http')}">
+                        <c:set var="imgVal" value="${bannerToEdit.image}"/>
+                    </c:if>
+                    <input type="text" name="image" class="form-input"
+                           placeholder="https://example.com/image.png" value="${imgVal}">
+                </div>
+                <div class="form-actions">
+                    <a href="#confirm-save-modal" class="admin-btn-primary open-modal-btn">
+                        <i class="fa-solid ${(not empty bannerToEdit && bannerToEdit.id > 0) ? 'fa-floppy-disk' : 'fa-plus'}"></i>
+                        <c:choose>
+                            <c:when test="${not empty bannerToEdit && bannerToEdit.id > 0}">Cập nhật</c:when>
+                            <c:otherwise>Thêm mới</c:otherwise>
+                        </c:choose>
                     </a>
-
                     <c:if test="${not empty bannerToEdit && bannerToEdit.id > 0}">
-                        <a href="${contextPath}/admin/banners" class="btn-add-banner"
-                           style="background: #334155; text-decoration: none; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-xmark" style="margin-right: 7px;"></i> Hủy
+                        <a href="${contextPath}/admin/banners" class="admin-btn-cancel">
+                            <i class="fa-solid fa-xmark"></i> Hủy
                         </a>
                     </c:if>
                 </div>
@@ -176,10 +181,8 @@
         </form>
 
         <form action="${contextPath}/admin/banners" method="get">
-            <div class="form-search-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-
-                <select name="filterPosition" onchange="this.form.submit()"
-                        style="height: 45px; padding: 0 15px; border: 1px solid #e2e8f0; border-radius: 10px; outline: none; cursor: pointer; color: #4b5563; min-width: 200px; background-color: white;">
+            <div class="form-search-row">
+                <select name="filterPosition" onchange="this.form.submit()" class="form-select filter-select">
                     <option value="">Tất cả vị trí</option>
                     <option value="Trang chủ" ${filterPosition == 'Trang chủ' ? 'selected' : ''}>Trang chủ</option>
                     <c:forEach var="cat" items="${categories}">
@@ -188,13 +191,11 @@
                         </option>
                     </c:forEach>
                 </select>
-
-                <div class="search-wrapper" style="flex: 1; margin-bottom: 0;">
-                    <input type="text" name="keyword" class="search-input-banner" placeholder="Tìm kiếm banner..."
-                           value="${param.keyword}">
+                <div class="search-wrapper">
+                    <input type="text" name="keyword" class="search-input-banner"
+                           placeholder="Tìm kiếm banner..." value="${param.keyword}">
                     <button type="submit" class="search-icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
-
             </div>
         </form>
 
@@ -230,13 +231,12 @@
                                          onerror="this.src='https://via.placeholder.com/100x60?text=No+Image'">
                                 </td>
                                 <td style="text-align: left; font-weight: 600;">${b.name}</td>
-                                <td><span class="status status-active"
-                                          style="background: #f1f5f9; color: #334155;">${b.position}</span></td>
+                                <td><span class="status status-active" style="background:#f1f5f9;color:#334155;">${b.position}</span></td>
                                 <td>${b.display_order}</td>
                                 <td>
                                     <div class="time-range">
                                         <i class="fa-regular fa-calendar"></i> ${b.start_time}<br>
-                                        <i class="fa-solid fa-arrow-down-long" style="font-size: 10px; margin: 2px 0;"></i><br>
+                                        <i class="fa-solid fa-arrow-down-long" style="font-size:10px;margin:2px 0;"></i><br>
                                         <i class="fa-regular fa-calendar-check"></i> ${b.end_time}
                                     </div>
                                 </td>
@@ -255,25 +255,20 @@
                 </tbody>
             </table>
         </div>
+
         <c:if test="${totalPages > 1}">
             <div class="pagination-container">
                 <c:if test="${currentPage > 1}">
                     <a href="${contextPath}/admin/banners?page=${currentPage - 1}&keyword=${keyword}&filterPosition=${filterPosition}"
-                       class="pagination-btn">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </a>
+                       class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></a>
                 </c:if>
                 <c:forEach var="i" begin="1" end="${totalPages}">
                     <a href="${contextPath}/admin/banners?page=${i}&keyword=${keyword}&filterPosition=${filterPosition}"
-                       class="page-number ${i == currentPage ? 'active' : ''}">
-                            ${i}
-                    </a>
+                       class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
                 </c:forEach>
                 <c:if test="${currentPage < totalPages}">
                     <a href="${contextPath}/admin/banners?page=${currentPage + 1}&keyword=${keyword}&filterPosition=${filterPosition}"
-                       class="pagination-btn">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </a>
+                       class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></a>
                 </c:if>
             </div>
         </c:if>
@@ -316,12 +311,12 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var alertBox = document.getElementById("successAlert");
+    document.addEventListener('DOMContentLoaded', function () {
+        var alertBox = document.getElementById('successAlert');
         if (alertBox) {
             setTimeout(function () {
-                alertBox.style.transition = "opacity 0.5s ease";
-                alertBox.style.opacity = "0";
+                alertBox.style.transition = 'opacity 0.5s ease';
+                alertBox.style.opacity = '0';
                 setTimeout(() => alertBox.remove(), 500);
             }, 5000);
         }
@@ -355,26 +350,10 @@
 
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', function (event) {
-                if (event.target === this) {
-                    this.classList.remove('show');
-                }
+                if (event.target === this) { this.classList.remove('show'); }
             });
         });
-    });
-</script>
-<div id="logoutConfirmModal" class="modal-overlay">
-    <div class="modal-content">
-        <h3>Xác nhận đăng xuất</h3>
-        <p>Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?</p>
-        <div class="modal-buttons">
-            <a href="#" class="modal-btn modal-cancel" id="cancelLogout">Hủy</a>
-            <a href="${contextPath}/logout" class="modal-btn modal-confirm">Đăng xuất</a>
-        </div>
-    </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
         const logoutLink = document.getElementById('logoutLink');
         const logoutConfirmModal = document.getElementById('logoutConfirmModal');
         const cancelLogoutBtn = document.getElementById('cancelLogout');
@@ -393,22 +372,15 @@
         }
         if (logoutConfirmModal) {
             logoutConfirmModal.addEventListener('click', function (e) {
-                if (e.target === logoutConfirmModal) {
-                    logoutConfirmModal.classList.remove('show');
-                }
+                if (e.target === logoutConfirmModal) { logoutConfirmModal.classList.remove('show'); }
             });
         }
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+
         const today = new Date();
         const pad = n => String(n).padStart(2, '0');
         const todayStr = today.getFullYear() + '-' + pad(today.getMonth() + 1) + '-' + pad(today.getDate());
-
         const startInput = document.getElementById('banner-start-time');
-        const endInput   = document.getElementById('banner-end-time');
-
+        const endInput = document.getElementById('banner-end-time');
         if (startInput) {
             startInput.setAttribute('min', todayStr);
             startInput.addEventListener('change', function () {
