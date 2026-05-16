@@ -220,4 +220,16 @@ public class OrderService {
     public Map<String, Integer> getTopSellingProducts(int days, int limit) {
         return orderDao.getTopSellingProducts(days, limit);
     }
+
+    public Map<String, Integer> getPaymentMethodRatio(int days) {
+        return orderDao.getPaymentMethodRatio(days);
+    }
+
+    public Map<String, Double> getRevenueByPaymentMethod(int days) {
+        return orderDao.getRevenueByPaymentMethod(days);
+    }
+
+    public Map<String, Double> getOrderCancellationRate(int days) {
+        return orderDao.getOrderCancellationRate(days);
+    }
 }

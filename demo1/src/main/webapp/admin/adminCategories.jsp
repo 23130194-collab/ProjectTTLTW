@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="${contextPath}/admin/admincss/headerAndSidebar.css">
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminCategories.css">
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminModal.css">
+    <link rel="stylesheet" href="${contextPath}/admin/admincss/adminForm.css">
 </head>
 
 <body>
@@ -63,7 +64,6 @@
         <button class="notification-btn" id="notificationBtn">
             <i class="fa-solid fa-bell"></i>
         </button>
-
         <div class="user-profile">
             <img src="https://www.shutterstock.com/image-vector/admin-icon-strategy-collection-thin-600nw-2307398667.jpg"
                  alt="User Profile">
@@ -77,7 +77,7 @@
         <div class="breadcrumb">
             <a href="${contextPath}/admin/dashboard" class="breadcrumb-link">Trang chủ</a>
             <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-current">Danh mục</span>
+            <span class="breadcrumb-current">Mục sản phẩm</span>
         </div>
 
         <c:if test="${not empty sessionScope.successMessage}">
@@ -101,59 +101,70 @@
             </div>
         </c:if>
 
-        <form action="${contextPath}/admin/categories" method="post" class="category-form" id="categoryForm">
+        <form action="${contextPath}/admin/categories" method="post" class="admin-form-card" id="categoryForm">
             <c:if test="${not empty categoryToEdit}">
                 <input type="hidden" name="categoryId" value="${categoryToEdit.id}">
             </c:if>
-            <div class="form-row">
-                <div class="input-group flex-2">
-                    <label class="input-label">Tên mục sản phẩm</label>
-                    <input type="text" name="categoryName" class="input-field" placeholder="Tên mục sản phẩm"
-                           value="${categoryToEdit.name}" required>
+            <div class="admin-form-header">
+                <div class="admin-form-header-icon">
+                    <i class="fa-solid ${not empty categoryToEdit ? 'fa-pen' : 'fa-plus'}"></i>
                 </div>
-                <div class="input-group flex-1">
-                    <label class="input-label">Thứ tự hiển thị</label>
-                    <input type="number" name="displayOrder" id="displayOrderInput" class="input-field"
-                           placeholder="Thứ tự" value="${categoryToEdit.display_order}" required>
+                <h2 class="admin-form-title-text">
+                    <c:choose>
+                        <c:when test="${not empty categoryToEdit}">Chỉnh sửa mục sản phẩm</c:when>
+                        <c:otherwise>Thêm mục sản phẩm mới</c:otherwise>
+                    </c:choose>
+                </h2>
+            </div>
+            <div class="admin-form-grid">
+                <div class="form-field form-span-2">
+                    <label class="admin-form-label">Tên mục sản phẩm <span class="required">*</span></label>
+                    <input type="text" name="categoryName" class="form-input"
+                           placeholder="Nhập tên mục sản phẩm" value="${categoryToEdit.name}" required>
                 </div>
-                <div class="input-group flex-1">
-                    <label class="input-label">Trạng thái</label>
-                    <select name="status" class="input-field">
+                <div class="form-field form-span-1">
+                    <label class="admin-form-label">Thứ tự hiển thị <span class="required">*</span></label>
+                    <input type="number" name="displayOrder" id="displayOrderInput" class="form-input"
+                           placeholder="VD: 1" value="${categoryToEdit.display_order}" required>
+                </div>
+                <div class="form-field form-span-1">
+                    <label class="admin-form-label">Trạng thái</label>
+                    <select name="status" class="form-select">
                         <option value="active" ${categoryToEdit.status == 'active' ? 'selected' : ''}>Hoạt động</option>
                         <option value="hidden" ${categoryToEdit.status == 'hidden' ? 'selected' : ''}>Ẩn</option>
                     </select>
                 </div>
-            </div>
-            <div class="form-row" style="align-items: flex-end;">
-                <div class="input-group" style="flex: 1;">
-                    <label class="input-label">Đường dẫn hình ảnh</label>
-                    <input type="text" name="imageUrl" class="input-field"
+                <div class="form-field form-span-2">
+                    <label class="admin-form-label">Đường dẫn hình ảnh</label>
+                    <input type="text" name="imageUrl" class="form-input"
                            placeholder="https://example.com/image.png" value="${categoryToEdit.image}">
                 </div>
-                <div class="button-group" style="margin-left: 15px; width: auto;">
-                    <a href="#confirm-save-modal" class="add-category-btn open-modal-btn">
+                <div class="form-actions">
+                    <a href="#confirm-save-modal" class="admin-btn-primary open-modal-btn">
+                        <i class="fa-solid ${not empty categoryToEdit ? 'fa-floppy-disk' : 'fa-plus'}"></i>
                         <c:choose>
                             <c:when test="${not empty categoryToEdit}">Cập nhật</c:when>
-                            <c:otherwise><i class="fa-solid fa-plus"
-                                            style="margin-right: 8px;"></i> Thêm danh mục</c:otherwise>
+                            <c:otherwise>Thêm mới</c:otherwise>
                         </c:choose>
                     </a>
                     <c:if test="${not empty categoryToEdit}">
-                        <a href="${contextPath}/admin/categories" class="cancel-btn">Hủy</a>
+                        <a href="${contextPath}/admin/categories" class="admin-btn-cancel">
+                            <i class="fa-solid fa-xmark"></i> Hủy
+                        </a>
                     </c:if>
                 </div>
             </div>
             <c:if test="${not empty categoryToEdit.image}">
-                <div class="current-image-preview" style="margin-top: 10px; display: flex; align-items: center;">
-                    <span style="font-size: 14px; color: #64748b; margin-right: 10px;">Ảnh hiện tại:</span>
+                <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 13px; color: #64748b;">Ảnh hiện tại:</span>
                     <c:choose>
                         <c:when test="${categoryToEdit.image.startsWith('http')}">
                             <img src="${categoryToEdit.image}" alt="Preview"
-                                 style="height: 40px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                                 style="height: 40px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         </c:when>
                         <c:otherwise>
                             <img src="${contextPath}/${categoryToEdit.image}" alt="Preview"
-                                 style="height: 40px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                                 style="height: 40px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         </c:otherwise>
                     </c:choose>
                 </div>

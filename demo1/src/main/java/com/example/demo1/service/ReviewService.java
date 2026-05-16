@@ -41,4 +41,12 @@ public class ReviewService {
     public boolean hasUserReviewedProduct(int userId, int productId) {
         return reviewDao.hasUserReviewedProduct(userId, productId);
     }
+
+    public Map<String, Double> getAverageRatingByCategory(int days) {
+        return reviewDao.getAverageRatingByCategory(days);
+    }
+
+    public Map<String, Integer> getRatingDistribution(int days) {
+        return reviewDao.getRatingDistribution(days);
+    }
 }

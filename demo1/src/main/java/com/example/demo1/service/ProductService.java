@@ -171,4 +171,8 @@ public class ProductService {
     public Map<String, Integer> getProductRatioByBrand() {
         return pdao.getProductRatioByBrand();
     }
+
+    public Map<String, Integer> getOldestUnsoldProducts(int limit) {
+        return pdao.getOldestUnsoldProducts(limit);
+    }
 }

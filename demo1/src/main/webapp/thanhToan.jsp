@@ -168,9 +168,9 @@
 
             <div class="payment-box">
                 <div class="section-title">PHƯƠNG THỨC THANH TOÁN</div>
-                <select class="payment-select">
-                    <option>Thanh toán khi nhận hàng (COD)</option>
-                    <option>Chuyển khoản ngân hàng</option>
+                <select name="payment_method" class="payment-select">
+                    <option value="Thanh toán khi nhận hàng (COD)">Thanh toán khi nhận hàng (COD)</option>
+                    <option value="Chuyển khoản ngân hàng">Chuyển khoản ngân hàng</option>
                 </select>
             </div>
 
