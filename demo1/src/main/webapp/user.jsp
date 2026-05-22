@@ -188,7 +188,7 @@
                                         <div class="item-details">
                                             <div class="order-meta-line">
                                                 Đơn hàng: ${order.orderCode} • Ngày đặt: <fmt:formatDate
-                                                    value="${order.createdAt}" pattern="dd/MM/yyyy"/>
+                                                    value="${order.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
                                             </div>
                                             <div class="product-name">${item.productName}</div>
                                             <div class="product-price">
@@ -217,8 +217,33 @@
                                        class="view-detail-link">
                                         Xem chi tiết >
                                     </a>
+                                    <c:if test="${order.orderStatus eq 'Đang giao'}">
+                                        <button type="button"
+                                                class="btn-confirm-received"
+                                                data-modal-id="confirmReceiveModal-${order.id}">
+                                            Xác nhận nhận hàng
+                                        </button>
+                                    </c:if>
                                 </div>
                             </div>
+
+                            <c:if test="${order.orderStatus eq 'Đang giao'}">
+                                <div id="confirmReceiveModal-${order.id}" class="cancel-modal-overlay confirm-received-modal">
+                                    <div class="cancel-modal-content">
+                                        <form action="${pageContext.request.contextPath}/confirm-received" method="post">
+                                            <div class="modal-header">
+                                                <h3>Xác nhận nhận hàng</h3>
+                                                <p>Bạn xác nhận đã nhận được đơn hàng ${order.orderCode}? Sau khi xác nhận, đơn hàng sẽ được hoàn tất.</p>
+                                            </div>
+                                            <input type="hidden" name="id" value="${order.id}">
+                                            <div class="modal-footer">
+                                                <button type="submit" class="modal-btn modal-btn-confirm modal-btn-confirm-received">Xác nhận</button>
+                                                <button type="button" class="modal-btn modal-btn-cancel" data-close-modal>Không</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </c:if>
                         </div>
                     </c:forEach>
                 </div>
@@ -262,6 +287,32 @@
                 }
             });
         }
+
+        document.querySelectorAll('[data-modal-id]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const modal = document.getElementById(button.dataset.modalId);
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-close-modal]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const modal = button.closest('.confirm-received-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        document.querySelectorAll('.confirm-received-modal').forEach(function (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
     });
 </script>
 </body>
