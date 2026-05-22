@@ -30,22 +30,26 @@ function showFavToast(type, contextPath) {
     }, 5000);
 }
 
-function showLoginRequiredPopup(contextPath) {
-    const existingPopup = document.getElementById('login-required-modal');
-    if (existingPopup) {
-        existingPopup.classList.add('show');
+function showLoginRequiredPopup(contextPath, message) {
+    const msgText = message || 'Vui lòng đăng nhập tài khoản để thực hiện thao tác này.';
+    let modal = document.getElementById('login-required-modal');
+    
+    if (modal) {
+        const titleEl = modal.querySelector('.login-required-title');
+        if (titleEl) titleEl.textContent = msgText;
+        modal.classList.add('show');
         return;
     }
 
     const currentPath = window.location.pathname + window.location.search;
 
-    const modal = document.createElement('div');
+    modal = document.createElement('div');
     modal.id = 'login-required-modal';
     modal.className = 'modal-overlay login-required-modal';
     modal.innerHTML = `
         <div class="modal-content login-required-content">
             <button class="login-required-close" id="loginRequiredClose">&#10005;</button>
-            <h3 class="login-required-title">Vui lòng đăng nhập tài khoản để thực hiện thao tác này.</h3>
+            <h3 class="login-required-title">${msgText}</h3>
             <div class="login-required-actions">
                 <a href="${contextPath}/signup?redirect=${encodeURIComponent(currentPath)}" class="login-required-btn btn-register">Đăng ký</a>
                 <a href="${contextPath}/login?redirect=${encodeURIComponent(currentPath)}" class="login-required-btn btn-login">Đăng nhập</a>
@@ -69,7 +73,6 @@ function showLoginRequiredPopup(contextPath) {
     });
 }
 
-
 document.addEventListener('DOMContentLoaded', function () {
     const contextPath = (typeof globalContextPath !== 'undefined') ? globalContextPath : '';
 
@@ -82,10 +85,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const loginLink = document.querySelector('a.icon-btn[href*="/login"]');
             if (loginLink) {
                 e.preventDefault();
-                showLoginRequiredPopup(contextPath);
+                showLoginRequiredPopup(contextPath, 'Vui lòng đăng nhập để xem giỏ hàng và thanh toán');
             }
         }
     });
+
+    const btnRequireLoginReview = document.querySelector('.btn-require-login-review');
+    if (btnRequireLoginReview) {
+        btnRequireLoginReview.addEventListener('click', function(e) {
+            e.preventDefault();
+            showLoginRequiredPopup(contextPath, 'Vui lòng đăng nhập để viết đánh giá sản phẩm');
+        });
+    }
 
     const removeLinks = document.querySelectorAll('.fav-remove-link');
     const container = document.querySelector('.favorite-grid');
@@ -144,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 if (response.status === 401) {
-                    showLoginRequiredPopup(contextPath);
+                    showLoginRequiredPopup(contextPath, 'Vui lòng đăng nhập để thêm sản phẩm yêu thích');
                     return;
                 }
 
