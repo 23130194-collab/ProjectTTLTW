@@ -100,7 +100,10 @@
 
 <div class="app-container">
     <div class="header-cart">
-        <span></span>
+        <a href="javascript:history.back()" class="back-link" title="Quay lại">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <span>Giỏ hàng</span>
     </div>
 
     <c:if test="${not empty sessionScope.cartError}">
@@ -114,55 +117,145 @@
         <c:remove var="cartError" scope="session"/>
     </c:if>
 
-    <div class="cart-content">
+    <%
+        boolean isCartEmpty = (cart == null || cart.isEmpty());
+    %>
 
-    <c:forEach items="${sessionScope.cart}" var="entry">
-        <c:set var="item" value="${entry.value}"/>
-        <div class="product-item">
-            <img src="${item.product.image}" alt="${item.product.name}">
-            <div class="info">
-                <div class="info-line">
-                    <span>${item.product.name}</span>
-                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-                        <a href="AddCart?action=delete&id=${item.product.id}" class="delete-icon">
-                            <i class="fa fa-trash"></i>
-                        </a>
+    <c:choose>
+        <c:when test="${empty sessionScope.cart}">
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart empty-cart-icon"></i>
+                <p class="empty-cart-title">Giỏ hàng trống</p>
+                <p class="empty-cart-sub">Bạn chưa có sản phẩm nào trong giỏ hàng.<br>Hãy tiếp tục mua sắm nhé!</p>
+                <a href="${pageContext.request.contextPath}/home" class="btn-go-home">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </a>
+            </div>
+        </c:when>
 
-                        <div class="qty">
-                            <a href="AddCart?action=update&id=${item.product.id}&num=-1" style="text-decoration:none;">
-                                <button>-</button>
-                            </a>
+        <c:otherwise>
+            <div class="cart-select-all">
+                <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                <label for="selectAll">Chọn tất cả</label>
+            </div>
 
-                            <input type="text" value="${item.quantity}" readonly>
-
-                            <a href="AddCart?action=update&id=${item.product.id}&num=1" style="text-decoration:none;">
-                                <button>+</button>
-                            </a>
+            <div class="cart-content">
+                <c:forEach items="${sessionScope.cart}" var="entry">
+                    <c:set var="item" value="${entry.value}"/>
+                    <div class="product-item">
+                        <div class="select-item">
+                            <input type="checkbox" class="item-checkbox"
+                                   data-price="${item.product.price}"
+                                   data-qty="${item.quantity}"
+                                   onchange="updateCart()">
+                        </div>
+                        <img src="${item.product.image}" alt="${item.product.name}">
+                        <div class="info">
+                            <div class="info-line">
+                                <span>${item.product.name}</span>
+                                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                                    <a href="AddCart?action=delete&id=${item.product.id}" class="delete-icon">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
+                                    <div class="qty" data-stock="${item.product.stock}">
+                                        <button onclick="changeQty(this, ${item.product.id}, -1)">-</button>
+                                        <input type="text" value="${item.quantity}" readonly>
+                                        <button onclick="changeQty(this, ${item.product.id}, 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="current-price">
+                                    <fmt:formatNumber value="${item.product.price}" pattern="#,###"/>₫
+                                </span>
+                                <c:if test="${item.product.oldPrice > item.product.price}">
+                                    <span class="old-price">
+                                        <fmt:formatNumber value="${item.product.oldPrice}" pattern="#,###"/>₫
+                                    </span>
+                                </c:if>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div>
-                <span class="current-price">
-                    <fmt:formatNumber value="${item.product.price}" pattern="#,###"/>₫
-                </span>
-                    <c:if test="${item.product.oldPrice > item.product.price}">
-                    <span class="old-price">
-                        <fmt:formatNumber value="${item.product.oldPrice}" pattern="#,###"/>₫
-                    </span>
-                    </c:if>
-                </div>
+                </c:forEach>
             </div>
-        </div>
-    </c:forEach>
-    </div>
+        </c:otherwise>
+    </c:choose>
 </div>
 
-<div class="footer-bar">
-    <span class="total-amount">Tạm tính: <fmt:formatNumber value="${totalAmount}" pattern="#,###"/>₫</span>
-    <a href="AddCart?action=checkout" class="btn-buy-link">Mua ngay</a>
-</div>
+<c:if test="${not empty sessionScope.cart}">
+    <div class="footer-bar">
+        <span class="total-amount">Tạm tính: <span id="totalDisplay">0</span>₫</span>
+        <a href="AddCart?action=checkout" class="btn-buy-link">Mua ngay</a>
+    </div>
+</c:if>
 
 <script src="js/header.js"></script>
+<script>
+    function toggleSelectAll(source) {
+        document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = source.checked);
+        updateCart();
+    }
+
+    function updateCart() {
+        const all      = document.querySelectorAll('.item-checkbox');
+        const checked  = document.querySelectorAll('.item-checkbox:checked');
+        const selectAll = document.getElementById('selectAll');
+
+        selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+        selectAll.checked       = all.length > 0 && all.length === checked.length;
+
+        let total = 0;
+        checked.forEach(cb => {
+            const price = parseFloat(cb.dataset.price) || 0;
+            const qty   = parseInt(cb.dataset.qty)     || 1;
+            total += price * qty;
+        });
+
+        document.getElementById('totalDisplay').textContent = total.toLocaleString('vi-VN');
+    }
+
+    function changeQty(btn, productId, delta) {
+        const qtyDiv   = btn.closest('.qty');
+        const qtyInput = qtyDiv.querySelector('input');
+        const curQty   = parseInt(qtyInput.value);
+        const stock    = parseInt(qtyDiv.dataset.stock) || 99;
+        const newQty   = curQty + delta;
+
+        if (newQty < 1) return;
+
+        if (delta > 0 && newQty > stock) {
+            showToast('Vượt quá số lượng tồn kho! Chỉ còn ' + stock + ' sản phẩm.');
+            return;
+        }
+
+        fetch('AddCart?action=update&id=' + productId + '&num=' + delta, { method: 'GET' })
+            .then(res => {
+                if (res.ok) {
+                    qtyInput.value = newQty;
+                    const checkbox = btn.closest('.product-item').querySelector('.item-checkbox');
+                    checkbox.dataset.qty = newQty;
+                    updateCart();
+                }
+            });
+    }
+
+    function showToast(msg) {
+        const existing = document.getElementById('stockToast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'stockToast';
+        toast.className = 'stock-toast';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('show'));
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    }
+</script>
 </body>
 
 </html>
