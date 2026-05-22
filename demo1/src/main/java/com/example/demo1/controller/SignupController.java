@@ -24,6 +24,10 @@ public class SignupController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String redirect = request.getParameter("redirect");
+        if (redirect != null && !redirect.isEmpty()) {
+            request.getSession().setAttribute("post_auth_redirect", redirect);
+        }
         request.getRequestDispatcher("signup.jsp").forward(request, response);
     }
 
