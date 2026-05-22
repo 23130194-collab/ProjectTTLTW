@@ -301,7 +301,7 @@
 
                     <c:choose>
                         <c:when test="${empty sessionScope.user}">
-                            <a href="${pageContext.request.contextPath}/login" class="btn-write-review">Viết đánh giá</a>
+                            <button class="btn-write-review btn-require-login-review">Viết đánh giá</button>
                         </c:when>
                         <c:when test="${hasReviewed}">
                             <button class="btn-write-review btn-reviewed" id="btn-already-reviewed">
