@@ -15,8 +15,16 @@ public class FavoriteController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
+        String ajaxHeader = request.getHeader("X-Requested-With");
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+            if ("XMLHttpRequest".equals(ajaxHeader)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"requireLogin\": true}");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/login");
+            }
             return;
         }
 

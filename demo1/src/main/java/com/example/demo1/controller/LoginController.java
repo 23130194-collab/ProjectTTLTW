@@ -15,6 +15,10 @@ import java.util.Map;
 public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String redirect = request.getParameter("redirect");
+        if (redirect != null && !redirect.isEmpty()) {
+            request.getSession().setAttribute("post_auth_redirect", redirect);
+        }
         request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 
@@ -42,7 +46,22 @@ public class LoginController extends HttpServlet {
             if (user.getRole() == 1) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             } else {
-                response.sendRedirect(request.getContextPath() + "/home");
+                String redirectParam = request.getParameter("redirect");
+                if (redirectParam == null || redirectParam.isEmpty()) {
+                    redirectParam = (String) session.getAttribute("post_auth_redirect");
+                }
+                
+                if (redirectParam != null && !redirectParam.isEmpty() && redirectParam.startsWith("/")) {
+                    session.removeAttribute("post_auth_redirect");
+                    String contextPath = request.getContextPath();
+                    if (redirectParam.startsWith(contextPath)) {
+                        response.sendRedirect(redirectParam);
+                    } else {
+                        response.sendRedirect(contextPath + redirectParam);
+                    }
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/home");
+                }
             }
         } else {
             User existingUser = as.getUserByEmail(email);

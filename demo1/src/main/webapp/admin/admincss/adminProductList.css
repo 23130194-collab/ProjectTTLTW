@@ -327,6 +327,7 @@ body {
 }
 .status-active { background: #dcfce7; color: #15803d; }
 .status-hidden { background: #fee2e2; color: #b91c1c; }
+.status-delete { background: #f1f5f9; color: #475569; }
 
 .action-buttons {
     display: flex;
@@ -350,6 +351,9 @@ body {
 
 .action-btn.delete { background: #fee2e2; color: #dc2626; }
 .action-btn.delete:hover { background: #fecaca; }
+
+.action-btn.restore { background: #dcfce7; color: #15803d; }
+.action-btn.restore:hover { background: #bbf7d0; }
 
 .pagination-container {
     display: flex;
