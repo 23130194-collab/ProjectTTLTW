@@ -168,9 +168,6 @@
                     <c:if test="${p.discountValue > 0}">
                         <div class="old-price"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
                     </c:if>
-                    <c:if test="${p.stock == 0}">
-                        <span class="out-of-stock-badge">Hết hàng</span>
-                    </c:if>
                 </div>
 
                 <div class="shipping-box">
@@ -179,11 +176,17 @@
                 </div>
 
                 <div class="buy-box">
-                    <a href="AddCart?action=buyNow&id=${p.id}" class="btn-buy" role="button">MUA NGAY</a>
-
-                    <a href="AddCart?action=add&id=${p.id}" class="btn-cart" role="button">
-                        <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
-                    </a>
+                    <c:choose>
+                        <c:when test="${p.stock > 0}">
+                            <a href="AddCart?action=buyNow&id=${p.id}" class="btn-buy" role="button">MUA NGAY</a>
+                            <a href="AddCart?action=add&id=${p.id}" class="btn-cart" role="button">
+                                <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
+                            </a>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="btn-out-of-stock">TẠM HẾT HÀNG</div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
         </div>
@@ -298,7 +301,7 @@
 
                     <c:choose>
                         <c:when test="${empty sessionScope.user}">
-                            <a href="${pageContext.request.contextPath}/login" class="btn-write-review">Viết đánh giá</a>
+                            <button class="btn-write-review btn-require-login-review">Viết đánh giá</button>
                         </c:when>
                         <c:when test="${hasReviewed}">
                             <button class="btn-write-review btn-reviewed" id="btn-already-reviewed">
@@ -496,22 +499,25 @@
                     <c:if test="${p.discountValue > 0}">
                         <div class="price-old"><fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ</div>
                     </c:if>
-                    <c:if test="${p.stock == 0}">
-                        <span class="out-of-stock-badge">Hết hàng</span>
-                    </c:if>
                 </div>
-                <a href="AddCart?action=buyNow&id=${p.id}"
-                   class="btn-buy-now js-buy-now"
-                   role="button">
-                    MUA NGAY
-                </a>
+                <c:choose>
+                    <c:when test="${p.stock > 0}">
+                        <a href="AddCart?action=buyNow&id=${p.id}"
+                           class="btn-buy-now js-buy-now"
+                           role="button">
+                            MUA NGAY
+                        </a>
 
-
-                <a href="AddCart?action=add&id=${p.id}"
-                   class="btn-add-cart js-add-cart"
-                   role="button">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                </a>
+                        <a href="AddCart?action=add&id=${p.id}"
+                           class="btn-add-cart js-add-cart"
+                           role="button">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="btn-out-of-stock-bottom">TẠM HẾT HÀNG</div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </div>

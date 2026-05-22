@@ -108,6 +108,7 @@
                             <option value="">Tất cả trạng thái</option>
                             <option value="active" ${'active' == selectedStatus ? 'selected' : ''}>Hoạt động</option>
                             <option value="inactive" ${'inactive' == selectedStatus ? 'selected' : ''}>Ẩn</option>
+                            <option value="delete" ${'delete' == selectedStatus ? 'selected' : ''}>Ngừng bán</option>
                         </select>
                         <i class="fa-solid fa-chevron-down select-arrow"></i>
                     </div>
@@ -177,6 +178,9 @@
                                         <c:when test="${product.status == 'inactive'}">
                                             <span class="status status-hidden">Ẩn</span>
                                         </c:when>
+                                        <c:when test="${product.status == 'delete'}">
+                                            <span class="status status-delete">Ngừng bán</span>
+                                        </c:when>
                                         <c:otherwise>
                                             <span class="status status-other">${product.status}</span>
                                         </c:otherwise>
@@ -186,8 +190,16 @@
                                     <div class="action-buttons">
                                         <a href="${contextPath}/admin/upload-product?id=${product.id}" class="action-btn edit"
                                            title="Sửa"><i class="fa-solid fa-pen"></i></a>
-                                        <a href="#confirm-delete-modal-${product.id}" class="action-btn delete"
-                                           title="Xoá sản phẩm"><i class="fa-solid fa-trash-can"></i></a>
+                                        <c:choose>
+                                            <c:when test="${product.status == 'delete'}">
+                                                <a href="#confirm-restore-modal-${product.id}" class="action-btn restore"
+                                                   title="Khôi phục sản phẩm" style="color: #2ecc71;"><i class="fa-solid fa-rotate-left"></i></a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="#confirm-delete-modal-${product.id}" class="action-btn delete"
+                                                   title="Xoá sản phẩm"><i class="fa-solid fa-trash-can"></i></a>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </td>
                             </tr>
@@ -260,8 +272,18 @@
             <p>Bạn có chắc chắn muốn xoá sản phẩm "${product.name}" không?</p>
             <div class="modal-buttons">
                 <a href="#" class="modal-btn modal-cancel">Hủy</a>
-                <a href="${contextPath}/admin/products?action=delete&id=${product.id}" class="modal-btn modal-confirm">Đồng
-                    ý</a>
+                <a href="${contextPath}/admin/products?action=delete&id=${product.id}" class="modal-btn modal-confirm">Đồng ý</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-restore-modal-${product.id}" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Xác nhận khôi phục sản phẩm</h3>
+            <p>Bạn có chắc chắn muốn khôi phục sản phẩm "${product.name}" về trạng thái hoạt động không?</p>
+            <div class="modal-buttons">
+                <a href="#" class="modal-btn modal-cancel">Hủy</a>
+                <a href="${contextPath}/admin/products?action=restore&id=${product.id}" class="modal-btn modal-confirm" style="background-color: #EF4444;">Đồng ý</a>
             </div>
         </div>
     </div>

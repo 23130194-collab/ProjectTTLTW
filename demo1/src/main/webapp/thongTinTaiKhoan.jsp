@@ -12,7 +12,7 @@
     <title>Thông tin tài khoản | TechNova</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user.css?v=address-server-2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user.css?v=multi-address-1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/header.css">
 </head>
 <body>
@@ -202,8 +202,15 @@
                                 <div class="info-row">
                                     <span>Ngày sinh:</span>
                                     <p><fmt:formatDate value="${sessionScope.user.birthday}" pattern="dd/MM/yyyy"/></p>
-                                    <span>Địa chỉ:</span>
-                                    <p>${sessionScope.user.address}</p>
+                                    <span>Địa chỉ mặc định:</span>
+                                    <p>
+                                        <c:choose>
+                                            <c:when test="${not empty defaultAddress}">
+                                                <c:out value="${defaultAddress.fullAddress}"/>
+                                            </c:when>
+                                            <c:otherwise>Chưa có địa chỉ mặc định</c:otherwise>
+                                        </c:choose>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -220,7 +227,6 @@
                             <c:set var="formGender" value="${not empty param.gender ? param.gender : sessionScope.user.gender}"/>
                             <c:set var="formEmail" value="${not empty param.email ? param.email : sessionScope.user.email}"/>
                             <c:set var="formBirthday" value="${not empty param.birthday ? param.birthday : currentBirthday}"/>
-                            <c:set var="formAddressDetail" value="${not empty param.addressDetail ? param.addressDetail : addressDetail}"/>
                             <form action="${pageContext.request.contextPath}/update-profile" method="post" id="accountProfileForm">
                                 <input type="hidden" name="mode" value="edit">
                                 <div class="info-body">
@@ -258,47 +264,177 @@
                                         <input type="date" name="birthday"
                                                value="${fn:escapeXml(formBirthday)}">
                                     </div>
-                                    <div class="info-row address-edit-row">
-                                        <span>Địa chỉ:</span>
-                                        <div class="account-address-fields">
-                                            <c:if test="${not empty addressLoadError}">
-                                                <small class="address-load-error"><c:out value="${addressLoadError}"/></small>
-                                            </c:if>
-                                            <input type="text" name="addressDetail" class="address-detail-input"
-                                                   value="${fn:escapeXml(formAddressDetail)}"
-                                                   placeholder="Số nhà, tên đường">
-                                            <div class="address-select-grid">
-                                                <select name="province" id="accountProvinceSelect">
-                                                    <option value="">Chọn Tỉnh/Thành phố</option>
-                                                    <c:forEach items="${addressProvinces}" var="province">
-                                                        <option value="${province.optionValue}" ${selectedProvinceValue == province.optionValue ? 'selected' : ''}>
-                                                            <c:out value="${province.name}"/>
-                                                        </option>
-                                                    </c:forEach>
-                                                </select>
-                                                <select name="ward" class="ward-select" ${empty addressWards ? 'disabled' : ''}>
-                                                    <option value="">Chọn Phường/Xã</option>
-                                                    <c:forEach items="${addressWards}" var="ward">
-                                                        <option value="${ward.optionValue}" ${selectedWardValue == ward.optionValue ? 'selected' : ''}>
-                                                            <c:out value="${ward.name}"/>
-                                                        </option>
-                                                    </c:forEach>
-                                                </select>
-                                            </div>
-                                            <button type="submit" id="accountLoadWardsButton"
-                                                    formaction="${pageContext.request.contextPath}/account"
-                                                    formmethod="post"
-                                                    name="addressAction"
-                                                    value="loadWards"
-                                                    formnovalidate
-                                                    hidden>
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="info-actions">
                                     <button type="submit" class="save-btn">Lưu</button>
 
+                                    <a href="${pageContext.request.contextPath}/account" class="cancel-btn"
+                                       style="text-decoration: none; display: inline-block;">Hủy</a>
+                                </div>
+                            </form>
+                        </div>
+                    </c:if>
+                </div>
+
+                <div class="card address-card" style="grid-column: span 2;">
+                    <div class="address-card-header">
+                        <h3>Địa chỉ nhận hàng</h3>
+                        <c:if test="${param.addressMode != 'add'}">
+                            <a href="${pageContext.request.contextPath}/account?addressMode=add" class="update-btn-ud address-add-link">
+                                <i class="fa-solid fa-plus"></i> Thêm địa chỉ
+                            </a>
+                        </c:if>
+                    </div>
+
+                    <c:if test="${not empty sessionScope.addressSuccess}">
+                        <div class="success-message">${sessionScope.addressSuccess}<span class="close-btn">&times;</span></div>
+                        <c:remove var="addressSuccess" scope="session"/>
+                    </c:if>
+                    <c:if test="${not empty sessionScope.addressError}">
+                        <div class="error-message-form">${sessionScope.addressError}<span class="close-btn">&times;</span></div>
+                        <c:remove var="addressError" scope="session"/>
+                    </c:if>
+                    <c:if test="${not empty addressFormError}">
+                        <div class="error-message-form"><c:out value="${addressFormError}"/><span class="close-btn">&times;</span></div>
+                    </c:if>
+
+                    <c:choose>
+                        <c:when test="${empty userAddresses}">
+                            <div class="empty-address-state">
+                                <i class="fa-regular fa-map"></i>
+                                <span>Chưa có địa chỉ nhận hàng nào.</span>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="address-list">
+                                <c:forEach items="${userAddresses}" var="address">
+                                    <div class="shipping-address-item ${address.defaultAddress ? 'is-default' : ''}">
+                                        <div class="shipping-address-main">
+                                            <div class="shipping-address-title">
+                                                <strong>
+                                                    <c:choose>
+                                                        <c:when test="${not empty address.label}">
+                                                            <c:out value="${address.label}"/>
+                                                        </c:when>
+                                                        <c:otherwise>Địa chỉ</c:otherwise>
+                                                    </c:choose>
+                                                </strong>
+                                                <c:if test="${address.defaultAddress}">
+                                                    <span class="address-badge-default">Mặc định</span>
+                                                </c:if>
+                                            </div>
+                                            <div class="shipping-recipient">
+                                                <c:out value="${address.fullName}"/> · <c:out value="${address.phone}"/>
+                                            </div>
+                                            <p class="shipping-address-text"><c:out value="${address.fullAddress}"/></p>
+                                        </div>
+                                        <div class="address-actions">
+                                            <a class="text-btn" href="${pageContext.request.contextPath}/account?addressMode=edit&addressId=${address.id}">
+                                                Sửa
+                                            </a>
+                                            <c:if test="${!address.defaultAddress}">
+                                                <form action="${pageContext.request.contextPath}/account-address" method="post">
+                                                    <input type="hidden" name="action" value="set-default">
+                                                    <input type="hidden" name="addressId" value="${address.id}">
+                                                    <button type="submit" class="text-btn">Đặt mặc định</button>
+                                                </form>
+                                            </c:if>
+                                            <form action="${pageContext.request.contextPath}/account-address" method="post"
+                                                  onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="addressId" value="${address.id}">
+                                                <button type="submit" class="text-btn danger-text-btn">Xóa</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+
+                    <c:set var="isAddressFormMode" value="${param.addressMode == 'add' or param.addressMode == 'edit'}"/>
+                    <c:set var="isAddressEdit" value="${param.addressMode == 'edit'}"/>
+
+                    <c:if test="${isAddressFormMode and (!isAddressEdit or not empty editingAddress)}">
+                        <c:set var="formAddressLabel" value="${not empty param.label ? param.label : (isAddressEdit ? editingAddress.label : 'Nhà riêng')}"/>
+                        <c:set var="formAddressFullName" value="${not empty param.fullName ? param.fullName : (isAddressEdit ? editingAddress.fullName : sessionScope.user.name)}"/>
+                        <c:set var="formAddressPhone" value="${not empty param.phone ? param.phone : (isAddressEdit ? editingAddress.phone : sessionScope.user.phone)}"/>
+                        <c:set var="formAddressDetail" value="${not empty param.addressDetail ? param.addressDetail : (isAddressEdit ? editingAddress.addressDetail : '')}"/>
+                        <c:set var="formAddressDefaultChecked" value="${not empty param.defaultAddress or (isAddressEdit and editingAddress.defaultAddress) or (!isAddressEdit and empty userAddresses)}"/>
+
+                        <div class="address-form-panel">
+                            <h4>${isAddressEdit ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}</h4>
+                            <c:if test="${not empty addressFormLoadError}">
+                                <small class="address-load-error"><c:out value="${addressFormLoadError}"/></small>
+                            </c:if>
+                            <form action="${pageContext.request.contextPath}/account-address" method="post" id="accountAddressForm">
+                                <input type="hidden" name="action" value="${isAddressEdit ? 'update' : 'add'}">
+                                <input type="hidden" name="addressMode" value="${param.addressMode}">
+                                <c:if test="${isAddressEdit}">
+                                    <input type="hidden" name="addressId" value="${editingAddress.id}">
+                                </c:if>
+
+                                <div class="address-form-grid">
+                                    <label>
+                                        <span>Nhãn địa chỉ</span>
+                                        <input type="text" name="label" value="${fn:escapeXml(formAddressLabel)}"
+                                               placeholder="Nhà riêng, Công ty...">
+                                    </label>
+                                    <label>
+                                        <span>Người nhận</span>
+                                        <input type="text" name="fullName" value="${fn:escapeXml(formAddressFullName)}" required>
+                                    </label>
+                                    <label>
+                                        <span>Số điện thoại</span>
+                                        <input type="tel" name="phone" value="${fn:escapeXml(formAddressPhone)}"
+                                               pattern="^(03|05|07|08|09)[0-9]{8}$"
+                                               title="Số điện thoại phải có 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09"
+                                               required>
+                                    </label>
+                                    <label class="address-detail-field">
+                                        <span>Số nhà, tên đường</span>
+                                        <input type="text" name="addressDetail" value="${fn:escapeXml(formAddressDetail)}" required>
+                                    </label>
+                                    <label>
+                                        <span>Tỉnh/Thành phố</span>
+                                        <select name="province" id="addressProvinceSelect" required>
+                                            <option value="">Chọn Tỉnh/Thành phố</option>
+                                            <c:forEach items="${addressFormProvinces}" var="province">
+                                                <option value="${province.optionValue}" ${selectedAddressProvinceValue == province.optionValue ? 'selected' : ''}>
+                                                    <c:out value="${province.name}"/>
+                                                </option>
+                                            </c:forEach>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Phường/Xã</span>
+                                        <select name="ward" id="addressWardSelect" ${empty addressFormWards ? 'disabled' : ''} required>
+                                            <option value="">Chọn Phường/Xã</option>
+                                            <c:forEach items="${addressFormWards}" var="ward">
+                                                <option value="${ward.optionValue}" ${selectedAddressWardValue == ward.optionValue ? 'selected' : ''}>
+                                                    <c:out value="${ward.name}"/>
+                                                </option>
+                                            </c:forEach>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <label class="address-default-option">
+                                    <input type="checkbox" name="defaultAddress" value="true" ${formAddressDefaultChecked ? 'checked' : ''}>
+                                    <span>Đặt làm địa chỉ mặc định</span>
+                                </label>
+
+                                <button type="submit" id="addressLoadWardsButton"
+                                        formaction="${pageContext.request.contextPath}/account"
+                                        formmethod="get"
+                                        name="addressAction"
+                                        value="loadWards"
+                                        formnovalidate
+                                        hidden>
+                                </button>
+
+                                <div class="info-actions">
+                                    <button type="submit" class="save-btn">${isAddressEdit ? 'Lưu địa chỉ' : 'Thêm địa chỉ'}</button>
                                     <a href="${pageContext.request.contextPath}/account" class="cancel-btn"
                                        style="text-decoration: none; display: inline-block;">Hủy</a>
                                 </div>
@@ -379,20 +515,20 @@
             }
         });
 
-        const accountProfileForm = document.getElementById('accountProfileForm');
-        const provinceSelect = document.getElementById('accountProvinceSelect');
-        const loadWardsButton = document.getElementById('accountLoadWardsButton');
+        const accountAddressForm = document.getElementById('accountAddressForm');
+        const provinceSelect = document.getElementById('addressProvinceSelect');
+        const loadWardsButton = document.getElementById('addressLoadWardsButton');
 
-        if (accountProfileForm && provinceSelect && loadWardsButton) {
+        if (accountAddressForm && provinceSelect && loadWardsButton) {
             provinceSelect.addEventListener('change', function () {
-                if (accountProfileForm.requestSubmit) {
-                    accountProfileForm.requestSubmit(loadWardsButton);
+                if (accountAddressForm.requestSubmit) {
+                    accountAddressForm.requestSubmit(loadWardsButton);
                     return;
                 }
 
-                accountProfileForm.action = loadWardsButton.formAction;
-                accountProfileForm.method = loadWardsButton.formMethod || 'post';
-                accountProfileForm.submit();
+                accountAddressForm.action = loadWardsButton.formAction;
+                accountAddressForm.method = loadWardsButton.formMethod || 'get';
+                accountAddressForm.submit();
             });
         }
     });

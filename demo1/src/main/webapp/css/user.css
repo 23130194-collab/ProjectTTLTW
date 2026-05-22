@@ -961,6 +961,200 @@ html {
     font-size: 13px;
 }
 
+.address-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+}
+
+.address-card-header h3 {
+    margin: 0;
+}
+
+.address-add-link {
+    align-items: center;
+    display: inline-flex;
+    float: none;
+    gap: 6px;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.address-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.shipping-address-item {
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 14px 16px;
+}
+
+.shipping-address-item.is-default {
+    background: #fffaf7;
+    border-color: #ffb199;
+}
+
+.shipping-address-main {
+    min-width: 0;
+}
+
+.shipping-address-title {
+    align-items: center;
+    color: #111827;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    line-height: 1.3;
+}
+
+.address-badge-default {
+    background: #fceceb;
+    border: 1px solid #f4b7b1;
+    border-radius: 999px;
+    color: #c0392b;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 4px 8px;
+}
+
+.shipping-recipient {
+    color: #475569;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.shipping-address-text {
+    color: #111827;
+    line-height: 1.45;
+    margin: 6px 0 0;
+    overflow-wrap: anywhere;
+    padding: 0;
+}
+
+.address-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+    min-width: 170px;
+}
+
+.address-actions form {
+    margin: 0;
+}
+
+.text-btn {
+    background: transparent;
+    border: none;
+    color: #2563eb;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 0;
+    text-decoration: none;
+}
+
+.text-btn:hover {
+    color: #1d4ed8;
+}
+
+.danger-text-btn {
+    color: #dc2626;
+}
+
+.danger-text-btn:hover {
+    color: #b91c1c;
+}
+
+.empty-address-state {
+    align-items: center;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    color: #64748b;
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 16px;
+}
+
+.address-form-panel {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 18px;
+    padding-top: 18px;
+}
+
+.address-form-panel h4 {
+    color: #111827;
+    font-size: 16px;
+    margin: 0 0 14px;
+}
+
+.address-form-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.address-form-grid label {
+    display: grid;
+    gap: 6px;
+}
+
+.address-form-grid label span {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.address-form-grid input,
+.address-form-grid select {
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    box-sizing: border-box;
+    color: #1f2937;
+    font-size: 14px;
+    height: 38px;
+    padding: 8px 11px;
+    width: 100%;
+}
+
+.address-form-grid select:disabled {
+    background: #f8fafc;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.address-detail-field {
+    grid-column: 1 / -1;
+}
+
+.address-default-option {
+    align-items: center;
+    color: #334155;
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.address-default-option input {
+    accent-color: #ff6632;
+}
+
 .info-row select:disabled {
     background: #f8fafc;
     color: #94a3b8;
@@ -1013,8 +1207,18 @@ html {
 
     .info-row.address-edit-row,
     .account-address-fields,
-    .address-select-grid {
+    .address-select-grid,
+    .address-form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .shipping-address-item {
+        flex-direction: column;
+    }
+
+    .address-actions {
+        justify-content: flex-start;
+        min-width: 0;
     }
 }
 
@@ -1989,6 +2193,201 @@ body {
 }
 
 .content #account .info-card .address-select-grid select:disabled {
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    transition: all 0.2s;
+}
+
+.cancel-modal-content .modal-btn-confirm {
+    background-color: #dc3545;
+    color: white;
+}
+
+.cancel-modal-content .modal-btn-confirm:hover {
+    background-color: #c82333;
+}
+
+.cancel-modal-content .modal-btn-cancel {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.cancel-modal-content .modal-btn-cancel:hover {
+    background-color: #d3d9df;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-icon {
+    font-size: 48px;
+    color: #ffc107;
+    margin-bottom: 15px;
+}
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 22px;
+    color: #333;
+}
+.modal-content p {
+    margin-bottom: 25px;
+    color: #666;
+    font-size: 16px;
+}
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.modal-btn {
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+.modal-btn-confirm {
+    background-color: #dc3545;
+    color: white;
+}
+.modal-btn-confirm:hover {
+    background-color: #c82333;
+}
+.modal-btn-cancel {
+    background-color: #e9ecef;
+    color: #333;
+}
+.modal-btn-cancel:hover {
+    background-color: #d3d9df;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(.active):not(.disabled) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.page-btn.active {
+    background: #c0392b;
+    border-color: #c0392b;
+    color: #fff;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.page-btn.disabled {
+    color: #cbd5e1;
+    border-color: #f1f5f9;
+    background: #f8fafc;
+    pointer-events: none;
+    cursor: default;
+}
+
+.page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    font-size: 14px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    pointer-events: none;
+}
+
+.content #account .info-card .info-body {
+    gap: 8px;
+}
+
+.content #account .info-card .info-row {
+    align-items: start;
+    column-gap: 14px;
+    row-gap: 8px;
+}
+
+.content #account .info-card .info-row span {
+    line-height: 1.25;
+    padding-top: 9px;
+}
+
+.content #account .info-card .info-row p {
+    line-height: 1.28;
+    padding-top: 7px;
+    overflow-wrap: anywhere;
+}
+
+.content #account .info-card .address-edit-row {
+    grid-template-columns: 150px minmax(0, 1fr);
+}
+
+.content #account .info-card .account-address-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    width: 100%;
+}
+
+.content #account .info-card .address-select-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+}
+
+.content #account .info-card .account-address-fields input,
+.content #account .info-card .account-address-fields select,
+.content #account .info-card .address-select-grid select {
+    width: 100% !important;
+    min-width: 0;
+    height: 35px;
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 7px;
+    background-color: #fff !important;
+    color: #1f2937 !important;
+    font-size: 14px;
+    line-height: 1.2;
+}
+.content #account .info-card .address-select-grid select {
+    height: 30px;
+}
+
+.content #account .info-card .address-select-grid select:disabled {
     background-color: #f8fafc !important;
     color: #94a3b8 !important;
 }
@@ -1998,4 +2397,100 @@ body {
     .content #account .info-card .address-select-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.login-required-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.login-required-modal.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.login-required-content {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 32px 32px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    transform: scale(0.92);
+    transition: transform 0.25s ease;
+}
+
+.login-required-modal.show .login-required-content {
+    transform: scale(1);
+}
+
+.login-required-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.login-required-close:hover {
+    color: #333;
+}
+
+
+.login-required-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 24px;
+    line-height: 1.5;
+}
+
+.login-required-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.login-required-btn {
+    flex: 1;
+    padding: 11px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.login-required-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+.btn-register {
+    border: 2px solid #d70018;
+    color: #d70018;
+    background: #fff;
+}
+
+.btn-login {
+    background: #d70018;
+    color: #fff;
+    border: 2px solid #d70018;
 }
