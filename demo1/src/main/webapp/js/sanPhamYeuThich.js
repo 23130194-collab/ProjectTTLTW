@@ -30,8 +30,62 @@ function showFavToast(type, contextPath) {
     }, 5000);
 }
 
+function showLoginRequiredPopup(contextPath) {
+    const existingPopup = document.getElementById('login-required-modal');
+    if (existingPopup) {
+        existingPopup.classList.add('show');
+        return;
+    }
+
+    const currentPath = window.location.pathname + window.location.search;
+
+    const modal = document.createElement('div');
+    modal.id = 'login-required-modal';
+    modal.className = 'modal-overlay login-required-modal';
+    modal.innerHTML = `
+        <div class="modal-content login-required-content">
+            <button class="login-required-close" id="loginRequiredClose">&#10005;</button>
+            <h3 class="login-required-title">Vui lòng đăng nhập tài khoản để thực hiện thao tác này.</h3>
+            <div class="login-required-actions">
+                <a href="${contextPath}/signup?redirect=${encodeURIComponent(currentPath)}" class="login-required-btn btn-register">Đăng ký</a>
+                <a href="${contextPath}/login?redirect=${encodeURIComponent(currentPath)}" class="login-required-btn btn-login">Đăng nhập</a>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => modal.classList.add('show'));
+
+    document.getElementById('loginRequiredClose').addEventListener('click', function () {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 250);
+    });
+
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 250);
+        }
+    });
+}
+
+
 document.addEventListener('DOMContentLoaded', function () {
     const contextPath = (typeof globalContextPath !== 'undefined') ? globalContextPath : '';
+
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+
+        const href = link.getAttribute('href');
+        if (href && href.includes('AddCart')) {
+            const loginLink = document.querySelector('a.icon-btn[href*="/login"]');
+            if (loginLink) {
+                e.preventDefault();
+                showLoginRequiredPopup(contextPath);
+            }
+        }
+    });
 
     const removeLinks = document.querySelectorAll('.fav-remove-link');
     const container = document.querySelector('.favorite-grid');
@@ -89,8 +143,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
 
-                if (response.status === 401 || response.status === 403) {
-                    window.location.href = `${contextPath}/login`;
+                if (response.status === 401) {
+                    showLoginRequiredPopup(contextPath);
                     return;
                 }
 
