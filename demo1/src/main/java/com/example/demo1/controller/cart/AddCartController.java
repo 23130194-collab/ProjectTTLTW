@@ -40,6 +40,12 @@ public class AddCartController extends HttpServlet {
             if ("add".equals(action)) {
                 Product product = productService.getProduct(id);
 
+                if (!cart.containsKey(id) && cart.size() >= 99) {
+                    session.setAttribute("cartError", "Giỏ hàng đã đầy! Giỏ hàng chỉ chứa tối đa 99 loại sản phẩm.");
+                    response.sendRedirect("AddCart?action=view");
+                    return;
+                }
+
                 int currentQty = (cart.containsKey(id)) ? cart.get(id).getQuantity() : 0;
                 int totalDesired = currentQty + 1;
 
@@ -78,6 +84,12 @@ public class AddCartController extends HttpServlet {
             else if ("buyNow".equals(action)) {
                 Product product = productService.getProduct(id);
                 int currentQty = (cart.containsKey(id)) ? cart.get(id).getQuantity() : 0;
+
+                if (!cart.containsKey(id) && cart.size() >= 99) {
+                    session.setAttribute("cartError", "Giỏ hàng đã đầy! Giỏ hàng chỉ chứa tối đa 99 loại sản phẩm.");
+                    response.sendRedirect("AddCart?action=view");
+                    return;
+                }
 
                 if (product != null && (currentQty + 1) > product.getStock()) {
                     session.setAttribute("cartError", "Sản phẩm " + product.getName() + " đã hết hàng hoặc không đủ số lượng.");
