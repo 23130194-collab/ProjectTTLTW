@@ -1540,7 +1540,8 @@ html {
 
 .action-footer {
     display: flex;
-    justify_content: flex-end;
+    justify-content: flex-end;
+    gap: 12px;
     margin-top: 20px;
     padding-bottom: 20px;
 }
@@ -1568,6 +1569,118 @@ html {
 .btn-cancel-order:hover {
     background-color: #dc3545;
     color: #fff;
+}
+
+.btn-confirm-received {
+    background-color: #16a34a;
+    color: #fff;
+    border: 1px solid #16a34a;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-confirm-received:hover {
+    background-color: #15803d;
+    border-color: #15803d;
+}
+
+.order-timeline {
+    display: flex;
+    align-items: start;
+    overflow-x: auto;
+    padding: 8px 0 4px;
+}
+
+.timeline-step {
+    min-width: 128px;
+    flex: 0 0 128px;
+    text-align: center;
+    color: #94a3b8;
+    position: relative;
+}
+
+.timeline-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    background: #e5e7eb;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px #e5e7eb;
+}
+
+.timeline-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: inherit;
+    line-height: 1.35;
+}
+
+.timeline-time {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.35;
+}
+
+.timeline-step.completed .timeline-icon,
+.timeline-step.current .timeline-icon {
+    background: #16a34a;
+    color: #fff;
+    box-shadow: 0 0 0 1px #16a34a;
+}
+
+.timeline-step.completed .timeline-title,
+.timeline-step.current .timeline-title {
+    color: #1f2937;
+}
+
+.timeline-step.completed .timeline-time,
+.timeline-step.current .timeline-time {
+    color: #475569;
+}
+
+.timeline-step.current .timeline-icon {
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.16);
+}
+
+.timeline-step.cancelled .timeline-icon {
+    background: #dc2626;
+    color: #fff;
+    box-shadow: 0 0 0 1px #dc2626;
+}
+
+.timeline-step.cancelled .timeline-title {
+    color: #b91c1c;
+}
+
+.timeline-connector {
+    flex: 1 1 32px;
+    height: 2px;
+    background: #e5e7eb;
+    margin-top: 19px;
+    min-width: 24px;
+}
+
+.timeline-connector.completed {
+    background: #16a34a;
+}
+
+@media (max-width: 768px) {
+    .btn-confirm-received {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 
@@ -2208,6 +2321,14 @@ body {
 
 .cancel-modal-content .modal-btn-confirm:hover {
     background-color: #c82333;
+}
+
+.cancel-modal-content .modal-btn-confirm-received {
+    background-color: #16a34a;
+}
+
+.cancel-modal-content .modal-btn-confirm-received:hover {
+    background-color: #15803d;
 }
 
 .cancel-modal-content .modal-btn-cancel {
