@@ -1,6 +1,7 @@
 package com.example.demo1.dao;
 
 import com.example.demo1.model.*;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.reflect.BeanMapper;
 import org.jdbi.v3.core.statement.Query;
@@ -79,13 +80,52 @@ public class OrderDao {
     }
 
     public boolean updateOrderStatus(int orderId, String status) {
-        int updatedRows = jdbi.withHandle(handle ->
-                handle.createUpdate("UPDATE orders SET order_status = :status WHERE id = :orderId")
-                        .bind("status", status)
-                        .bind("orderId", orderId)
-                        .execute()
-        );
-        return updatedRows > 0;
+        return updateOrderStatus(orderId, null, status, null);
+    }
+
+    public boolean updateOrderStatus(int orderId, String expectedStatus, String status, String note) {
+        return jdbi.inTransaction(handle -> {
+            StringBuilder sql = new StringBuilder("UPDATE orders SET order_status = :status WHERE id = :orderId");
+            if (expectedStatus != null) {
+                sql.append(" AND order_status = :expectedStatus");
+            }
+
+            org.jdbi.v3.core.statement.Update update = handle.createUpdate(sql.toString())
+                    .bind("status", status)
+                    .bind("orderId", orderId);
+
+            if (expectedStatus != null) {
+                update.bind("expectedStatus", expectedStatus);
+            }
+
+            int updatedRows = update.execute();
+            if (updatedRows > 0) {
+                insertOrderStatusHistory(handle, orderId, status, note);
+            }
+            return updatedRows > 0;
+        });
+    }
+
+    public void ensureStatusHistoryExists(int orderId, String status, String note) {
+        jdbi.useHandle(handle -> {
+            int existing = handle.createQuery("SELECT COUNT(*) FROM order_status_history WHERE order_id = :orderId AND status = :status")
+                    .bind("orderId", orderId)
+                    .bind("status", status)
+                    .mapTo(Integer.class)
+                    .one();
+            if (existing == 0) {
+                insertOrderStatusHistory(handle, orderId, status, note);
+            }
+        });
+    }
+
+    private void insertOrderStatusHistory(Handle handle, int orderId, String status, String note) {
+        handle.createUpdate("INSERT INTO order_status_history (order_id, status, note, created_at) " +
+                        "VALUES (:orderId, :status, :note, NOW())")
+                .bind("orderId", orderId)
+                .bind("status", status)
+                .bind("note", note == null ? "" : note)
+                .execute();
     }
 
     public void updateOrderTotals(int orderId, double subprice, double discountAmount, double totalAmount) {
@@ -212,6 +252,9 @@ public class OrderDao {
                         .mapTo(Integer.class).one();
                 order.setId(orderId);
 
+                insertOrderStatusHistory(handle, orderId, "Đặt hàng", "Khách hàng đặt đơn hàng");
+                insertOrderStatusHistory(handle, orderId, order.getOrderStatus(), "Đơn hàng chờ xác nhận");
+
                 handle.createUpdate("INSERT INTO payment (order_id, payment_method, payment_status, amount, paid_at, created_at) " +
                                 "VALUES (:orderId, :method, :status, :amount, NOW(), NOW())")
                         .bind("orderId", orderId)
@@ -286,11 +329,46 @@ public class OrderDao {
     }
 
     public boolean cancelOrder(int orderId, String reason) {
-        return jdbi.withHandle(handle ->
-                handle.createUpdate("UPDATE orders SET order_status = 'Đã hủy', cancellation_reason = :reason WHERE id = :orderId")
+        return jdbi.inTransaction(handle -> {
+            int updatedRows = handle.createUpdate("UPDATE orders SET order_status = 'Đã hủy', cancellation_reason = :reason " +
+                            "WHERE id = :orderId AND order_status <> 'Đã hủy'")
                         .bind("orderId", orderId)
                         .bind("reason", reason)
-                        .execute() > 0
+                        .execute();
+            if (updatedRows > 0) {
+                insertOrderStatusHistory(handle, orderId, "Đã hủy", reason);
+            }
+            return updatedRows > 0;
+        });
+    }
+
+    public List<OrderStatusHistory> getOrderStatusHistoryByOrderId(int orderId) {
+        String sql = "SELECT id, order_id AS orderId, status, note, created_at AS createdAt " +
+                "FROM order_status_history WHERE order_id = :orderId ORDER BY created_at ASC, id ASC";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("orderId", orderId)
+                        .mapToBean(OrderStatusHistory.class)
+                        .list()
+        );
+    }
+
+    public List<Integer> getOrderIdsReadyForAutoTransition(String currentStatus, int elapsedSeconds) {
+        String sql = "SELECT o.id FROM orders o " +
+                "LEFT JOIN (" +
+                "    SELECT order_id, MAX(created_at) AS last_changed_at " +
+                "    FROM order_status_history " +
+                "    GROUP BY order_id" +
+                ") h ON h.order_id = o.id " +
+                "WHERE o.order_status = :currentStatus " +
+                "AND TIMESTAMPDIFF(SECOND, COALESCE(h.last_changed_at, o.created_at), NOW()) >= :elapsedSeconds";
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("currentStatus", currentStatus)
+                        .bind("elapsedSeconds", elapsedSeconds)
+                        .mapTo(Integer.class)
+                        .list()
         );
     }
 

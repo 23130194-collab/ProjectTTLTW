@@ -142,7 +142,9 @@
                             <div class="overview-header">
                                 <span>Đơn hàng: <strong>${order.orderCode}</strong></span>
                                 <span class="divider"></span>
-                                <span>Ngày đặt hàng: <strong><fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy"/></strong></span>
+                                <span>Ngày đặt hàng: <strong><fmt:formatDate value="${order.createdAt}" pattern="HH:mm dd/MM/yyyy"/></strong></span>
+                                <span class="divider"></span>
+                                <span>Trạng thái hiện tại: <strong>${order.orderStatus}</strong></span>
                             </div>
 
                             <c:forEach var="item" items="${orderItems}">
@@ -159,6 +161,43 @@
                                     </div>
                                 </div>
                             </c:forEach>
+                        </div>
+
+                        <div class="card detail-card">
+                            <h3 class="card-title">Lịch sử trạng thái</h3>
+                            <div class="order-timeline">
+                                <c:forEach var="step" items="${timelineSteps}" varStatus="loop">
+                                    <div class="timeline-step ${step.completed ? 'completed' : ''} ${step.current ? 'current' : ''} ${step.cancelled ? 'cancelled' : ''}">
+                                        <div class="timeline-icon">
+                                            <c:choose>
+                                                <c:when test="${step.cancelled}">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </c:when>
+                                                <c:when test="${step.completed}">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <i class="fa-regular fa-clock"></i>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div class="timeline-title">${step.status}</div>
+                                            <div class="timeline-time">
+                                                <c:choose>
+                                                    <c:when test="${not empty step.occurredAt}">
+                                                        <fmt:formatDate value="${step.occurredAt}" pattern="HH:mm dd/MM/yyyy"/>
+                                                    </c:when>
+                                                    <c:otherwise>Chưa cập nhật</c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <c:if test="${not loop.last}">
+                                        <div class="timeline-connector ${step.completed and not step.current ? 'completed' : ''}"></div>
+                                    </c:if>
+                                </c:forEach>
+                            </div>
                         </div>
 
                         <div class="card detail-card">
@@ -211,6 +250,30 @@
                                         </div>
                                     </form>
                                 </div>
+	                            </div>
+	                        </c:if>
+
+                        <c:if test="${order.orderStatus eq 'Đang giao'}">
+                            <div class="action-footer">
+                                <button type="button" id="showConfirmReceivedModalBtn" class="btn-confirm-received">
+                                    Xác nhận nhận hàng
+                                </button>
+                            </div>
+
+                            <div id="confirmReceivedModal" class="cancel-modal-overlay confirm-received-modal">
+                                <div class="cancel-modal-content">
+                                    <form action="${contextPath}/confirm-received" method="post">
+                                        <div class="modal-header">
+                                            <h3>Xác nhận nhận hàng</h3>
+                                            <p>Bạn xác nhận đã nhận được đơn hàng ${order.orderCode}? Sau khi xác nhận, đơn hàng sẽ được hoàn tất.</p>
+                                        </div>
+                                        <input type="hidden" name="id" value="${order.id}">
+                                        <div class="modal-footer">
+                                            <button type="submit" class="modal-btn modal-btn-confirm modal-btn-confirm-received">Xác nhận</button>
+                                            <button type="button" id="closeConfirmReceivedModalBtn" class="modal-btn modal-btn-cancel">Không</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </c:if>
                     </div>
@@ -225,9 +288,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const showModalBtn = document.getElementById('showCancelModalBtn');
-        const modal = document.getElementById('cancelOrderModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
+	        const showModalBtn = document.getElementById('showCancelModalBtn');
+	        const modal = document.getElementById('cancelOrderModal');
+	        const closeModalBtn = document.getElementById('closeModalBtn');
+	        const showConfirmReceivedModalBtn = document.getElementById('showConfirmReceivedModalBtn');
+	        const confirmReceivedModal = document.getElementById('confirmReceivedModal');
+	        const closeConfirmReceivedModalBtn = document.getElementById('closeConfirmReceivedModalBtn');
 
         if (showModalBtn) {
             showModalBtn.addEventListener('click', function () {
@@ -235,17 +301,32 @@
             });
         }
 
-        if (closeModalBtn) {
-            closeModalBtn.addEventListener('click', function () {
-                if(modal) modal.style.display = 'none';
-            });
-        }
+	        if (closeModalBtn) {
+	            closeModalBtn.addEventListener('click', function () {
+	                if(modal) modal.style.display = 'none';
+	            });
+	        }
 
-        window.addEventListener('click', function (event) {
-            if (event.target === modal) {
-                if(modal) modal.style.display = 'none';
-            }
-        });
+	        if (showConfirmReceivedModalBtn) {
+	            showConfirmReceivedModalBtn.addEventListener('click', function () {
+	                if(confirmReceivedModal) confirmReceivedModal.style.display = 'flex';
+	            });
+	        }
+
+	        if (closeConfirmReceivedModalBtn) {
+	            closeConfirmReceivedModalBtn.addEventListener('click', function () {
+	                if(confirmReceivedModal) confirmReceivedModal.style.display = 'none';
+	            });
+	        }
+
+	        window.addEventListener('click', function (event) {
+	            if (event.target === modal) {
+	                if(modal) modal.style.display = 'none';
+	            }
+	            if (event.target === confirmReceivedModal) {
+	                if(confirmReceivedModal) confirmReceivedModal.style.display = 'none';
+	            }
+	        });
     });
 </script>
 

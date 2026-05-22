@@ -31,6 +31,8 @@ public class OrderAdminServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        orderService.autoAdvanceTimedOrders();
+
         String action = request.getParameter("action");
         if (action == null) {
             action = "list";
@@ -110,7 +112,7 @@ public class OrderAdminServlet extends HttpServlet {
             if ("Đã hủy".equals(status)) {
                 success = orderService.cancelOrder(orderId, "Bị hủy bởi quản trị viên");
             } else {
-                success = orderService.updateOrderStatus(orderId, status);
+                success = orderService.updateOrderStatus(orderId, status, "Quản trị viên cập nhật trạng thái đơn hàng");
 
                 if (success && "Đã giao".equals(status)) {
                     Order order = orderService.getOrderById(orderId);
