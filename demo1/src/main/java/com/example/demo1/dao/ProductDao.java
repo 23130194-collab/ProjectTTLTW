@@ -52,8 +52,11 @@ public class ProductDao {
             params.put("categoryId", categoryId);
         }
         if (status != null && !status.isEmpty()) {
-            whereSql.append(" AND p.status = :status");
-            params.put("status", status);
+            if ("all_admin".equals(status)) {
+            } else {
+                whereSql.append(" AND p.status = :status");
+                params.put("status", status);
+            }
         } else {
             whereSql.append(" AND p.status != 'delete'");
         }
