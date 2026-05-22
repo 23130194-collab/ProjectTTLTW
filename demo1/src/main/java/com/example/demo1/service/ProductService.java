@@ -99,6 +99,14 @@ public class ProductService {
         }
     }
 
+    public void restoreProduct(int productId) {
+        Product product = pdao.getById(productId, "delete");
+        if (product != null) {
+            product.setStatus("active");
+            pdao.update(product);
+        }
+    }
+
     public Product getPublicProduct(int id) {
         return pdao.getById(id, "active");
     }

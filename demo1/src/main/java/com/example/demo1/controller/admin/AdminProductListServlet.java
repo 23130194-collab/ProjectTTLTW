@@ -37,6 +37,18 @@ public class AdminProductListServlet extends HttpServlet {
                         System.err.println("ID sản phẩm không hợp lệ để xóa: " + productIdStr);
                     }
                 }
+            } else if ("restore".equals(action)) {
+                String productIdStr = request.getParameter("id");
+                if (productIdStr != null && !productIdStr.isEmpty()) {
+                    try {
+                        int productId = Integer.parseInt(productIdStr);
+                        ps.restoreProduct(productId);
+                        response.sendRedirect(request.getContextPath() + "/admin/products");
+                        return;
+                    } catch (NumberFormatException e) {
+                        System.err.println("ID sản phẩm không hợp lệ để khôi phục: " + productIdStr);
+                    }
+                }
             }
 
             List<Category> allCategories = cs.getAllCategories();
@@ -69,8 +81,13 @@ public class AdminProductListServlet extends HttpServlet {
                 sortOrder = "popular";
             }
 
+            String queryStatus = status;
+            if (status == null || status.isEmpty()) {
+                queryStatus = "all_admin";
+            }
+
             ProductPage productPage = ps.filterAndSortProducts(
-                    categoryId, status, keyword, null, Collections.emptyMap(),
+                    categoryId, queryStatus, keyword, null, Collections.emptyMap(),
                     sortOrder, currentPage, PRODUCTS_PER_PAGE
             );
 
