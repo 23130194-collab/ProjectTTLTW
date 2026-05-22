@@ -21,10 +21,11 @@ import java.text.Normalizer;
 import java.util.Collections;
 import java.util.List;
 
-@WebServlet(name = "OrderController", urlPatterns = {"/my-orders", "/order-detail", "/account"})
+@WebServlet(name = "OrderController", urlPatterns = {"/my-orders", "/order-detail", "/account", "/confirm-received"})
 public class OrderController extends HttpServlet {
     private final VietnamAddressService vietnamAddressService = new VietnamAddressService();
     private final UserAddressService userAddressService = new UserAddressService();
+    private final OrderService orderService = new OrderService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -35,6 +36,8 @@ public class OrderController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+
+        orderService.autoAdvanceTimedOrders();
 
         OrderDao orderDao = new OrderDao();
 
@@ -62,6 +65,8 @@ public class OrderController extends HttpServlet {
 
         if (path.equals("/order-detail")) {
             handleCancelOrder(request, response);
+        } else if (path.equals("/confirm-received")) {
+            handleConfirmReceived(request, response);
         } else if (path.equals("/account")) {
             handleAccountReload(request, response);
         } else {
@@ -123,6 +128,7 @@ public class OrderController extends HttpServlet {
 
             request.setAttribute("order", order);
             request.setAttribute("orderItems", orderItems);
+            request.setAttribute("timelineSteps", orderService.getOrderTimelineSteps(order));
             request.getRequestDispatcher("/chiTietDonHang.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
@@ -148,7 +154,6 @@ public class OrderController extends HttpServlet {
                 int orderId = Integer.parseInt(orderIdStr);
                 OrderDao orderDao = new OrderDao();
                 Order order = orderDao.getOrderById(orderId);
-                OrderService orderService = new OrderService();
 
                 if (order != null && order.getUserId() == user.getId()) {
                     if ("Chờ xác nhận".equals(order.getOrderStatus())) {
@@ -162,6 +167,30 @@ public class OrderController extends HttpServlet {
                 e.printStackTrace();
             }
         }
+        response.sendRedirect(request.getContextPath() + "/my-orders");
+    }
+
+    private void handleConfirmReceived(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String orderIdStr = request.getParameter("id");
+        if (orderIdStr != null) {
+            try {
+                int orderId = Integer.parseInt(orderIdStr);
+                orderService.confirmReceived(orderId, user.getId());
+                response.sendRedirect(request.getContextPath() + "/order-detail?id=" + orderId);
+                return;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+
         response.sendRedirect(request.getContextPath() + "/my-orders");
     }
 
