@@ -324,3 +324,52 @@ body {
     opacity: 0.4;
     pointer-events: none;
 }
+
+.out-of-stock-section {
+    margin-top: 30px;
+    border-top: 2px dashed #ddd;
+    padding-top: 20px;
+}
+
+.out-of-stock-title {
+    font-weight: bold;
+    color: #dc3545;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.product-item.disabled {
+    opacity: 0.6;
+    background: #f9f9f9;
+    filter: grayscale(100%);
+}
+
+.product-name-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-name-text {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.badge-out-of-stock {
+    background: #dc3545;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-left: 8px;
+    display: inline-block;
+}
+
+.qty-disabled {
+    cursor: not-allowed;
+    background: #eee;
+}
+
+.delete-action {
+    color: #dc3545;
+}

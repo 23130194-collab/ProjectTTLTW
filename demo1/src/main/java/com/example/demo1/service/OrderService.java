@@ -175,7 +175,7 @@ public class OrderService {
         return orderDao.getOrdersByUserIdAndStatus(userId, status);
     }
 
-    public boolean createOrder(Order order, RecipientInfo recipient, Map<Integer, CartItem> cart, Payment payment) {
+    public boolean createOrder(Order order, RecipientInfo recipient, List<CartItem> cartItems, Payment payment) {
         return orderDao.createOrder(order, recipient, cart, payment);
     }
 

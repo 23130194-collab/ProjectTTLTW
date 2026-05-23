@@ -44,16 +44,11 @@
         </div>
 
         <div class="header-actions">
-            <%
-                int totalQuantity = 0;
-                Map<Integer, CartItem> cart = (Map<Integer, CartItem>) session.getAttribute("cart");
-                if (cart != null) { totalQuantity = cart.size(); }
-            %>
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
-                <% if (totalQuantity > 0) { %>
-                <span class="cart-badge"><%= totalQuantity %></span>
-                <% } %>
+                <c:if test="${not empty requestScope.cartItems}">
+                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                </c:if>
             </a>
 
             <c:choose>
