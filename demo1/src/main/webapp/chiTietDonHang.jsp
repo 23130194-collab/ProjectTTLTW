@@ -15,38 +15,70 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${contextPath}/css/user.css">
     <link rel="stylesheet" href="${contextPath}/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css">
 </head>
 
 <body>
 <header class="header">
     <div class="header-container">
-        <a href="${contextPath}/home" class="logo">
+        <a href="${pageContext.request.contextPath}/home" class="logo">
             <img src="https://i.postimg.cc/Hn4Jc3yj/logo-2.png" alt="TechNova Logo">
             <span class="brand-name">TechNova</span>
         </a>
 
         <nav class="nav-links">
-            <a href="${contextPath}/home">Trang chủ</a>
-            <a href="${contextPath}/gioiThieu.jsp">Giới thiệu</a>
+            <a href="${pageContext.request.contextPath}/home" class="active">Trang chủ</a>
+            <a href="${pageContext.request.contextPath}/gioiThieu.jsp">Giới thiệu</a>
             <a href="#" id="category-toggle">Danh mục</a>
-            <a href="${contextPath}/contact">Liên hệ</a>
+            <a href="${pageContext.request.contextPath}/contact">Liên hệ</a>
         </nav>
 
-        <div class="search-box">
-            <input type="text" placeholder="Bạn muốn mua gì hôm nay?">
-            <button><i class="fas fa-search"></i></button>
+        <div class="search-box" style="position: relative; overflow: visible;">
+            <form action="search" method="get" id="searchForm" style="display: flex; width: 100%;">
+                <input type="text" name="keyword" id="searchInput" autocomplete="off" placeholder="Bạn muốn mua gì...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            <div id="suggestion-box" class="suggestion-box"></div>
         </div>
 
         <div class="header-actions">
-            <a href="${contextPath}/AddCart?action=view" class="icon-btn" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i></a>
+            <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
+                <i class="fas fa-shopping-cart"></i>
+                <c:if test="${not empty requestScope.cartItems}">
+                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                </c:if>
+            </a>
+
             <c:choose>
                 <c:when test="${not empty sessionScope.user}">
-                    <a href="${contextPath}/my-orders" class="icon-btn active" title="Tài khoản"><i class="fas fa-user"></i></a>
+                    <a href="${pageContext.request.contextPath}/my-orders" class="icon-btn" title="Tài khoản của bạn">
+                        <i class="fas fa-user"></i>
+                    </a>
                 </c:when>
                 <c:otherwise>
-                    <a href="${contextPath}/login" class="icon-btn" title="Đăng nhập"><i class="fas fa-user"></i></a>
+                    <a href="${pageContext.request.contextPath}/login" class="icon-btn" title="Đăng nhập">
+                        <i class="fas fa-user"></i>
+                    </a>
                 </c:otherwise>
             </c:choose>
+        </div>
+
+        <div class="category-box" id="categoryBox">
+            <c:forEach items="${applicationScope.categoryList}" var="cat">
+                <a href="list-product?id=${cat.id}" class="category-item">
+                    <c:set var="imageSrc" value="${cat.image}"/>
+                    <c:choose>
+                        <c:when test="${fn:startsWith(imageSrc, 'http')}">
+                            <img src="${imageSrc}" class="category-icon" alt="${cat.name}">
+                        </c:when>
+                        <c:otherwise>
+                            <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
+                        </c:otherwise>
+                    </c:choose>
+                        ${cat.name}
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </c:forEach>
         </div>
     </div>
 </header>
@@ -329,6 +361,10 @@
 	        });
     });
 </script>
+<script>
+    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+</script>
+<script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 
 </body>
 </html>
