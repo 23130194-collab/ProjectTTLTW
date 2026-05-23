@@ -132,7 +132,7 @@ public class ReviewDao {
         );
     }
 
-    public List<Review> getReviewsByPage(int offset, int limit, String keyword, String status) {
+    public List<Review> getReviewsByPage(int offset, int limit, String keyword, String status, Integer rating) {
         return jdbi.withHandle(handle -> {
             StringBuilder sql = new StringBuilder(BASE_SELECT);
             boolean hasWhere = false;
@@ -145,6 +145,12 @@ public class ReviewDao {
             if (status != null && !status.trim().isEmpty()) {
                 sql.append(hasWhere ? "AND " : "WHERE ");
                 sql.append("r.status = :status ");
+                hasWhere = true;
+            }
+
+            if (rating != null && rating > 0) {
+                sql.append(hasWhere ? "AND " : "WHERE ");
+                sql.append("r.rating = :rating ");
             }
 
             sql.append("ORDER BY r.created_at DESC LIMIT :limit OFFSET :offset");
@@ -157,6 +163,9 @@ public class ReviewDao {
             if (status != null && !status.trim().isEmpty()) {
                 query.bind("status", status);
             }
+            if (rating != null && rating > 0) {
+                query.bind("rating", rating);
+            }
             query.bind("limit", limit);
             query.bind("offset", offset);
 
@@ -164,7 +173,7 @@ public class ReviewDao {
         });
     }
 
-    public int getTotalReviewCount(String keyword, String status) {
+    public int getTotalReviewCount(String keyword, String status, Integer rating) {
         return jdbi.withHandle(handle -> {
             StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM reviews r ");
             sql.append("LEFT JOIN users u ON r.user_id = u.id ");
@@ -179,6 +188,12 @@ public class ReviewDao {
             if (status != null && !status.trim().isEmpty()) {
                 sql.append(hasWhere ? "AND " : "WHERE ");
                 sql.append("r.status = :status ");
+                hasWhere = true;
+            }
+
+            if (rating != null && rating > 0) {
+                sql.append(hasWhere ? "AND " : "WHERE ");
+                sql.append("r.rating = :rating ");
             }
 
             Query query = handle.createQuery(sql.toString());
@@ -188,6 +203,9 @@ public class ReviewDao {
             }
             if (status != null && !status.trim().isEmpty()) {
                 query.bind("status", status);
+            }
+            if (rating != null && rating > 0) {
+                query.bind("rating", rating);
             }
 
             return query.mapTo(Integer.class).one();
