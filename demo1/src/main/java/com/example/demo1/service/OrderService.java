@@ -176,7 +176,7 @@ public class OrderService {
     }
 
     public boolean createOrder(Order order, RecipientInfo recipient, List<CartItem> cartItems, Payment payment) {
-        return orderDao.createOrder(order, recipient, cart, payment);
+        return orderDao.createOrder(order, recipient, cartItems, payment);
     }
 
     public boolean cancelOrder(int orderId, String reason) {
