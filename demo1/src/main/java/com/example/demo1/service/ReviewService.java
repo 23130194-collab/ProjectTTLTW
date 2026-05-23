@@ -29,13 +29,13 @@ public class ReviewService {
         reviewDao.addReview(productId, userId, rating, comment);
     }
 
-    public List<Review> getReviewsByPage(int currentPage, int reviewsPerPage, String keyword, String status) {
+    public List<Review> getReviewsByPage(int currentPage, int reviewsPerPage, String keyword, String status, Integer rating) {
         int offset = (currentPage - 1) * reviewsPerPage;
-        return reviewDao.getReviewsByPage(offset, reviewsPerPage, keyword, status);
+        return reviewDao.getReviewsByPage(offset, reviewsPerPage, keyword, status, rating);
     }
 
-    public int getTotalReviewCount(String keyword, String status) {
-        return reviewDao.getTotalReviewCount(keyword, status);
+    public int getTotalReviewCount(String keyword, String status, Integer rating) {
+        return reviewDao.getTotalReviewCount(keyword, status, rating);
     }
 
     public boolean hasUserReviewedProduct(int userId, int productId) {

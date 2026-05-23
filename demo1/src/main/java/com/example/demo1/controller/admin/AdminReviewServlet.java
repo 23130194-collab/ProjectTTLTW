@@ -45,6 +45,7 @@ public class AdminReviewServlet extends HttpServlet {
     private void showReviewList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("searchKeyword");
         String status = request.getParameter("status");
+        String ratingStr = request.getParameter("rating");
         String pageStr = request.getParameter("page");
 
         int currentPage = 1;
@@ -60,14 +61,24 @@ public class AdminReviewServlet extends HttpServlet {
             status = null;
         }
 
-        int totalReviews = reviewService.getTotalReviewCount(keyword, status);
+        Integer rating = null;
+        if (ratingStr != null && !ratingStr.isEmpty() && !"all".equals(ratingStr)) {
+            try {
+                rating = Integer.parseInt(ratingStr);
+            } catch (NumberFormatException e) {
+                rating = null;
+            }
+        }
+
+        int totalReviews = reviewService.getTotalReviewCount(keyword, status, rating);
         int totalPages = (int) Math.ceil((double) totalReviews / REVIEWS_PER_PAGE);
 
-        List<Review> reviewList = reviewService.getReviewsByPage(currentPage, REVIEWS_PER_PAGE, keyword, status);
+        List<Review> reviewList = reviewService.getReviewsByPage(currentPage, REVIEWS_PER_PAGE, keyword, status, rating);
 
         request.setAttribute("reviewList", reviewList);
         request.setAttribute("searchKeyword", keyword);
         request.setAttribute("selectedStatus", status);
+        request.setAttribute("selectedRating", ratingStr);
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
 
@@ -102,7 +113,8 @@ public class AdminReviewServlet extends HttpServlet {
         String page = request.getParameter("page") != null ? request.getParameter("page") : "1";
         String searchKeyword = request.getParameter("searchKeyword") != null ? request.getParameter("searchKeyword") : "";
         String statusFilter = request.getParameter("statusFilter") != null ? request.getParameter("statusFilter") : "all";
+        String ratingFilter = request.getParameter("ratingFilter") != null ? request.getParameter("ratingFilter") : "all";
 
-        response.sendRedirect(request.getContextPath() + SERVLET_PATH + "?page=" + page + "&status=" + statusFilter + "&searchKeyword=" + searchKeyword);
+        response.sendRedirect(request.getContextPath() + SERVLET_PATH + "?page=" + page + "&status=" + statusFilter + "&rating=" + ratingFilter + "&searchKeyword=" + searchKeyword);
     }
 }

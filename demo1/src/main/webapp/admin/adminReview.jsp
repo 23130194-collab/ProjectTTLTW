@@ -95,6 +95,7 @@
                 <input type="hidden" name="page" value="${currentPage}">
                 <input type="hidden" name="searchKeyword" value="${searchKeyword}">
                 <input type="hidden" name="statusFilter" value="${selectedStatus}">
+                <input type="hidden" name="ratingFilter" value="${selectedRating}">
                 <div class="form-columns">
                     <div class="form-column-left">
                         <div class="form-group"><label class="form-label">Sản phẩm</label><input type="text"
@@ -131,7 +132,7 @@
                         </div>
                         <div class="form-buttons">
                             <a href="#" id="save-button" class="btn btn-primary">Cập nhật</a>
-                            <a href="${contextPath}/admin/reviews?page=${currentPage}&status=${selectedStatus}&searchKeyword=${searchKeyword}"
+                            <a href="${contextPath}/admin/reviews?page=${currentPage}&status=${selectedStatus}&rating=${selectedRating}&searchKeyword=${searchKeyword}"
                                class="btn btn-secondary">Hủy</a>
                         </div>
                     </div>
@@ -140,20 +141,28 @@
         </c:if>
 
         <div class="filter-bar">
-            <div class="filter-tabs">
-                <a href="${contextPath}/admin/reviews?status=all&searchKeyword=${searchKeyword}"
-                   class="tab ${empty selectedStatus or selectedStatus == 'all' ? 'active' : ''}">Tất cả</a>
-                <a href="${contextPath}/admin/reviews?status=active&searchKeyword=${searchKeyword}"
-                   class="tab ${selectedStatus == 'active' ? 'active' : ''}">Hoạt động</a>
-                <a href="${contextPath}/admin/reviews?status=hidden&searchKeyword=${searchKeyword}"
-                   class="tab ${selectedStatus == 'hidden' ? 'active' : ''}">Ẩn</a>
-            </div>
-            <form action="${contextPath}/admin/reviews" method="get" class="search-form">
-                <div class="search-wrapper">
+            <form action="${contextPath}/admin/reviews" method="get" class="search-form" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <div class="filter-dropdowns" style="display: flex; gap: 15px;">
+                    <select name="status" class="form-control" onchange="this.form.submit()" style="width: 150px; cursor: pointer;">
+                        <option value="all" ${empty selectedStatus or selectedStatus == 'all' ? 'selected' : ''}>Tất cả trạng thái</option>
+                        <option value="active" ${selectedStatus == 'active' ? 'selected' : ''}>Hoạt động</option>
+                        <option value="hidden" ${selectedStatus == 'hidden' ? 'selected' : ''}>Ẩn</option>
+                    </select>
+                    
+                    <select name="rating" class="form-control" onchange="this.form.submit()" style="width: 150px; cursor: pointer;">
+                        <option value="all" ${empty selectedRating or selectedRating == 'all' ? 'selected' : ''}>Tất cả số sao</option>
+                        <option value="5" ${selectedRating == '5' ? 'selected' : ''}>5 Sao</option>
+                        <option value="4" ${selectedRating == '4' ? 'selected' : ''}>4 Sao</option>
+                        <option value="3" ${selectedRating == '3' ? 'selected' : ''}>3 Sao</option>
+                        <option value="2" ${selectedRating == '2' ? 'selected' : ''}>2 Sao</option>
+                        <option value="1" ${selectedRating == '1' ? 'selected' : ''}>1 Sao</option>
+                    </select>
+                </div>
+                
+                <div class="search-wrapper" style="flex: 1; max-width: 400px; margin: 0;">
                     <input type="text" name="searchKeyword" id="searchInput" class="search-input-review"
                            placeholder="Tìm theo tên sản phẩm, người dùng..." value="${searchKeyword}">
                     <button type="submit" class="search-icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    <input type="hidden" name="status" value="${selectedStatus}">
                 </div>
             </form>
         </div>
@@ -207,7 +216,7 @@
                                 </td>
                                 <td class="col-actions">
                                     <div class="action-buttons">
-                                        <a href="${contextPath}/admin/reviews?action=edit&id=${review.id}&page=${currentPage}&status=${selectedStatus}&searchKeyword=${searchKeyword}"
+                                        <a href="${contextPath}/admin/reviews?action=edit&id=${review.id}&page=${currentPage}&status=${selectedStatus}&rating=${selectedRating}&searchKeyword=${searchKeyword}"
                                            class="action-btn edit" title="Sửa trạng thái"><i class="fa-solid fa-pen"></i></a>
                                     </div>
                                 </td>
@@ -222,15 +231,15 @@
         <c:if test="${totalPages > 1}">
             <div class="pagination-container">
                 <c:if test="${currentPage > 1}">
-                    <a href="${contextPath}/admin/reviews?page=${currentPage - 1}&status=${selectedStatus}&searchKeyword=${searchKeyword}"
+                    <a href="${contextPath}/admin/reviews?page=${currentPage - 1}&status=${selectedStatus}&rating=${selectedRating}&searchKeyword=${searchKeyword}"
                        class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></a>
                 </c:if>
                 <c:forEach var="i" begin="1" end="${totalPages}">
-                    <a href="${contextPath}/admin/reviews?page=${i}&status=${selectedStatus}&searchKeyword=${searchKeyword}"
+                    <a href="${contextPath}/admin/reviews?page=${i}&status=${selectedStatus}&rating=${selectedRating}&searchKeyword=${searchKeyword}"
                        class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
                 </c:forEach>
                 <c:if test="${currentPage < totalPages}">
-                    <a href="${contextPath}/admin/reviews?page=${currentPage + 1}&status=${selectedStatus}&searchKeyword=${searchKeyword}"
+                    <a href="${contextPath}/admin/reviews?page=${currentPage + 1}&status=${selectedStatus}&rating=${selectedRating}&searchKeyword=${searchKeyword}"
                        class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></a>
                 </c:if>
             </div>
