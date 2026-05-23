@@ -1,44 +1,37 @@
 package com.example.demo1.service;
 
-import com.example.demo1.dao.ProductDao;
+import com.example.demo1.dao.CartDao;
 import com.example.demo1.model.CartItem;
-import com.example.demo1.model.Product;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class CartService {
-    private ProductDao productDao = new ProductDao();
+    private final CartDao cartDao = new CartDao();
 
-    public void addToCart(Map<Integer, CartItem> cart, int productId, int quantity) {
-        if (cart.containsKey(productId)) {
-            CartItem item = cart.get(productId);
-            item.setQuantity(item.getQuantity() + quantity);
-        } else {
-            Product p = productDao.getById(productId);
-            if (p != null) {
-                cart.put(productId, new CartItem(p, quantity));
-            }
-        }
+    public void addToCart(int userId, int productId, int quantity) {
+        cartDao.addItem(userId, productId, quantity);
     }
 
-    public double calculateTotal(Map<Integer, CartItem> cart) {
-        return cart.values().stream().mapToDouble(CartItem::getTotalPrice).sum();
+    public double calculateTotal(int userId) {
+        return cartDao.calculateTotal(userId);
     }
 
-    public void updateQuantity(Map<Integer, CartItem> cart, int productId, int quantity) {
-        if (cart.containsKey(productId)) {
-            CartItem item = cart.get(productId);
-            int newQty = item.getQuantity() + quantity;
-            if (newQty > 0) {
-                item.setQuantity(newQty);
-            } else {
-                cart.remove(productId);
-            }
-        }
+    public void updateQuantity(int userId, int productId, int quantity) {
+        cartDao.updateItemQuantity(userId, productId, quantity);
     }
 
+    public void removeItem(int userId, int productId) {
+        cartDao.removeItem(userId, productId);
+    }
 
-    public void removeItem(Map<Integer, CartItem> cart, int productId) {
-        cart.remove(productId);
+    public List<CartItem> getCartItems(int userId) {
+        return cartDao.getCartItems(userId);
+    }
+
+    public int countItems(int userId) {
+        return cartDao.countItems(userId);
+    }
+
+    public void clearCart(int userId) {
+        cartDao.clearCart(userId);
     }
 }
