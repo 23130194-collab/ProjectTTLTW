@@ -99,6 +99,13 @@
 
 <div class="overlay" id="overlay"></div>
 
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner-box">
+        <div class="loading-spinner"></div>
+        <p class="loading-text" id="loading-text">Đang xử lý...</p>
+    </div>
+</div>
+
 <form action="ProcessOrderServlet" method="POST">
     <div class="app-container">
         <div class="app-scroll">
@@ -226,6 +233,24 @@
             email.focus();
             event.preventDefault();
             return false;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.classList.add('btn-loading');
+        const overlay = document.getElementById('loading-overlay');
+        const textEl = document.getElementById('loading-text');
+        const t = setTimeout(function() {
+            if (textEl) textEl.textContent = 'Đang xử lý đơn hàng...';
+            if (overlay) overlay.classList.add('active');
+        }, 400);
+        window.addEventListener('pagehide', function() { clearTimeout(t); }, { once: true });
+    });
+
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.remove('active');
+            document.querySelectorAll('.btn-loading').forEach(function(btn) { btn.classList.remove('btn-loading'); });
         }
     });
 </script>

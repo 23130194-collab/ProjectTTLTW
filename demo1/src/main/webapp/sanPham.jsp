@@ -100,6 +100,13 @@
 </header>
 <div class="overlay" id="overlay"></div>
 
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner-box">
+        <div class="loading-spinner"></div>
+        <p class="loading-text" id="loading-text">Đang xử lý...</p>
+    </div>
+</div>
+
 <main>
     <div class="all">
         <div class="breadcrumb">
@@ -468,7 +475,7 @@
                             <textarea name="comment"
                                       placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm"></textarea>
                         </div>
-                        <button class="btn-submit-review">GỬI ĐÁNH GIÁ</button>
+                        <button class="btn-submit-review" id="btn-submit-review" type="submit">GỬI ĐÁNH GIÁ</button>
                     </form>
 
                 </div>
