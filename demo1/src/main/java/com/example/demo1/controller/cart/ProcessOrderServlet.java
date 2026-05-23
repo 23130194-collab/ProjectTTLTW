@@ -1,20 +1,24 @@
 package com.example.demo1.controller.cart;
 
 import com.example.demo1.model.*;
+import com.example.demo1.service.CartService;
 import com.example.demo1.service.OrderService;
 import com.example.demo1.service.ProductService;
+import com.example.demo1.service.NotificationService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.IOException;
-import java.util.Map;
-import com.example.demo1.service.NotificationService;
-
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @WebServlet(name = "ProcessOrderServlet", value = "/ProcessOrderServlet")
 public class ProcessOrderServlet extends HttpServlet {
     private final OrderService orderService = new OrderService();
     private final ProductService productService = new ProductService();
+    private final CartService cartService = new CartService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -26,9 +30,32 @@ public class ProcessOrderServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        Map<Integer, CartItem> cart = (Map<Integer, CartItem>) session.getAttribute("cart");
-        if (cart == null || cart.isEmpty()) {
-            session.setAttribute("cartError", "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi mua ngay.");
+        if (user == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        List<CartItem> cartItems = cartService.getCartItems(user.getId());
+
+        String[] productIds = request.getParameterValues("productIds");
+
+        if (productIds != null && cartItems != null && !cartItems.isEmpty()) {
+            Set<Integer> selectedIds = new HashSet<>();
+            for (String idStr : productIds) {
+                selectedIds.add(Integer.parseInt(idStr));
+            }
+
+            List<CartItem> filteredItems = new ArrayList<>();
+            for (CartItem item : cartItems) {
+                if (selectedIds.contains(item.getProduct().getId())) {
+                    filteredItems.add(item);
+                }
+            }
+            cartItems = filteredItems;
+        }
+
+        if (cartItems == null || cartItems.isEmpty()) {
+            session.setAttribute("cartError", "Giỏ hàng thanh toán không hợp lệ hoặc đã trống.");
             response.sendRedirect("AddCart?action=view");
             return;
         }
@@ -48,7 +75,7 @@ public class ProcessOrderServlet extends HttpServlet {
             return;
         }
 
-        for (CartItem item : cart.values()) {
+        for (CartItem item : cartItems) {
             Product dbProduct = productService.getProduct(item.getProduct().getId());
 
             if (dbProduct == null) {
@@ -67,7 +94,8 @@ public class ProcessOrderServlet extends HttpServlet {
         Order order = new Order();
         double total = 0;
         double subprice = 0;
-        for (CartItem item : cart.values()) {
+
+        for (CartItem item : cartItems) {
             double price = item.getProduct().getPrice();
             double oldPrice = item.getProduct().getOldPrice();
 
@@ -102,7 +130,7 @@ public class ProcessOrderServlet extends HttpServlet {
         recipient.setDistrict(district);
         recipient.setAddress(addressDetail);
 
-        boolean success = orderService.createOrder(order, recipient, cart, payment);
+        boolean success = orderService.createOrder(order, recipient, cartItems, payment);
 
         if (success) {
             try {
@@ -117,16 +145,22 @@ public class ProcessOrderServlet extends HttpServlet {
                 String adminLink = "admin/orders?action=view&id=" + order.getId();
 
                 Notification adminNoti = new Notification(null, adminContent, adminLink, 1);
-
                 new com.example.demo1.dao.NotificationDao().insert(adminNoti);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            session.removeAttribute("cart");
+            if (productIds != null) {
+                for (String idStr : productIds) {
+                    cartService.removeItem(user.getId(), Integer.parseInt(idStr));
+                }
+            } else {
+                cartService.clearCart(user.getId());
+            }
+
             response.sendRedirect("thankyouNotification.jsp");
-        }else {
+        } else {
             response.sendRedirect("thanhToan.jsp?error=db");
         }
     }
