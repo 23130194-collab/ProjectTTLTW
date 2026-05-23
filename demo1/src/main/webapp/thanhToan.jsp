@@ -1,5 +1,4 @@
 <%@ page import="com.example.demo1.model.CartItem" %>
-<%@ page import="java.util.Map" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -14,8 +13,10 @@
     <title>Thông tin giao hàng | TechNova</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/header.css">
-    <link rel="stylesheet" href="css/thongTin.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/thongTin.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css">
+
 </head>
 
 <body>
@@ -33,33 +34,20 @@
             <a href="${pageContext.request.contextPath}/contact">Liên hệ</a>
         </nav>
 
-        <div class="search-box">
+        <div class="search-box" style="position: relative; overflow: visible;">
             <form action="search" method="get" id="searchForm" style="display: flex; width: 100%;">
-                <input type="text" name="keyword" id="searchInput"
-                       placeholder="Bạn muốn mua gì hôm nay?" autocomplete="off">
+                <input type="text" name="keyword" id="searchInput" autocomplete="off" placeholder="Bạn muốn mua gì...">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
-            <div id="suggestion-box" class="suggestion-box" style="display:none;"></div>
+            <div id="suggestion-box" class="suggestion-box"></div>
         </div>
 
         <div class="header-actions">
-
-            <%
-                int totalQuantity = 0;
-                Map<Integer, CartItem> cart = (Map<Integer, CartItem>) session.getAttribute("cart");
-
-                if (cart != null) {
-                    totalQuantity = cart.size();
-                }
-            %>
-
-            <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper"
-               title="Giỏ hàng">
+            <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
-
-                <% if (totalQuantity > 0) { %>
-                <span class="cart-badge"><%= totalQuantity %></span>
-                <% } %>
+                <c:if test="${not empty requestScope.cartItems}">
+                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                </c:if>
             </a>
 
             <c:choose>
@@ -85,8 +73,7 @@
                             <img src="${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:when>
                         <c:otherwise>
-                            <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon"
-                                 alt="${cat.name}">
+                            <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
                         ${cat.name}
@@ -117,22 +104,24 @@
             </div>
 
             <c:set var="totalOldPrice" value="0"/>
-            <c:forEach items="${sessionScope.cart}" var="entry">
-                <c:set var="item" value="${entry.value}"/>
+
+            <c:forEach items="${requestScope.cartItems}" var="item">
                 <c:set var="totalOldPrice" value="${totalOldPrice + (item.product.oldPrice * item.quantity)}"/>
+
+                <input type="hidden" name="productIds" value="${item.product.id}">
 
                 <div class="product-box">
                     <img src="${item.product.image}" alt="${item.product.name}">
                     <div class="product-info">
                         <b>${item.product.name}</b><br>
                         <div>
-                            <span class="current-price">
-                                <fmt:formatNumber value="${item.product.price}" pattern="#,###"/>₫
-                            </span>
+                <span class="current-price">
+                    <fmt:formatNumber value="${item.product.price}" pattern="#,###"/>₫
+                </span>
                             <c:if test="${item.product.oldPrice > item.product.price}">
-                                <span class="old-price">
-                                    <fmt:formatNumber value="${item.product.oldPrice}" pattern="#,###"/>₫
-                                </span>
+                    <span class="old-price">
+                        <fmt:formatNumber value="${item.product.oldPrice}" pattern="#,###"/>₫
+                    </span>
                             </c:if>
                         </div>
                         <small class="product-qty">Số lượng: ${item.quantity}</small>
@@ -211,7 +200,6 @@
     </div>
 </form>
 
-</body>
 <script src="js/header.js"></script>
 <script>
     const form = document.querySelector('form');
@@ -253,7 +241,6 @@
             document.querySelectorAll('.btn-loading').forEach(function(btn) { btn.classList.remove('btn-loading'); });
         }
     });
-</script>
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
@@ -310,4 +297,11 @@
         });
     });
 </script>
+
+<script>
+    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+</script>
+<script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
+</body>
+
 </html>
