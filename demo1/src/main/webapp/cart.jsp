@@ -98,6 +98,13 @@
 </header>
 <div class="overlay" id="overlay"></div>
 
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner-box">
+        <div class="loading-spinner"></div>
+        <p class="loading-text" id="loading-text">Đang xử lý...</p>
+    </div>
+</div>
+
 <div class="app-container">
     <div class="header-cart">
         <a href="javascript:history.back()" class="back-link" title="Quay lại">
@@ -255,6 +262,51 @@
             setTimeout(() => toast.remove(), 300);
         }, 5000);
     }
+
+    function showLoadingOverlay(text) {
+        const overlay = document.getElementById('loading-overlay');
+        const textEl = document.getElementById('loading-text');
+        if (!overlay) return;
+        if (textEl) textEl.textContent = text || 'Đang xử lý...';
+        overlay.classList.add('active');
+    }
+
+    function hideLoadingOverlay() {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.classList.remove('active');
+    }
+
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+            hideLoadingOverlay();
+            document.querySelectorAll('.btn-loading').forEach(btn => btn.classList.remove('btn-loading'));
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnCheckout = document.querySelector('a.btn-buy-link[href*="checkout"]');
+        if (btnCheckout) {
+            btnCheckout.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                this.classList.add('btn-loading');
+                const t = setTimeout(() => showLoadingOverlay('Đang chuyển đến thanh toán...'), 400);
+                window.location.href = href;
+                window.addEventListener('pagehide', () => clearTimeout(t), { once: true });
+            });
+        }
+
+        document.querySelectorAll('a.delete-icon').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                this.classList.add('btn-loading');
+                const t = setTimeout(() => showLoadingOverlay('Đang xóa sản phẩm...'), 400);
+                window.location.href = href;
+                window.addEventListener('pagehide', () => clearTimeout(t), { once: true });
+            });
+        });
+    });
 </script>
 </body>
 

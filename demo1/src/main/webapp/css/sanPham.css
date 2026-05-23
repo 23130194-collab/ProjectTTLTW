@@ -1829,4 +1829,116 @@ body {
     background: #d70018;
     color: #fff;
     border: 2px solid #d70018;
-}
+}
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.loading-spinner-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 36px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f0f0f0;
+    border-top-color: #d70018;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    letter-spacing: 0.2px;
+}
+
+.btn-buy.btn-loading,
+.btn-cart.btn-loading,
+.btn-buy-now.btn-loading,
+.btn-add-cart.btn-loading,
+.btn-submit-review.btn-loading {
+    opacity: 0.65;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.action-toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1a1a2e;
+    color: #fff;
+    padding: 13px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+}
+
+.action-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.action-toast.toast-success {
+    background: #1a1a2e;
+    border-left: 4px solid #22c55e;
+}
+
+.action-toast.toast-error {
+    background: #1a1a2e;
+    border-left: 4px solid #ef4444;
+}
+
+.action-toast-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.toast-success .action-toast-icon {
+    color: #22c55e;
+}
+
+.toast-error .action-toast-icon {
+    color: #ef4444;
+}
