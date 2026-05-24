@@ -8,6 +8,7 @@ public class RecipientInfo {
     private String email;
     private String province;
     private String district;
+    private String ward;
     private String address;
 
     public RecipientInfo() {
@@ -55,6 +56,14 @@ public class RecipientInfo {
     }
     public void setDistrict(String district) {
         this.district = district;
+    }
+
+    public String getWard() {
+        return ward;
+    }
+
+    public void setWard(String ward) {
+        this.ward = ward;
     }
 
     public String getAddress() {

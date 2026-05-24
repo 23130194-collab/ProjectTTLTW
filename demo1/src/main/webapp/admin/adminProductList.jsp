@@ -86,6 +86,25 @@
             </a>
         </div>
 
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div id="success-alert" style="background-color: #e6f4ea; color: #1e8e3e; padding: 15px; margin-bottom: 20px; border: 1px solid #ceead6; border-radius: 4px; display: flex; align-items: center; gap: 10px; transition: opacity 0.5s ease;">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>${sessionScope.successMessage}</span>
+            </div>
+            <c:remove var="successMessage" scope="session" />
+            <script>
+                setTimeout(function() {
+                    var alert = document.getElementById('success-alert');
+                    if (alert) {
+                        alert.style.opacity = '0';
+                        setTimeout(function() {
+                            alert.style.display = 'none';
+                        }, 500);
+                    }
+                }, 3000);
+            </script>
+        </c:if>
+
         <div class="filter-bar">
             <form action="${contextPath}/admin/products" method="get" id="filterForm" class="filter-left">
                 <div class="filter-item">
@@ -105,7 +124,7 @@
                 <div class="filter-item">
                     <div class="select-wrapper">
                         <select name="status" id="status-select" onchange="this.form.submit()">
-                            <option value="">Tất cả trạng thái</option>
+                            <option value="all_admin" ${'all_admin' == selectedStatus ? 'selected' : ''}>Tất cả trạng thái</option>
                             <option value="active" ${'active' == selectedStatus ? 'selected' : ''}>Hoạt động</option>
                             <option value="inactive" ${'inactive' == selectedStatus ? 'selected' : ''}>Ẩn</option>
                             <option value="delete" ${'delete' == selectedStatus ? 'selected' : ''}>Ngừng bán</option>

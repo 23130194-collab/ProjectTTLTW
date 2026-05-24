@@ -4,6 +4,7 @@ import com.example.demo1.dao.OrderDao;
 import com.example.demo1.dao.ProductDao;
 import com.example.demo1.model.*;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,15 +14,17 @@ import java.util.Map;
 
 public class OrderService {
     private static final int AUTO_ADVANCE_SECONDS = 60;
-    private static final String STATUS_ORDER_PLACED = "Đặt hàng";
-    private static final String STATUS_PENDING = "Chờ xác nhận";
-    private static final String STATUS_PROCESSING = "Đang xử lý";
-    private static final String STATUS_SHIPPING = "Đang giao";
-    private static final String STATUS_DELIVERED = "Đã giao";
-    private static final String STATUS_CANCELLED = "Đã hủy";
+    public static final String STATUS_ORDER_PLACED = "Đặt hàng";
+    public static final String STATUS_PENDING = "Chờ xác nhận";
+    public static final String STATUS_PROCESSING = "Đang xử lý";
+    public static final String STATUS_SHIPPING = "Đang giao";
+    public static final String STATUS_SENT_TO_CARRIER = "Đã giao cho đơn vị vận chuyển";
+    public static final String STATUS_DELIVERED = "Đã giao";
+    public static final String STATUS_CANCELLED = "Đã hủy";
 
     private final OrderDao orderDao = new OrderDao();
     private final ProductDao productDao = new ProductDao();
+    private final GhnShippingService ghnShippingService = new GhnShippingService();
 
     public OrderPage getPagedOrders(String keyword, int currentPage, int ordersPerPage) {
         return getPagedOrders(keyword, null, currentPage, ordersPerPage);
@@ -213,17 +216,157 @@ public class OrderService {
         return updateOrderStatus(orderId, STATUS_DELIVERED, "Khách hàng xác nhận đã nhận hàng");
     }
 
+    public ShippingActionResult handoverToCarrier(int orderId) {
+        Order order = orderDao.getOrderById(orderId);
+        if (order == null) {
+            return ShippingActionResult.failure("Đơn hàng không tồn tại.");
+        }
+        if (!isProcessingStatus(order.getOrderStatus())) {
+            return ShippingActionResult.failure("Chỉ có thể giao đơn đang xử lý cho đơn vị vận chuyển.");
+        }
+        if (order.isSentToCarrier()) {
+            return ShippingActionResult.success("Đơn hàng đã được gửi sang đơn vị vận chuyển trước đó.");
+        }
+        if (order.getRecipientInfo() == null) {
+            return ShippingActionResult.failure("Đơn hàng thiếu thông tin người nhận.");
+        }
+
+        try {
+            List<OrderItem> items = orderDao.getOrderItemsByOrderId(orderId);
+            Payment payment = orderDao.getPaymentByOrderId(orderId);
+            GhnCreateOrderResult result = ghnShippingService.createShippingOrder(order, order.getRecipientInfo(), items, payment);
+            if (!result.isSuccess()) {
+                return ShippingActionResult.failure(result.getMessage());
+            }
+
+            String note = "Đã tạo vận đơn GHN";
+            if (result.getOrderCode() != null && !result.getOrderCode().trim().isEmpty()) {
+                note += ": " + result.getOrderCode();
+            }
+            orderDao.ensureStatusHistoryExists(orderId, STATUS_SENT_TO_CARRIER, note);
+            return ShippingActionResult.success(note, result.getOrderCode());
+        } catch (IllegalStateException | IOException e) {
+            return ShippingActionResult.failure(e.getMessage());
+        }
+    }
+
+    public ShippingActionResult markCarrierPickedUp(String orderCode, String note) {
+        Order order = orderDao.getOrderByCode(orderCode);
+        if (order == null) {
+            return ShippingActionResult.failure("Không tìm thấy đơn hàng " + orderCode + ".");
+        }
+        if (STATUS_CANCELLED.equals(order.getOrderStatus()) || STATUS_DELIVERED.equals(order.getOrderStatus())) {
+            return ShippingActionResult.failure("Đơn hàng đã ở trạng thái cuối, không thể chuyển sang đang giao.");
+        }
+        if (STATUS_SHIPPING.equals(order.getOrderStatus())) {
+            return ShippingActionResult.success("Đơn hàng đang ở trạng thái Đang giao.");
+        }
+
+        boolean success = updateOrderStatus(
+                order.getId(),
+                STATUS_SHIPPING,
+                defaultStatusNote(note, STATUS_SHIPPING)
+        );
+        return success
+                ? ShippingActionResult.success("Đơn hàng đã chuyển sang Đang giao.")
+                : ShippingActionResult.failure("Không thể chuyển đơn hàng sang Đang giao.");
+    }
+
+    public ShippingActionResult markCarrierDelivered(String orderCode, String note) {
+        Order order = orderDao.getOrderByCode(orderCode);
+        if (order == null) {
+            return ShippingActionResult.failure("Không tìm thấy đơn hàng " + orderCode + ".");
+        }
+        if (STATUS_CANCELLED.equals(order.getOrderStatus()) || STATUS_DELIVERED.equals(order.getOrderStatus())) {
+            return ShippingActionResult.failure("Đơn hàng đã ở trạng thái cuối.");
+        }
+
+        boolean success = updateOrderStatus(
+                order.getId(),
+                STATUS_DELIVERED,
+                defaultStatusNote(note, STATUS_DELIVERED)
+        );
+        return success
+                ? ShippingActionResult.success("Đơn hàng đã được đánh dấu là đã giao.")
+                : ShippingActionResult.failure("Không thể đánh dấu đơn hàng là đã giao.");
+    }
+
+    public ShippingActionResult applyGhnShippingStatus(String clientOrderCode, String ghnOrderCode, String ghnStatus, String description) {
+        String orderCode = normalizeFilter(clientOrderCode);
+        if (orderCode == null) {
+            return ShippingActionResult.failure("Webhook GHN thiếu client_order_code.");
+        }
+
+        String normalizedStatus = normalizeFilter(ghnStatus);
+        if (normalizedStatus == null) {
+            return ShippingActionResult.failure("Webhook GHN thiếu trạng thái vận đơn.");
+        }
+
+        String note = buildCarrierNote("GHN cập nhật " + normalizedStatus, ghnOrderCode, description);
+        String lowerStatus = normalizedStatus.toLowerCase();
+        if ("delivered".equals(lowerStatus)) {
+            return markCarrierDelivered(orderCode, note);
+        }
+        if (isGhnInTransitStatus(lowerStatus)) {
+            return markCarrierPickedUp(orderCode, note);
+        }
+        if (isGhnCancelledStatus(lowerStatus)) {
+            Order order = orderDao.getOrderByCode(orderCode);
+            if (order == null) {
+                return ShippingActionResult.failure("Không tìm thấy đơn hàng " + orderCode + ".");
+            }
+            boolean success = cancelOrder(order.getId(), note);
+            return success
+                    ? ShippingActionResult.success("Đơn hàng đã được hủy theo trạng thái GHN.")
+                    : ShippingActionResult.failure("Không thể hủy đơn hàng theo trạng thái GHN.");
+        }
+
+        Order order = orderDao.getOrderByCode(orderCode);
+        if (order == null) {
+            return ShippingActionResult.failure("Không tìm thấy đơn hàng " + orderCode + ".");
+        }
+        orderDao.ensureStatusHistoryExists(order.getId(), "GHN: " + normalizedStatus, note);
+        return ShippingActionResult.success("Đã ghi nhận trạng thái GHN: " + normalizedStatus + ".");
+    }
+
+    private String buildCarrierNote(String prefix, String carrierOrderCode, String description) {
+        StringBuilder note = new StringBuilder(prefix == null ? "" : prefix);
+        if (carrierOrderCode != null && !carrierOrderCode.trim().isEmpty()) {
+            note.append(" - mã vận đơn ").append(carrierOrderCode.trim());
+        }
+        if (description != null && !description.trim().isEmpty()) {
+            note.append(" - ").append(description.trim());
+        }
+        return note.toString();
+    }
+
+    private boolean isGhnInTransitStatus(String status) {
+        return "picked".equals(status)
+                || "storing".equals(status)
+                || "transporting".equals(status)
+                || "sorting".equals(status)
+                || "delivering".equals(status)
+                || "money_collect_delivering".equals(status)
+                || "delivery_fail".equals(status);
+    }
+
+    private boolean isGhnCancelledStatus(String status) {
+        return "cancel".equals(status)
+                || "cancelled".equals(status)
+                || "damage".equals(status)
+                || "lost".equals(status);
+    }
+
+    private boolean isProcessingStatus(String status) {
+        return STATUS_PROCESSING.equals(status) || "Đang xử lí".equals(status);
+    }
+
     public int autoAdvanceTimedOrders() {
         int updatedCount = 0;
         updatedCount += autoAdvanceOrders(
                 STATUS_PENDING,
                 STATUS_PROCESSING,
                 "Tự động chuyển sang Đang xử lý sau 1 phút"
-        );
-        updatedCount += autoAdvanceOrders(
-                STATUS_PROCESSING,
-                STATUS_SHIPPING,
-                "Tự động chuyển sang Đang giao sau 1 phút"
         );
         return updatedCount;
     }
@@ -261,7 +404,6 @@ public class OrderService {
 
         if (order.getCreatedAt() != null) {
             statusTimes.putIfAbsent(STATUS_ORDER_PLACED, order.getCreatedAt());
-            statusTimes.putIfAbsent(STATUS_PENDING, order.getCreatedAt());
         }
 
         List<String> timelineStatuses = new ArrayList<>(Arrays.asList(
