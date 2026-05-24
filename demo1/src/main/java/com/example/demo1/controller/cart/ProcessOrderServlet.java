@@ -60,12 +60,13 @@ public class ProcessOrderServlet extends HttpServlet {
             return;
         }
 
-        String fullName = request.getParameter("fullname");
-        String phone = request.getParameter("phone");
-        String email = request.getParameter("email");
-        String province = request.getParameter("province");
-        String district = request.getParameter("district");
-        String addressDetail = request.getParameter("address");
+        String fullName = cleanInput(request.getParameter("fullname"));
+        String phone = cleanPhone(request.getParameter("phone"));
+        String email = cleanInput(request.getParameter("email"));
+        String province = cleanInput(request.getParameter("province"));
+        String district = cleanInput(request.getParameter("district"));
+        String ward = cleanInput(request.getParameter("ward"));
+        String addressDetail = cleanInput(request.getParameter("address"));
 
         String phoneRegex = "^(03|05|07|08|09)[0-9]{8}$";
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
@@ -110,7 +111,7 @@ public class ProcessOrderServlet extends HttpServlet {
         double discountAmount = subprice - total;
         double shippingFee = 0;
 
-        String paymentMethod = request.getParameter("payment_method");
+        String paymentMethod = cleanInput(request.getParameter("payment_method"));
         if (paymentMethod == null) paymentMethod = "Thanh toán khi nhận hàng (COD)";
         Payment payment = new Payment(0, paymentMethod, "Thành công", total);
 
@@ -128,6 +129,7 @@ public class ProcessOrderServlet extends HttpServlet {
         recipient.setEmail(email);
         recipient.setProvince(province);
         recipient.setDistrict(district);
+        recipient.setWard(ward);
         recipient.setAddress(addressDetail);
 
         boolean success = orderService.createOrder(order, recipient, cartItems, payment);
@@ -163,5 +165,22 @@ public class ProcessOrderServlet extends HttpServlet {
         } else {
             response.sendRedirect("thanhToan.jsp?error=db");
         }
+    }
+
+    private String cleanInput(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        return value
+                .replace('\u00A0', ' ')
+                .replaceAll("\\s+", " ")
+                .replaceAll("\\s+,\\s*", ", ")
+                .trim();
+    }
+
+    private String cleanPhone(String value) {
+        String cleanedValue = cleanInput(value);
+        return cleanedValue == null ? null : cleanedValue.replaceAll("\\s+", "");
     }
 }
