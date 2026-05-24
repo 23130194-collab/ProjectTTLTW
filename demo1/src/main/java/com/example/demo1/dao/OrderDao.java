@@ -11,16 +11,21 @@ import java.util.Map;
 import java.util.Optional;
 
 public class OrderDao {
+    private static final String STATUS_SENT_TO_CARRIER = "Đã giao cho đơn vị vận chuyển";
+    private static final String STATUS_READY_FOR_CUSTOMER_CONFIRMATION = "Chờ khách xác nhận nhận hàng";
+
     private Jdbi jdbi = DatabaseDao.get();
 
     public List<Order> getAllOrders(int page, int pageSize) {
-        return jdbi.withHandle(handle ->
+        List<Order> orders = jdbi.withHandle(handle ->
                 handle.createQuery("SELECT * FROM orders ORDER BY order_code DESC LIMIT :limit OFFSET :offset")
                         .bind("limit", pageSize)
                         .bind("offset", (page - 1) * pageSize)
                         .mapToBean(Order.class)
                         .list()
         );
+        applyDeliveryFlags(orders);
+        return orders;
     }
 
     public int getTotalOrderCount() {
@@ -56,11 +61,21 @@ public class OrderDao {
                         .orElse(null)
         );
 
-        if (order != null) {
-            RecipientInfo recipientInfo = getRecipientInfoByOrderId(orderId);
-            order.setRecipientInfo(recipientInfo);
-        }
+        decorateOrder(order);
 
+        return order;
+    }
+
+    public Order getOrderByCode(String orderCode) {
+        Order order = jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM orders WHERE order_code = :orderCode")
+                        .bind("orderCode", orderCode)
+                        .mapToBean(Order.class)
+                        .findOne()
+                        .orElse(null)
+        );
+
+        decorateOrder(order);
         return order;
     }
 
@@ -77,6 +92,47 @@ public class OrderDao {
                     .mapTo(OrderItem.class)
                     .list();
         });
+    }
+
+    public Payment getPaymentByOrderId(int orderId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM payment WHERE order_id = :orderId ORDER BY created_at DESC LIMIT 1")
+                        .bind("orderId", orderId)
+                        .mapToBean(Payment.class)
+                        .findOne()
+                        .orElse(null)
+        );
+    }
+
+    private void decorateOrder(Order order) {
+        if (order == null) {
+            return;
+        }
+
+        order.setRecipientInfo(getRecipientInfoByOrderId(order.getId()));
+        applyDeliveryFlags(order);
+    }
+
+    private void applyDeliveryFlags(List<Order> orders) {
+        if (orders == null) {
+            return;
+        }
+
+        for (Order order : orders) {
+            applyDeliveryFlags(order);
+        }
+    }
+
+    private void applyDeliveryFlags(Order order) {
+        if (order == null) {
+            return;
+        }
+
+        order.setSentToCarrier(hasStatusHistory(order.getId(), STATUS_SENT_TO_CARRIER));
+        order.setReadyForCustomerConfirmation(
+                "Đang giao".equals(order.getOrderStatus())
+                        && hasStatusHistory(order.getId(), STATUS_READY_FOR_CUSTOMER_CONFIRMATION)
+        );
     }
 
     public boolean updateOrderStatus(int orderId, String status) {
@@ -119,6 +175,16 @@ public class OrderDao {
         });
     }
 
+    public boolean hasStatusHistory(int orderId, String status) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT COUNT(*) FROM order_status_history WHERE order_id = :orderId AND status = :status")
+                        .bind("orderId", orderId)
+                        .bind("status", status)
+                        .mapTo(Integer.class)
+                        .one() > 0
+        );
+    }
+
     private void insertOrderStatusHistory(Handle handle, int orderId, String status, String note) {
         handle.createUpdate("INSERT INTO order_status_history (order_id, status, note, created_at) " +
                         "VALUES (:orderId, :status, :note, NOW())")
@@ -151,13 +217,15 @@ public class OrderDao {
         String sql = buildOrderFilterSql("SELECT * FROM orders", keyword, status)
                 + " ORDER BY order_code DESC LIMIT :limit OFFSET :offset";
 
-        return jdbi.withHandle(handle -> {
+        List<Order> orders = jdbi.withHandle(handle -> {
             Query query = handle.createQuery(sql)
                     .bind("limit", pageSize)
                     .bind("offset", (page - 1) * pageSize);
             bindOrderFilters(query, keyword, status);
             return query.mapToBean(Order.class).list();
         });
+        applyDeliveryFlags(orders);
+        return orders;
     }
 
     public int getSearchOrderCount(String keyword, String status) {
@@ -202,6 +270,7 @@ public class OrderDao {
             for (Order order : orders) {
                 order.setItems(getOrderItemsByOrderId(order.getId()));
                 order.setRecipientInfo(getRecipientInfoByOrderId(order.getId()));
+                applyDeliveryFlags(order);
             }
             return orders;
         });
@@ -231,6 +300,7 @@ public class OrderDao {
             for (Order order : orders) {
                 order.setItems(getOrderItemsByOrderId(order.getId()));
                 order.setRecipientInfo(getRecipientInfoByOrderId(order.getId()));
+                applyDeliveryFlags(order);
             }
             return orders;
         });
@@ -253,7 +323,7 @@ public class OrderDao {
                 order.setId(orderId);
 
                 insertOrderStatusHistory(handle, orderId, "Đặt hàng", "Khách hàng đặt đơn hàng");
-                insertOrderStatusHistory(handle, orderId, order.getOrderStatus(), "Đơn hàng chờ xác nhận");
+                insertOrderStatusHistory(handle, orderId, order.getOrderStatus(), initialStatusNote(order.getOrderStatus()));
 
                 handle.createUpdate("INSERT INTO payment (order_id, payment_method, payment_status, amount, paid_at, created_at) " +
                                 "VALUES (:orderId, :method, :status, :amount, NOW(), NOW())")
@@ -263,14 +333,15 @@ public class OrderDao {
                         .bind("amount", payment.getAmount())
                         .execute();
 
-                handle.createUpdate("INSERT INTO recipient_info (order_id, full_name, phone, email, province, district, address_detail) " +
-                                "VALUES (:orderId, :fullName, :phone, :email, :province, :district, :addressDetail)")
+                handle.createUpdate("INSERT INTO recipient_info (order_id, full_name, phone, email, province, district, ward, address_detail) " +
+                                "VALUES (:orderId, :fullName, :phone, :email, :province, :district, :ward, :addressDetail)")
                         .bind("orderId", orderId)
                         .bind("fullName", recipient.getFullName())
                         .bind("phone", recipient.getPhone())
                         .bind("email", recipient.getEmail())
                         .bind("province", recipient.getProvince())
                         .bind("district", recipient.getDistrict())
+                        .bind("ward", recipient.getWard())
                         .bind("addressDetail", recipient.getAddress())
                         .execute();
 
@@ -302,6 +373,13 @@ public class OrderDao {
                 return false;
             }
         });
+    }
+
+    private String initialStatusNote(String status) {
+        if ("Đang xử lý".equals(status)) {
+            return "Đơn hàng đã thanh toán online, chuyển sang đang xử lý";
+        }
+        return "Đơn hàng chờ xác nhận";
     }
 
     public int countTotalOrdersByUserId(int userId) {
@@ -373,7 +451,7 @@ public class OrderDao {
     }
 
     public RecipientInfo getRecipientInfoByOrderId(int orderId) {
-        String sql = "SELECT * FROM recipient_info WHERE order_id = :orderId";
+        String sql = "SELECT *, address_detail AS address FROM recipient_info WHERE order_id = :orderId";
         return jdbi.withHandle(handle ->
                 handle.createQuery(sql)
                         .bind("orderId", orderId)
@@ -396,6 +474,7 @@ public class OrderDao {
             for (Order order : orders) {
                 order.setItems(getOrderItemsByOrderId(order.getId()));
                 order.setRecipientInfo(getRecipientInfoByOrderId(order.getId()));
+                applyDeliveryFlags(order);
             }
             return orders;
         });
