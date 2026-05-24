@@ -18,7 +18,6 @@ public class OrderService {
     public static final String STATUS_PENDING = "Chờ xác nhận";
     public static final String STATUS_PROCESSING = "Đang xử lý";
     public static final String STATUS_SHIPPING = "Đang giao";
-    public static final String STATUS_READY_FOR_CUSTOMER_CONFIRMATION = "Chờ khách xác nhận nhận hàng";
     public static final String STATUS_SENT_TO_CARRIER = "Đã giao cho đơn vị vận chuyển";
     public static final String STATUS_DELIVERED = "Đã giao";
     public static final String STATUS_CANCELLED = "Đã hủy";
@@ -210,7 +209,7 @@ public class OrderService {
             return false;
         }
 
-        if (!STATUS_SHIPPING.equals(order.getOrderStatus()) || !order.isReadyForCustomerConfirmation()) {
+        if (!STATUS_SHIPPING.equals(order.getOrderStatus())) {
             return false;
         }
 
@@ -279,26 +278,17 @@ public class OrderService {
             return ShippingActionResult.failure("Không tìm thấy đơn hàng " + orderCode + ".");
         }
         if (STATUS_CANCELLED.equals(order.getOrderStatus()) || STATUS_DELIVERED.equals(order.getOrderStatus())) {
-            return ShippingActionResult.failure("Đơn hàng đã ở trạng thái cuối, không thể chờ khách xác nhận.");
+            return ShippingActionResult.failure("Đơn hàng đã ở trạng thái cuối.");
         }
 
-        if (!STATUS_SHIPPING.equals(order.getOrderStatus())) {
-            boolean shippingUpdated = updateOrderStatus(
-                    order.getId(),
-                    STATUS_SHIPPING,
-                    "Đơn vị vận chuyển đã lấy hàng và đang giao"
-            );
-            if (!shippingUpdated) {
-                return ShippingActionResult.failure("Không thể chuyển đơn hàng sang Đang giao.");
-            }
-        }
-
-        orderDao.ensureStatusHistoryExists(
+        boolean success = updateOrderStatus(
                 order.getId(),
-                STATUS_READY_FOR_CUSTOMER_CONFIRMATION,
-                defaultStatusNote(note, STATUS_READY_FOR_CUSTOMER_CONFIRMATION)
+                STATUS_DELIVERED,
+                defaultStatusNote(note, STATUS_DELIVERED)
         );
-        return ShippingActionResult.success("Đơn hàng đã sẵn sàng để khách xác nhận nhận hàng.");
+        return success
+                ? ShippingActionResult.success("Đơn hàng đã được đánh dấu là đã giao.")
+                : ShippingActionResult.failure("Không thể đánh dấu đơn hàng là đã giao.");
     }
 
     public ShippingActionResult applyGhnShippingStatus(String clientOrderCode, String ghnOrderCode, String ghnStatus, String description) {
@@ -420,8 +410,7 @@ public class OrderService {
                 STATUS_ORDER_PLACED,
                 STATUS_PENDING,
                 STATUS_PROCESSING,
-                STATUS_SHIPPING,
-                STATUS_READY_FOR_CUSTOMER_CONFIRMATION
+                STATUS_SHIPPING
         ));
 
         if (STATUS_CANCELLED.equals(order.getOrderStatus()) || hasCancelledHistory) {
