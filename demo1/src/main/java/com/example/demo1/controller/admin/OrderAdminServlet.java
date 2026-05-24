@@ -53,6 +53,8 @@ public class OrderAdminServlet extends HttpServlet {
         String action = request.getParameter("action");
         if ("updateStatus".equals(action)) {
             updateOrderStatus(request, response);
+        } else if ("handoverToCarrier".equals(action)) {
+            handoverToCarrier(request, response);
         } else {
             listOrders(request, response);
         }
@@ -131,6 +133,24 @@ public class OrderAdminServlet extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + SERVLET_PATH + "?action=view&id=" + orderId);
 
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("errorMessage", "ID đơn hàng không hợp lệ.");
+            response.sendRedirect(request.getContextPath() + SERVLET_PATH);
+        }
+    }
+
+    private void handoverToCarrier(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            int orderId = Integer.parseInt(request.getParameter("orderId"));
+            ShippingActionResult result = orderService.handoverToCarrier(orderId);
+
+            if (result.isSuccess()) {
+                request.getSession().setAttribute("successMessage", result.getMessage());
+            } else {
+                request.getSession().setAttribute("errorMessage", result.getMessage());
+            }
+
+            response.sendRedirect(request.getContextPath() + SERVLET_PATH + "?action=view&id=" + orderId);
         } catch (NumberFormatException e) {
             request.getSession().setAttribute("errorMessage", "ID đơn hàng không hợp lệ.");
             response.sendRedirect(request.getContextPath() + SERVLET_PATH);
