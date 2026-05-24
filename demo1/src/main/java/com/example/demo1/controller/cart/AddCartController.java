@@ -9,8 +9,10 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @WebServlet(name = "AddCartController", value = "/AddCart")
 public class AddCartController extends HttpServlet {
@@ -24,29 +26,33 @@ public class AddCartController extends HttpServlet {
 
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect(request.getContextPath()+"/login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        Map<Integer, CartItem> cart = (Map<Integer, CartItem>) session.getAttribute("cart");
-        if (cart == null) {
-            cart = new HashMap<>();
-            session.setAttribute("cart", cart);
-        }
+        int userId = user.getId();
 
         try {
             int id = (request.getParameter("id") != null) ? Integer.parseInt(request.getParameter("id")) : 0;
 
             if ("add".equals(action)) {
                 Product product = productService.getProduct(id);
+                int totalItemsCount = cartService.countItems(userId);
 
-                if (!cart.containsKey(id) && cart.size() >= 99) {
+                if (totalItemsCount >= 99) {
                     session.setAttribute("cartError", "Giỏ hàng đã đầy! Giỏ hàng chỉ chứa tối đa 99 loại sản phẩm.");
                     response.sendRedirect("AddCart?action=view");
                     return;
                 }
 
-                int currentQty = (cart.containsKey(id)) ? cart.get(id).getQuantity() : 0;
+                List<CartItem> currentItems = cartService.getCartItems(userId);
+                int currentQty = 0;
+                for (CartItem item : currentItems) {
+                    if (item.getProduct().getId() == id) {
+                        currentQty = item.getQuantity();
+                        break;
+                    }
+                }
                 int totalDesired = currentQty + 1;
 
                 if (product != null && totalDesired > product.getStock()) {
@@ -55,37 +61,50 @@ public class AddCartController extends HttpServlet {
                     return;
                 }
 
-                cartService.addToCart(cart, id, 1);
+                cartService.addToCart(userId, id, 1);
                 response.sendRedirect("AddCart?action=view");
             }
-
             else if ("update".equals(action)) {
                 int num = Integer.parseInt(request.getParameter("num"));
-
                 Product product = productService.getProduct(id);
-                CartItem currentItem = cart.get(id);
-                int currentQtyInCart = (currentItem != null) ? currentItem.getQuantity() : 0;
+
+                List<CartItem> currentItems = cartService.getCartItems(userId);
+                int currentQtyInCart = 0;
+                for (CartItem item : currentItems) {
+                    if (item.getProduct().getId() == id) {
+                        currentQtyInCart = item.getQuantity();
+                        break;
+                    }
+                }
 
                 int futureQuantity = currentQtyInCart + num;
 
                 if (num > 0 && product != null && futureQuantity > product.getStock()) {
-                    session.setAttribute("cartError", "Không thể tăng. Kho chỉ còn " + product.getStock() + " sản phẩm.");
-                    response.sendRedirect("AddCart?action=view");
-                    return;
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("Kho chỉ còn " + product.getStock() + " sản phẩm.");                    return;
                 }
 
-                cartService.updateQuantity(cart, id, num);
+                cartService.updateQuantity(userId, id, num);
                 response.sendRedirect("AddCart?action=view");
             }
             else if ("delete".equals(action)) {
-                cartService.removeItem(cart, id);
+                cartService.removeItem(userId, id);
                 response.sendRedirect("AddCart?action=view");
             }
             else if ("buyNow".equals(action)) {
                 Product product = productService.getProduct(id);
-                int currentQty = (cart.containsKey(id)) ? cart.get(id).getQuantity() : 0;
 
-                if (!cart.containsKey(id) && cart.size() >= 99) {
+                List<CartItem> currentItems = cartService.getCartItems(userId);
+                int currentQty = 0;
+                for (CartItem item : currentItems) {
+                    if (item.getProduct().getId() == id) {
+                        currentQty = item.getQuantity();
+                        break;
+                    }
+                }
+
+                int totalItemsCount = cartService.countItems(userId);
+                if (totalItemsCount >= 99) {
                     session.setAttribute("cartError", "Giỏ hàng đã đầy! Giỏ hàng chỉ chứa tối đa 99 loại sản phẩm.");
                     response.sendRedirect("AddCart?action=view");
                     return;
@@ -97,22 +116,50 @@ public class AddCartController extends HttpServlet {
                     return;
                 }
 
-                cartService.addToCart(cart, id, 1);
-                response.sendRedirect("AddCart?action=checkout");
+                cartService.addToCart(userId, id, 1);
+                response.sendRedirect("AddCart?action=checkout&ids=" + id);
             }
             else if ("view".equals(action)) {
-                request.setAttribute("totalAmount", cartService.calculateTotal(cart));
+                List<CartItem> cartItems = cartService.getCartItems(userId);
+                request.setAttribute("cartItems", cartItems);
+                request.setAttribute("totalAmount", cartService.calculateTotal(userId));
                 request.getRequestDispatcher("/cart.jsp").forward(request, response);
             }
             else if ("checkout".equals(action)) {
-                if (cart == null || cart.isEmpty()) {
+                List<CartItem> cartItems = cartService.getCartItems(userId);
+                String idsParam = request.getParameter("ids");
+
+                if (cartItems == null || cartItems.isEmpty()) {
                     session.setAttribute("cartError", "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi đặt hàng.");
                     response.sendRedirect("AddCart?action=view");
                     return;
                 }
 
-                double total = cartService.calculateTotal(cart);
+                double total = 0;
+
+                if (idsParam != null && !idsParam.isEmpty()) {
+                    Set<Integer> selectedIds = new HashSet<>();
+                    for (String idStr : idsParam.split(",")) {
+                        selectedIds.add(Integer.parseInt(idStr.trim()));
+                    }
+
+                    List<CartItem> filteredItems = new ArrayList<>();
+
+                    for (CartItem item : cartItems) {
+                        if (selectedIds.contains(item.getProduct().getId())) {
+                            filteredItems.add(item);
+                            total += item.getProduct().getPrice() * item.getQuantity();
+                        }
+                    }
+
+                    cartItems = filteredItems;
+                } else {
+                    total = cartService.calculateTotal(userId);
+                }
+
+                request.setAttribute("cartItems", cartItems);
                 request.setAttribute("totalAmount", total);
+
                 request.getRequestDispatcher("/thanhToan.jsp").forward(request, response);
             }
         } catch (Exception e) {

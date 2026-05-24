@@ -1,3 +1,43 @@
+function showLoadingOverlay(text) {
+    const overlay = document.getElementById('loading-overlay');
+    const textEl = document.getElementById('loading-text');
+    if (!overlay) return;
+    if (textEl) textEl.textContent = text || 'Đang xử lý...';
+    overlay.classList.add('active');
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
+function showActionToast(message, type) {
+    const existing = document.getElementById('action-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'action-toast';
+    toast.className = 'action-toast toast-' + (type || 'success');
+
+    const iconClass = type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check';
+    toast.innerHTML = `<i class="fa-solid ${iconClass} action-toast-icon"></i><span>${message}</span>`;
+
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
+
+window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+        hideLoadingOverlay();
+        document.querySelectorAll('.btn-loading').forEach(btn => btn.classList.remove('btn-loading'));
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     const globalContextPath = document.querySelector('script[src*="sanPham.js"]').getAttribute('src')
         .replace('/js/sanPham.js', '');
@@ -191,9 +231,71 @@ document.addEventListener('DOMContentLoaded', function () {
             if (txtReviewContent.value.trim() === "") {
                 alert("Bạn chưa nhập nội dung đánh giá!");
                 e.preventDefault();
+                return;
             }
+            const submitBtn = document.getElementById('btn-submit-review');
+            if (submitBtn) submitBtn.classList.add('btn-loading');
+            const reviewLoadingTimer = setTimeout(() => showLoadingOverlay('Đang gửi đánh giá...'), 400);
+            reviewForm.addEventListener('submit', () => clearTimeout(reviewLoadingTimer), { once: true });
         });
     }
+
+    const btnBuy = document.querySelector('.btn-buy');
+    const btnCart = document.querySelector('.btn-cart');
+    const btnsBuyNow = document.querySelectorAll('.btn-buy-now, .js-buy-now');
+    const btnsAddCart = document.querySelectorAll('.btn-add-cart, .js-add-cart');
+
+    function handleCartClick(e, text) {
+        const href = this.getAttribute('href');
+
+        const loginLink = document.querySelector('a.icon-btn[href*="/login"]');
+        if (loginLink) {
+            e.preventDefault();
+            if (typeof showLoginRequiredPopup === 'function') {
+                showLoginRequiredPopup(
+                    typeof globalContextPath !== 'undefined' ? globalContextPath : '',
+                    'Vui lòng đăng nhập để xem giỏ hàng và thanh toán'
+                );
+            }
+            return;
+        }
+
+        e.preventDefault();
+        if (btnBuy) btnBuy.classList.add('btn-loading');
+        if (btnCart) btnCart.classList.add('btn-loading');
+        btnsBuyNow.forEach(b => b.classList.add('btn-loading'));
+        btnsAddCart.forEach(b => b.classList.add('btn-loading'));
+
+        const loadingTimer = setTimeout(() => showLoadingOverlay(text), 400);
+
+        window.location.href = href;
+
+        window.addEventListener('pagehide', () => clearTimeout(loadingTimer), { once: true });
+    }
+
+    if (btnBuy) {
+        btnBuy.addEventListener('click', function(e) {
+            handleCartClick.call(this, e, 'Mua ngay, đang chuyển đến thanh toán...');
+        });
+    }
+
+    if (btnCart) {
+        btnCart.addEventListener('click', function(e) {
+            handleCartClick.call(this, e, 'Đang thêm vào giỏ hàng...');
+        });
+    }
+
+    btnsBuyNow.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            handleCartClick.call(this, e, 'Mua ngay, đang chuyển đến thanh toán...');
+        });
+    });
+
+    btnsAddCart.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            handleCartClick.call(this, e, 'Đang thêm vào giỏ hàng...');
+        });
+    });
 
     const reviewsList = document.querySelector('.reviews-list');
     const btnSeeMore = document.querySelector('.btn-see-more');

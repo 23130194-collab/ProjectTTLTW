@@ -92,28 +92,56 @@ public class AdminUploadProductServlet extends HttpServlet {
 
         if (status == null || status.trim().isEmpty()) status = "active";
 
+        if (stock < 0) {
+            request.setAttribute("errorMessage", "Số lượng tồn kho không được nhỏ hơn 0.");
+            forwardWithData(request, response);
+            return;
+        }
+
         List<String> missingFields = new ArrayList<>();
         if (name == null || name.trim().isEmpty()) missingFields.add("Tên sản phẩm");
         if (categoryId == 0) missingFields.add("Danh mục");
         if (brandId == 0) missingFields.add("Thương hiệu");
-        if (oldPrice <= 0) missingFields.add("Giá gốc sản phẩm");
+        if (oldPrice <= 0) missingFields.add("Giá gốc lớn hơn 0");
 
         String mainImage = request.getParameter("mainImage");
         if (isNew && (mainImage == null || mainImage.trim().isEmpty())) {
             missingFields.add("Ảnh đại diện");
         }
 
-        Double discountValue = getDiscountValue(request);
+        Double discountValue = null;
+        String discountValueStr = request.getParameter("discountValue");
+        if (discountValueStr != null && !discountValueStr.trim().isEmpty()) {
+            try {
+                double value = Double.parseDouble(discountValueStr);
+                if (value < 0 || value > 100) {
+                    request.setAttribute("errorMessage", "Giảm giá (%) phải từ 0 đến 100.");
+                    forwardWithData(request, response);
+                    return;
+                }
+                discountValue = value;
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Giá trị giảm giá không hợp lệ.");
+                forwardWithData(request, response);
+                return;
+            }
+        }
+
         Timestamp discountStart = parseTimestamp(request.getParameter("discountStart"));
         Timestamp discountEnd = parseTimestamp(request.getParameter("discountEnd"));
 
         if (discountValue != null && discountValue > 0) {
             if (discountStart == null) missingFields.add("Ngày bắt đầu giảm giá");
             if (discountEnd == null) missingFields.add("Ngày kết thúc giảm giá");
+            else if (discountStart != null && !discountStart.before(discountEnd)) {
+                request.setAttribute("errorMessage", "Ngày bắt đầu giảm giá phải trước ngày kết thúc.");
+                forwardWithData(request, response);
+                return;
+            }
         }
 
         if (!missingFields.isEmpty()) {
-            request.setAttribute("errorMessage", "Vui lòng nhập đầy đủ các trường: " + String.join(", ", missingFields) + ".");
+            request.setAttribute("errorMessage", "Vui lòng nhập/kiểm tra lại các trường: " + String.join(", ", missingFields) + ".");
             forwardWithData(request, response);
             return;
         }

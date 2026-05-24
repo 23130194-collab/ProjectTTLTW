@@ -83,7 +83,8 @@ public class AdminProductListServlet extends HttpServlet {
 
             String queryStatus = status;
             if (status == null || status.isEmpty()) {
-                queryStatus = "all_admin";
+                queryStatus = "active";
+                status = "active";
             }
 
             ProductPage productPage = ps.filterAndSortProducts(

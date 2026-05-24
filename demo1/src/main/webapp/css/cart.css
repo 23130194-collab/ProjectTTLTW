@@ -264,3 +264,112 @@ body {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.loading-spinner-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 36px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f0f0f0;
+    border-top-color: #e53935;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.btn-buy-link.btn-loading {
+    opacity: 0.65;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.delete-icon.btn-loading {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.out-of-stock-section {
+    margin-top: 30px;
+    border-top: 2px dashed #ddd;
+    padding-top: 20px;
+}
+
+.out-of-stock-title {
+    font-weight: bold;
+    color: #dc3545;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.product-item.disabled {
+    opacity: 0.6;
+    background: #f9f9f9;
+    filter: grayscale(100%);
+}
+
+.product-name-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-name-text {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.badge-out-of-stock {
+    background: #dc3545;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-left: 8px;
+    display: inline-block;
+}
+
+.qty-disabled {
+    cursor: not-allowed;
+    background: #eee;
+}
+
+.delete-action {
+    color: #dc3545;
+}

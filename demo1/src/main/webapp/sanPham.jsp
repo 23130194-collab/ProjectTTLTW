@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css">
+
 
 </head>
 <body>
@@ -35,33 +37,20 @@
             <a href="${pageContext.request.contextPath}/contact">Liên hệ</a>
         </nav>
 
-        <div class="search-box">
+        <div class="search-box" style="position: relative; overflow: visible;">
             <form action="search" method="get" id="searchForm" style="display: flex; width: 100%;">
-                <input type="text" name="keyword" id="searchInput"
-                       placeholder="Bạn muốn mua gì hôm nay?" autocomplete="off">
+                <input type="text" name="keyword" id="searchInput" autocomplete="off" placeholder="Bạn muốn mua gì...">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
-            <div id="suggestion-box" class="suggestion-box" style="display:none;"></div>
+            <div id="suggestion-box" class="suggestion-box"></div>
         </div>
 
         <div class="header-actions">
-
-            <%
-                int totalQuantity = 0;
-                Map<Integer, CartItem> cart = (Map<Integer, CartItem>) session.getAttribute("cart");
-
-                if (cart != null) {
-                    totalQuantity = cart.size();
-                }
-            %>
-
-            <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper"
-               title="Giỏ hàng">
+            <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
-
-                <% if (totalQuantity > 0) { %>
-                <span class="cart-badge"><%= totalQuantity %></span>
-                <% } %>
+                <c:if test="${not empty requestScope.cartItems}">
+                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                </c:if>
             </a>
 
             <c:choose>
@@ -87,8 +76,7 @@
                             <img src="${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:when>
                         <c:otherwise>
-                            <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon"
-                                 alt="${cat.name}">
+                            <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
                         ${cat.name}
@@ -99,6 +87,13 @@
     </div>
 </header>
 <div class="overlay" id="overlay"></div>
+
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner-box">
+        <div class="loading-spinner"></div>
+        <p class="loading-text" id="loading-text">Đang xử lý...</p>
+    </div>
+</div>
 
 <main>
     <div class="all">
@@ -468,7 +463,7 @@
                             <textarea name="comment"
                                       placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm"></textarea>
                         </div>
-                        <button class="btn-submit-review">GỬI ĐÁNH GIÁ</button>
+                        <button class="btn-submit-review" id="btn-submit-review" type="submit">GỬI ĐÁNH GIÁ</button>
                     </form>
 
                 </div>
@@ -601,6 +596,10 @@
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPham.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
+<script>
+    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+</script>
+<script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>
 
 </html>

@@ -236,7 +236,7 @@ public class OrderDao {
         });
     }
 
-    public boolean createOrder(Order order, RecipientInfo recipient, Map<Integer, CartItem> cart, Payment payment) {
+    public boolean createOrder(Order order, RecipientInfo recipient, List<CartItem> cartItems, Payment payment) {
         return jdbi.inTransaction(handle -> {
             try {
                 int orderId = handle.createUpdate("INSERT INTO orders (user_id, order_code, order_status, subprice, discount_amount, shipping_fee, total_amount) " +
@@ -274,7 +274,7 @@ public class OrderDao {
                         .bind("addressDetail", recipient.getAddress())
                         .execute();
 
-                for (CartItem item : cart.values()) {
+                for (CartItem item : cartItems) {
                     double originalPrice = item.getProduct().getOldPrice();
                     if (originalPrice == 0) {
                         originalPrice = item.getProduct().getPrice();
