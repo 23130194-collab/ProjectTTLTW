@@ -205,7 +205,7 @@
                                        class="view-detail-link">
                                         Xem chi tiết >
                                     </a>
-                                    <c:if test="${order.orderStatus eq 'Đang giao'}">
+                                    <c:if test="${order.readyForCustomerConfirmation}">
                                         <button type="button"
                                                 class="btn-confirm-received"
                                                 data-modal-id="confirmReceiveModal-${order.id}">
@@ -215,7 +215,7 @@
                                 </div>
                             </div>
 
-                            <c:if test="${order.orderStatus eq 'Đang giao'}">
+                            <c:if test="${order.readyForCustomerConfirmation}">
                                 <div id="confirmReceiveModal-${order.id}" class="cancel-modal-overlay confirm-received-modal">
                                     <div class="cancel-modal-content">
                                         <form action="${pageContext.request.contextPath}/confirm-received" method="post">
