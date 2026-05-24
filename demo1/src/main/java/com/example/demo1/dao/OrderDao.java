@@ -12,7 +12,6 @@ import java.util.Optional;
 
 public class OrderDao {
     private static final String STATUS_SENT_TO_CARRIER = "Đã giao cho đơn vị vận chuyển";
-    private static final String STATUS_READY_FOR_CUSTOMER_CONFIRMATION = "Chờ khách xác nhận nhận hàng";
 
     private Jdbi jdbi = DatabaseDao.get();
 
@@ -129,10 +128,7 @@ public class OrderDao {
         }
 
         order.setSentToCarrier(hasStatusHistory(order.getId(), STATUS_SENT_TO_CARRIER));
-        order.setReadyForCustomerConfirmation(
-                "Đang giao".equals(order.getOrderStatus())
-                        && hasStatusHistory(order.getId(), STATUS_READY_FOR_CUSTOMER_CONFIRMATION)
-        );
+        order.setReadyForCustomerConfirmation("Đang giao".equals(order.getOrderStatus()));
     }
 
     public boolean updateOrderStatus(int orderId, String status) {
