@@ -285,7 +285,7 @@
 	                            </div>
 	                        </c:if>
 
-                        <c:if test="${order.orderStatus eq 'Đang giao'}">
+                        <c:if test="${order.readyForCustomerConfirmation}">
                             <div class="action-footer">
                                 <button type="button" id="showConfirmReceivedModalBtn" class="btn-confirm-received">
                                     Xác nhận nhận hàng
