@@ -76,7 +76,14 @@
 
 <main class="main-content">
     <div class="content-area">
-        <h1 class="page-title">${not empty product ? 'Chỉnh sửa' : 'Thêm'} sản phẩm</h1>
+        <div class="page-title-row">
+            <h1 class="page-title">${not empty product ? 'Chỉnh sửa' : 'Thêm'} sản phẩm</h1>
+            <c:if test="${not empty product}">
+                <a href="${contextPath}/admin/product-preview?id=${product.id}" target="_blank" class="btn-preview-product" title="Xem chi tiết sản phẩm">
+                    <i class="fa-solid fa-eye"></i>
+                </a>
+            </c:if>
+        </div>
         <div class="breadcrumb">
             <a href="${contextPath}/admin/dashboard">Trang chủ</a> / <a
                 href="${contextPath}/admin/products">Danh sách sản phẩm</a> /
@@ -100,12 +107,12 @@
                 <div class="form-group">
                     <h3>Tên sản phẩm</h3>
                     <input type="text" name="name" placeholder="Nhập tên sản phẩm"
-                           class="form-input" value="${product.name}" required>
+                           class="form-input" value="${product.name}">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <h3>Danh mục</h3>
-                        <select class="form-select" name="categoryId" id="category-select" required>
+                        <select class="form-select" name="categoryId" id="category-select">
                             <option value="" disabled ${empty product ? 'selected' : '' }>Chọn danh
                                 mục
                             </option>
@@ -117,7 +124,7 @@
                     </div>
                     <div class="form-group">
                         <h3>Thương hiệu</h3>
-                        <select class="form-select" name="brandId" required>
+                        <select class="form-select" name="brandId">
                             <option value="" disabled ${empty product ? 'selected' : '' }>Chọn
                                 thương hiệu
                             </option>
@@ -187,7 +194,7 @@
                         <label>Giảm giá (%)</label>
                         <input type="number" name="discountValue"
                                placeholder="Nhập giá trị giảm giá" class="form-input"
-                               value="${product.discountValue}" min="0" max="100" step="1.0">
+                               value="${product.discountValue}" step="1.0">
                     </div>
                 </div>
             </div>
