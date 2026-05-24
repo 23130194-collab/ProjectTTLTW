@@ -19,6 +19,8 @@ public class Order {
     private LocalDateTime updatedAt;
     private List<OrderItem> items;
     private RecipientInfo recipientInfo;
+    private boolean sentToCarrier;
+    private boolean readyForCustomerConfirmation;
 
     public Order() {
     }
@@ -133,5 +135,21 @@ public class Order {
 
     public void setRecipientInfo(RecipientInfo recipientInfo) {
         this.recipientInfo = recipientInfo;
+    }
+
+    public boolean isSentToCarrier() {
+        return sentToCarrier;
+    }
+
+    public void setSentToCarrier(boolean sentToCarrier) {
+        this.sentToCarrier = sentToCarrier;
+    }
+
+    public boolean isReadyForCustomerConfirmation() {
+        return readyForCustomerConfirmation;
+    }
+
+    public void setReadyForCustomerConfirmation(boolean readyForCustomerConfirmation) {
+        this.readyForCustomerConfirmation = readyForCustomerConfirmation;
     }
 }

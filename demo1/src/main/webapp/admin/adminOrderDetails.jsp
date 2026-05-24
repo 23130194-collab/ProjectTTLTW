@@ -78,6 +78,11 @@
         </c:if>
 
         <c:if test="${not empty orderDetail}">
+            <c:set var="recipientInfo" value="${orderDetail.order.recipientInfo}"/>
+            <c:set var="recipientAddress" value="${fn:trim(recipientInfo.address)}"/>
+            <c:set var="recipientWard" value="${fn:trim(recipientInfo.ward)}"/>
+            <c:set var="recipientDistrict" value="${fn:trim(recipientInfo.district)}"/>
+            <c:set var="recipientProvince" value="${fn:trim(recipientInfo.province)}"/>
             <div class="invoice-container">
                 <header class="invoice-header">
                     <div><span class="invoice-logo">TechNova</span></div>
@@ -94,8 +99,12 @@
                     </div>
                     <div class="meta-column">
                         <strong>Thông tin người nhận:</strong>
-                        <address>${orderDetail.customer.name}<br/>${orderDetail.customer.phone}<br/>${orderDetail.customer.address}</address>
-                        <div>${orderDetail.customer.email}</div>
+                        <address>
+                            ${not empty recipientInfo.fullName ? recipientInfo.fullName : orderDetail.customer.name}<br/>
+                            ${not empty recipientInfo.phone ? recipientInfo.phone : orderDetail.customer.phone}<br/>
+                            ${recipientAddress}<c:if test="${not empty recipientWard}">, ${recipientWard}</c:if><c:if test="${not empty recipientDistrict}">, ${recipientDistrict}</c:if><c:if test="${not empty recipientProvince}">, ${recipientProvince}</c:if>
+                        </address>
+                        <div>${not empty recipientInfo.email ? recipientInfo.email : orderDetail.customer.email}</div>
                     </div>
                     <div class="meta-column">
                         <strong>Phương thức thanh toán:</strong>
@@ -136,6 +145,47 @@
                         <a href="#confirm-status-update-modal" class="update-status-btn open-modal-btn">Cập nhật</a>
                     </form>
                 </section>
+
+                <c:set var="isProcessingOrder" value="${orderDetail.order.orderStatus == 'Đang xử lý' || orderDetail.order.orderStatus == 'Đang xử lí'}"/>
+                <c:set var="isPendingOrder" value="${orderDetail.order.orderStatus == 'Chờ xác nhận'}"/>
+                <c:if test="${isProcessingOrder || isPendingOrder}">
+                    <section class="carrier-action-section">
+                        <div class="carrier-action-content">
+                            <div>
+                                <strong>Giao vận GHN</strong>
+                                <p>
+                                    <c:choose>
+                                        <c:when test="${orderDetail.order.sentToCarrier}">
+                                            Đơn hàng đã được gửi sang Giao Hàng Nhanh. Chờ đơn vị vận chuyển lấy hàng và quét mã.
+                                        </c:when>
+                                        <c:when test="${isPendingOrder}">
+                                            Đơn COD vẫn đang chờ xác nhận. Khi đơn chuyển sang Đang xử lý, admin có thể giao cho đơn vị vận chuyển.
+                                        </c:when>
+                                        <c:otherwise>
+                                            Tạo vận đơn GHN để đơn vị vận chuyển đến lấy hàng.
+                                        </c:otherwise>
+                                    </c:choose>
+                                </p>
+                            </div>
+                            <c:if test="${isProcessingOrder && not orderDetail.order.sentToCarrier}">
+                                <form action="${pageContext.request.contextPath}/admin/orders" method="post" id="handoverCarrierForm">
+                                    <input type="hidden" name="action" value="handoverToCarrier">
+                                    <input type="hidden" name="orderId" value="${orderDetail.order.id}">
+                                    <a href="#confirm-carrier-handover-modal" class="carrier-handover-btn open-modal-btn">
+                                        <i class="fa-solid fa-truck-fast"></i>
+                                        Giao cho đơn vị vận chuyển
+                                    </a>
+                                </form>
+                            </c:if>
+                            <c:if test="${isPendingOrder}">
+                                <button type="button" class="carrier-handover-btn is-disabled" disabled>
+                                    <i class="fa-solid fa-truck-fast"></i>
+                                    Giao cho đơn vị vận chuyển
+                                </button>
+                            </c:if>
+                        </div>
+                    </section>
+                </c:if>
 
                 <div class="invoice-items-table-wrap">
                     <table class="invoice-items-table">
@@ -237,6 +287,17 @@
         <div class="modal-buttons">
             <a href="#" class="modal-btn modal-cancel">Hủy</a>
             <button type="submit" form="updateStatusForm" class="modal-btn modal-confirm">Cập nhật</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirm-carrier-handover-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>Giao cho đơn vị vận chuyển</h3>
+        <p>Hệ thống sẽ tạo vận đơn GHN cho đơn hàng này. Bạn có chắc chắn muốn tiếp tục?</p>
+        <div class="modal-buttons">
+            <a href="#" class="modal-btn modal-cancel">Hủy</a>
+            <button type="submit" form="handoverCarrierForm" class="modal-btn modal-confirm">Giao cho GHN</button>
         </div>
     </div>
 </div>
