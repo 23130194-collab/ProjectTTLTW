@@ -27,7 +27,8 @@ import java.util.List;
 public class AdminUploadProductServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
@@ -50,12 +51,14 @@ public class AdminUploadProductServlet extends HttpServlet {
                         request.setAttribute("product", product);
 
                         List<Product_Image> detailImages = productService.getProductImages(productId);
-                        if (detailImages == null) detailImages = new ArrayList<>();
+                        if (detailImages == null)
+                            detailImages = new ArrayList<>();
                         detailImages.sort(Comparator.comparingInt(Product_Image::getDisplayOrder));
                         request.setAttribute("images", detailImages);
 
                         List<Product_Spec> specs = productService.getProductSpecs(productId);
-                        if (specs == null) specs = new ArrayList<>();
+                        if (specs == null)
+                            specs = new ArrayList<>();
                         request.setAttribute("specs", specs);
                     }
                 } catch (NumberFormatException e) {
@@ -72,7 +75,8 @@ public class AdminUploadProductServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
@@ -86,11 +90,16 @@ public class AdminUploadProductServlet extends HttpServlet {
         String description = request.getParameter("description");
         int categoryId = parseIntSafe(request.getParameter("categoryId"));
         int brandId = parseIntSafe(request.getParameter("brandId"));
-        int stock = parseIntSafe(request.getParameter("stock"));
-        double oldPrice = parseDoubleSafe(request.getParameter("oldPrice"));
+        String stockStr = request.getParameter("stock");
+        if (stockStr != null) stockStr = stockStr.replace(".", "").replace(",", "");
+        int stock = parseIntSafe(stockStr);
+        String oldPriceStr = request.getParameter("oldPrice");
+        if (oldPriceStr != null) oldPriceStr = oldPriceStr.replace(".", "").replace(",", "");
+        double oldPrice = parseDoubleSafe(oldPriceStr);
         String status = request.getParameter("status");
 
-        if (status == null || status.trim().isEmpty()) status = "active";
+        if (status == null || status.trim().isEmpty())
+            status = "active";
 
         if (stock < 0) {
             request.setAttribute("errorMessage", "Số lượng tồn kho không được nhỏ hơn 0.");
@@ -99,10 +108,14 @@ public class AdminUploadProductServlet extends HttpServlet {
         }
 
         List<String> missingFields = new ArrayList<>();
-        if (name == null || name.trim().isEmpty()) missingFields.add("Tên sản phẩm");
-        if (categoryId == 0) missingFields.add("Danh mục");
-        if (brandId == 0) missingFields.add("Thương hiệu");
-        if (oldPrice <= 0) missingFields.add("Giá gốc lớn hơn 0");
+        if (name == null || name.trim().isEmpty())
+            missingFields.add("Tên sản phẩm");
+        if (categoryId == 0)
+            missingFields.add("Danh mục");
+        if (brandId == 0)
+            missingFields.add("Thương hiệu");
+        if (oldPrice <= 0)
+            missingFields.add("Giá gốc lớn hơn 0");
 
         String mainImage = request.getParameter("mainImage");
         if (isNew && (mainImage == null || mainImage.trim().isEmpty())) {
@@ -131,8 +144,10 @@ public class AdminUploadProductServlet extends HttpServlet {
         Timestamp discountEnd = parseTimestamp(request.getParameter("discountEnd"));
 
         if (discountValue != null && discountValue > 0) {
-            if (discountStart == null) missingFields.add("Ngày bắt đầu giảm giá");
-            if (discountEnd == null) missingFields.add("Ngày kết thúc giảm giá");
+            if (discountStart == null)
+                missingFields.add("Ngày bắt đầu giảm giá");
+            if (discountEnd == null)
+                missingFields.add("Ngày kết thúc giảm giá");
             else if (discountStart != null && !discountStart.before(discountEnd)) {
                 request.setAttribute("errorMessage", "Ngày bắt đầu giảm giá phải trước ngày kết thúc.");
                 forwardWithData(request, response);
@@ -141,7 +156,8 @@ public class AdminUploadProductServlet extends HttpServlet {
         }
 
         if (!missingFields.isEmpty()) {
-            request.setAttribute("errorMessage", "Vui lòng nhập/kiểm tra lại các trường: " + String.join(", ", missingFields) + ".");
+            request.setAttribute("errorMessage",
+                    "Vui lòng nhập/kiểm tra lại các trường: " + String.join(", ", missingFields) + ".");
             forwardWithData(request, response);
             return;
         }
@@ -164,7 +180,8 @@ public class AdminUploadProductServlet extends HttpServlet {
                 newProduct.setStock(stock);
                 newProduct.setStatus(status);
 
-                int currentProductId = productService.createProduct(newProduct, mainImage, detailImages, discountValue, discountStart, discountEnd);
+                int currentProductId = productService.createProduct(newProduct, mainImage, detailImages, discountValue,
+                        discountStart, discountEnd);
                 updateProductSpecs(request, currentProductId);
             } else {
                 Product productToUpdate = productService.getProduct(productId);
@@ -174,20 +191,28 @@ public class AdminUploadProductServlet extends HttpServlet {
                     return;
                 }
 
-                if (name != null && !name.trim().isEmpty()) productToUpdate.setName(name);
-                if (description != null && !description.trim().isEmpty()) productToUpdate.setDescription(description);
+                if (name != null && !name.trim().isEmpty())
+                    productToUpdate.setName(name);
+                if (description != null && !description.trim().isEmpty())
+                    productToUpdate.setDescription(description);
                 productToUpdate.setStatus(status);
 
-                if (categoryId > 0) productToUpdate.setCategoryId(categoryId);
-                if (brandId > 0) productToUpdate.setBrandId(brandId);
-                if (stock >= 0) productToUpdate.setStock(stock);
-                if (oldPrice > 0) productToUpdate.setOldPrice(oldPrice);
+                if (categoryId > 0)
+                    productToUpdate.setCategoryId(categoryId);
+                if (brandId > 0)
+                    productToUpdate.setBrandId(brandId);
+                if (stock >= 0)
+                    productToUpdate.setStock(stock);
+                if (oldPrice > 0)
+                    productToUpdate.setOldPrice(oldPrice);
 
-                productService.updateProduct(productToUpdate, mainImage, detailImages, discountValue, discountStart, discountEnd);
+                productService.updateProduct(productToUpdate, mainImage, detailImages, discountValue, discountStart,
+                        discountEnd);
                 updateProductSpecs(request, productId);
             }
 
-            request.getSession().setAttribute("successMessage", isNew ? "Thêm sản phẩm thành công!" : "Cập nhật sản phẩm thành công!");
+            request.getSession().setAttribute("successMessage",
+                    isNew ? "Thêm sản phẩm thành công!" : "Cập nhật sản phẩm thành công!");
             response.sendRedirect(request.getContextPath() + "/admin/products");
 
         } catch (Exception e) {
@@ -256,7 +281,8 @@ public class AdminUploadProductServlet extends HttpServlet {
         }
     }
 
-    private void forwardWithData(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void forwardWithData(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         CategoryService categoryService = new CategoryService();
         BrandService brandService = new BrandService();
         request.setAttribute("categoryList", categoryService.getAllCategories());
@@ -268,8 +294,13 @@ public class AdminUploadProductServlet extends HttpServlet {
         productData.setCategoryId(parseIntSafe(request.getParameter("categoryId")));
         productData.setBrandId(parseIntSafe(request.getParameter("brandId")));
         productData.setDescription(request.getParameter("description"));
-        productData.setOldPrice(parseDoubleSafe(request.getParameter("oldPrice")));
-        productData.setStock(parseIntSafe(request.getParameter("stock")));
+        String oldPriceStr = request.getParameter("oldPrice");
+        if (oldPriceStr != null) oldPriceStr = oldPriceStr.replace(".", "").replace(",", "");
+        productData.setOldPrice(parseDoubleSafe(oldPriceStr));
+        
+        String stockStr = request.getParameter("stock");
+        if (stockStr != null) stockStr = stockStr.replace(".", "").replace(",", "");
+        productData.setStock(parseIntSafe(stockStr));
         productData.setStatus(request.getParameter("status"));
 
         String discountValueStr = request.getParameter("discountValue");
@@ -287,7 +318,8 @@ public class AdminUploadProductServlet extends HttpServlet {
     }
 
     private Timestamp parseTimestamp(String dateStr) {
-        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        if (dateStr == null || dateStr.trim().isEmpty())
+            return null;
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
             java.util.Date parsedDate = dateFormat.parse(dateStr);
@@ -301,12 +333,16 @@ public class AdminUploadProductServlet extends HttpServlet {
     private int parseIntSafe(String s) {
         try {
             return (s != null && !s.isEmpty()) ? Integer.parseInt(s.trim()) : 0;
-        } catch (NumberFormatException e) { return 0; }
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     private double parseDoubleSafe(String s) {
         try {
             return (s != null && !s.isEmpty()) ? Double.parseDouble(s.trim()) : 0.0;
-        } catch (NumberFormatException e) { return 0.0; }
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
     }
 }
