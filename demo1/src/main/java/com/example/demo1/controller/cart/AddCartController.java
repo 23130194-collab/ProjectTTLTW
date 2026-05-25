@@ -13,11 +13,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.example.demo1.model.UserAddress;
+import com.example.demo1.service.UserAddressService;
 
 @WebServlet(name = "AddCartController", value = "/AddCart")
 public class AddCartController extends HttpServlet {
     private final CartService cartService = new CartService();
     private final ProductService productService = new ProductService();
+    private final UserAddressService userAddressService = new UserAddressService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -81,7 +84,8 @@ public class AddCartController extends HttpServlet {
 
                 if (num > 0 && product != null && futureQuantity > product.getStock()) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Kho chỉ còn " + product.getStock() + " sản phẩm.");                    return;
+                    response.getWriter().write("Kho chỉ còn " + product.getStock() + " sản phẩm.");
+                    return;
                 }
 
                 cartService.updateQuantity(userId, id, num);
@@ -157,8 +161,13 @@ public class AddCartController extends HttpServlet {
                     total = cartService.calculateTotal(userId);
                 }
 
+                List<UserAddress> userAddresses = userAddressService.getAddressesByUserId(userId);
+                UserAddress defaultAddress = userAddressService.getDefaultAddressByUserId(userId);
+
                 request.setAttribute("cartItems", cartItems);
                 request.setAttribute("totalAmount", total);
+                request.setAttribute("userAddresses", userAddresses);
+                request.setAttribute("defaultAddress", defaultAddress);
 
                 request.getRequestDispatcher("/thanhToan.jsp").forward(request, response);
             }
