@@ -93,7 +93,15 @@
     </div>
 </div>
 
-<form action="ProcessOrderServlet" method="POST">
+<form action="ProcessOrderServlet" method="POST" id="checkoutForm">
+    <input type="hidden" id="form-address"    name="address"   value="">
+    <input type="hidden" id="form-province"   name="province"  value="">
+    <input type="hidden" id="form-district"   name="district"  value="">
+    <input type="hidden" id="form-ward"       name="ward"      value="">
+    <input type="hidden" id="form-address-id" name="addressId" value="">
+    <input type="hidden" id="form-fullname-addr" name="recipientName"  value="">
+    <input type="hidden" id="form-phone-addr"    name="recipientPhone" value="">
+
     <div class="app-container">
         <div class="app-scroll">
             <div class="header-cart">
@@ -107,7 +115,6 @@
 
             <c:forEach items="${requestScope.cartItems}" var="item">
                 <c:set var="totalOldPrice" value="${totalOldPrice + (item.product.oldPrice * item.quantity)}"/>
-
                 <input type="hidden" name="productIds" value="${item.product.id}">
 
                 <div class="product-box">
@@ -115,13 +122,13 @@
                     <div class="product-info">
                         <b>${item.product.name}</b><br>
                         <div>
-                <span class="current-price">
-                    <fmt:formatNumber value="${item.product.price}" pattern="#,###"/>₫
-                </span>
+                            <span class="current-price">
+                                <fmt:formatNumber value="${item.product.price}" pattern="#,###"/>₫
+                            </span>
                             <c:if test="${item.product.oldPrice > item.product.price}">
-                    <span class="old-price">
-                        <fmt:formatNumber value="${item.product.oldPrice}" pattern="#,###"/>₫
-                    </span>
+                                <span class="old-price">
+                                    <fmt:formatNumber value="${item.product.oldPrice}" pattern="#,###"/>₫
+                                </span>
                             </c:if>
                         </div>
                         <small class="product-qty">Số lượng: ${item.quantity}</small>
@@ -147,19 +154,62 @@
             <div class="section">
                 <div class="section-title">ĐỊA CHỈ NHẬN HÀNG</div>
 
-                <select name="province" id="province" required>
-                    <option value="">Chọn Tỉnh/Thành phố*</option>
-                </select>
+                <c:choose>
+                    <c:when test="${not empty requestScope.userAddresses}">
+                        <div id="selected-address-box">
+                            <c:choose>
+                                <c:when test="${not empty requestScope.defaultAddress}">
+                                    <div class="selected-address-display">
+                                        <div class="addr-name-phone">
+                                            <c:if test="${not empty requestScope.defaultAddress.label}">
+                                                <span class="addr-label">${requestScope.defaultAddress.label}</span>
+                                            </c:if>
+                                                ${requestScope.defaultAddress.fullName}
+                                            &nbsp;|&nbsp;
+                                                ${requestScope.defaultAddress.phone}
+                                            <span class="addr-default-badge">Mặc định</span>
+                                        </div>
+                                        <div class="addr-detail">${requestScope.defaultAddress.fullAddress}</div>
+                                        <button type="button" class="btn-change-address" id="btnOpenAddressModal">
+                                            <i class="fa-solid fa-pen-to-square"></i> Thay đổi
+                                        </button>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:set var="firstAddr" value="${requestScope.userAddresses[0]}"/>
+                                    <div class="selected-address-display">
+                                        <div class="addr-name-phone">
+                                            <c:if test="${not empty firstAddr.label}">
+                                                <span class="addr-label">${firstAddr.label}</span>
+                                            </c:if>
+                                                ${firstAddr.fullName}
+                                            &nbsp;|&nbsp;
+                                                ${firstAddr.phone}
+                                        </div>
+                                        <div class="addr-detail">${firstAddr.fullAddress}</div>
+                                        <button type="button" class="btn-change-address" id="btnOpenAddressModal">
+                                            <i class="fa-solid fa-pen-to-square"></i> Thay đổi
+                                        </button>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div id="selected-address-box">
+                            <div class="no-address-hint">
+                                <i class="fa-solid fa-location-dot"></i>
+                                Bạn chưa có địa chỉ nhận hàng nào.
+                            </div>
+                            <button type="button" class="btn-change-address" id="btnOpenAddressModal"
+                                    style="width:100%; text-align:center;" onclick="openAddressModal()">
+                                <i class="fa-solid fa-plus"></i> Thêm địa chỉ nhận hàng
+                            </button>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
 
-                <select name="district" id="district" required>
-                    <option value="">Chọn Quận/Huyện*</option>
-                </select>
-
-                <select name="ward" id="ward" required>
-                    <option value="">Chọn Phường/Xã*</option>
-                </select>
-                <textarea name="address" placeholder="Số nhà, tên đường*" required></textarea>
-                <textarea name="note" placeholder="Ghi chú (nếu có)"></textarea>
+                <textarea name="note" placeholder="Ghi chú (nếu có)" style="margin-top:10px;"></textarea>
             </div>
 
             <div class="payment-box">
@@ -200,108 +250,96 @@
     </div>
 </form>
 
+<div class="address-modal-overlay" id="addressModalOverlay">
+    <div class="address-modal-box">
+        <div class="address-modal-header">
+            <h3>Địa chỉ nhận hàng</h3>
+            <button type="button" class="address-modal-close" id="btnCloseAddressModal">&times;</button>
+        </div>
+
+        <div id="modalAddressCardList">
+            <c:choose>
+                <c:when test="${not empty requestScope.userAddresses}">
+                    <div class="address-list-title">Chọn địa chỉ</div>
+                    <c:forEach items="${requestScope.userAddresses}" var="addr">
+                        <div class="address-card ${addr.defaultAddress ? 'selected' : ''}"
+                             data-id="${addr.id}"
+                             data-fullname="${addr.fullName}"
+                             data-phone="${addr.phone}"
+                             data-full-address="${addr.fullAddress}"
+                             data-ward="${addr.ward}"
+                             data-province="${addr.province}"
+                             data-default="${addr.defaultAddress}"
+                             onclick="selectAddress(this)">
+                            <div class="addr-name-phone">
+                                <c:if test="${not empty addr.label}">
+                                    <span class="addr-label">${addr.label}</span>
+                                </c:if>
+                                    ${addr.fullName} &nbsp;|&nbsp; ${addr.phone}
+                                <c:if test="${addr.defaultAddress}">
+                                    <span class="addr-default-badge">Mặc định</span>
+                                </c:if>
+                            </div>
+                            <div class="addr-detail">${addr.fullAddress}</div>
+                            <input type="radio" class="addr-radio"
+                                   name="addrRadio" value="${addr.id}"
+                                ${addr.defaultAddress ? 'checked' : ''}
+                                   onclick="event.stopPropagation(); selectAddress(this.closest('.address-card'))">
+                        </div>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <div class="no-address-hint" id="noAddressHint">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Chưa có địa chỉ nào. Hãy thêm địa chỉ mới bên dưới.
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <div class="add-address-toggle" id="toggleNewAddressForm">
+            <i class="fa-solid fa-plus"></i> Thêm địa chỉ mới
+        </div>
+
+        <form class="new-address-form" id="newAddressForm">
+            <input type="hidden" name="action" value="add">
+
+            <div class="row-2col">
+                <input class="input-box" name="fullName"
+                       placeholder="Họ tên người nhận*" required
+                       value="${sessionScope.user.name}">
+                <input class="input-box" name="phone" type="tel"
+                       placeholder="Số điện thoại*" required
+                       pattern="^(03|05|07|08|09)[0-9]{8}$"
+                       value="${sessionScope.user.phone}">
+            </div>
+            <input class="input-box" name="label" placeholder="Nhà, Công ty, ...">
+
+            <select name="province" id="newProvince" required>
+                <option value="">Chọn Tỉnh/Thành phố*</option>
+            </select>
+            <select name="ward" id="newWard" required>
+                <option value="">Chọn Phường/Xã*</option>
+            </select>
+            <input class="input-box" name="addressDetail"
+                   placeholder="Số nhà, tên đường*" required>
+
+            <div class="checkbox-row">
+                <input type="checkbox" name="defaultAddress" id="newDefaultCheck" value="true">
+                <label for="newDefaultCheck">Đặt làm địa chỉ mặc định</label>
+            </div>
+            <button type="submit" class="btn-save-new-address">
+                 Lưu địa chỉ
+            </button>
+        </form>
+    </div>
+</div>
+
 <script src="js/header.js"></script>
-<script>
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function (event) {
-        const phone = document.getElementById('phone');
-        const email = document.querySelector('input[type="email"]');
-
-        const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
-        if (!phoneRegex.test(phone.value)) {
-            alert("Số điện thoại không hợp lệ! Phải có 10 số và đúng đầu số nhà mạng.");
-            phone.focus();
-            event.preventDefault();
-            return false;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email.value)) {
-            alert("Định dạng email không đúng!");
-            email.focus();
-            event.preventDefault();
-            return false;
-        }
-
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) submitBtn.classList.add('btn-loading');
-        const overlay = document.getElementById('loading-overlay');
-        const textEl = document.getElementById('loading-text');
-        const t = setTimeout(function() {
-            if (textEl) textEl.textContent = 'Đang xử lý đơn hàng...';
-            if (overlay) overlay.classList.add('active');
-        }, 400);
-        window.addEventListener('pagehide', function() { clearTimeout(t); }, { once: true });
-    });
-
-    window.addEventListener('pageshow', function(e) {
-        if (e.persisted) {
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay) overlay.classList.remove('active');
-            document.querySelectorAll('.btn-loading').forEach(function(btn) { btn.classList.remove('btn-loading'); });
-        }
-    });
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script>
-    $(document).ready(function() {
-        fetch('https://provinces.open-api.vn/api/p/')
-            .then(response => response.json())
-            .then(data => {
-                let html = '<option value="">Chọn Tỉnh/Thành phố*</option>';
-                data.forEach(item => {
-                    html += '<option data-code="' + item.code + '" value="' + item.name + '">' + item.name + '</option>';
-                });
-                $('#province').html(html);
-            })
-            .catch(err => console.error("Lỗi tải Tỉnh/Thành:", err));
-
-        $('#province').change(function() {
-            const code = $(this).find(':selected').data('code');
-            if (code) {
-                fetch('https://provinces.open-api.vn/api/p/' + code + '?depth=2')
-                    .then(response => response.json())
-                    .then(data => {
-                        let html = '<option value="">Chọn Quận/Huyện*</option>';
-                        if (data.districts) {
-                            data.districts.forEach(item => {
-                                html += '<option data-code="' + item.code + '" value="' + item.name + '">' + item.name + '</option>';
-                            });
-                        }
-                        $('#district').html(html);
-                        $('#ward').html('<option value="">Chọn Phường/Xã*</option>');
-                    });
-            } else {
-                $('#district').html('<option value="">Chọn Quận/Huyện*</option>');
-                $('#ward').html('<option value="">Chọn Phường/Xã*</option>');
-            }
-        });
-
-        $('#district').change(function() {
-            const code = $(this).find(':selected').data('code');
-            if (code) {
-                fetch('https://provinces.open-api.vn/api/d/' + code + '?depth=2')
-                    .then(response => response.json())
-                    .then(data => {
-                        let html = '<option value="">Chọn Phường/Xã*</option>';
-                        if (data.wards) {
-                            data.wards.forEach(item => {
-                                html += '<option data-code="' + item.code + '" value="' + item.name + '">' + item.name + '</option>';
-                            });
-                        }
-                        $('#ward').html(html);
-                    });
-            } else {
-                $('#ward').html('<option value="">Chọn Phường/Xã*</option>');
-            }
-        });
-    });
-</script>
-
+<script src="${pageContext.request.contextPath}/js/thanhToan.js"></script>
 <script>
     window.CONTEXT_PATH = '${pageContext.request.contextPath}';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>
-
 </html>
