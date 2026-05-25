@@ -38,6 +38,10 @@ public class ProcessOrderServlet extends HttpServlet {
         List<CartItem> cartItems = cartService.getCartItems(user.getId());
 
         String[] productIds = request.getParameterValues("productIds");
+        String idsParam = "";
+        if (productIds != null) {
+            idsParam = String.join(",", productIds);
+        }
 
         if (productIds != null && cartItems != null && !cartItems.isEmpty()) {
             Set<Integer> selectedIds = new HashSet<>();
@@ -65,6 +69,9 @@ public class ProcessOrderServlet extends HttpServlet {
         String email = cleanInput(request.getParameter("email"));
         String province = cleanInput(request.getParameter("province"));
         String district = cleanInput(request.getParameter("district"));
+        if (district == null) {
+            district = "";
+        }
         String ward = cleanInput(request.getParameter("ward"));
         String addressDetail = cleanInput(request.getParameter("address"));
 
@@ -72,7 +79,7 @@ public class ProcessOrderServlet extends HttpServlet {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
         if (phone == null || !phone.matches(phoneRegex) || email == null || !email.matches(emailRegex)) {
-            response.sendRedirect("thanhToan.jsp?error=invalid_format");
+            response.sendRedirect("AddCart?action=checkout&ids=" + idsParam + "&error=invalid_format");
             return;
         }
 
@@ -163,7 +170,7 @@ public class ProcessOrderServlet extends HttpServlet {
 
             response.sendRedirect("thankyouNotification.jsp");
         } else {
-            response.sendRedirect("thanhToan.jsp?error=db");
+            response.sendRedirect("AddCart?action=checkout&ids=" + idsParam + "&error=db");
         }
     }
 
