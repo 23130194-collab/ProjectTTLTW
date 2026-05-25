@@ -188,7 +188,7 @@
                     <div class="form-group">
                         <label>Giá gốc (VND)</label>
                         <input type="text" name="oldPrice" placeholder="Nhập giá sản phẩm"
-                               class="form-input" value="${product.oldPrice}">
+                               class="form-input" value="<fmt:formatNumber value='${product.oldPrice}' pattern='#' />">
                     </div>
                     <div class="form-group">
                         <label>Giảm giá (%)</label>
