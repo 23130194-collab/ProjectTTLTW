@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 forced_root_block: 'p',
                 remove_script_host: false,
                 convert_urls: false,
-                setup: function(editor) {
-                    editor.on('init', function() {
+                setup: function (editor) {
+                    editor.on('init', function () {
                         console.log('TinyMCE đã khởi tạo thành công!');
                         const textarea = document.getElementById('product-description');
                         if (textarea && textarea.value.trim()) {
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (btnAddImage) {
-        btnAddImage.addEventListener('click', function() {
+        btnAddImage.addEventListener('click', function () {
             const imageUrl = imageUrlInput.value.trim();
             const displayOrder = imageOrderInput.value.trim() || '0';
 
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const imgElement = document.createElement('img');
             imgElement.src = imageUrl;
             imgElement.alt = "Preview";
-            imgElement.onerror = function() {
+            imgElement.onerror = function () {
                 this.onerror = null;
                 this.src = 'https://placehold.co/100x100/e2e8f0/475569?text=Lỗi+Ảnh';
             };
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
             imageUrlInput.focus();
         });
 
-        previewContainer.addEventListener('click', function(e) {
+        previewContainer.addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('remove-thumb')) {
                 const thumbItem = e.target.closest('.thumb-item');
                 if (thumbItem) {
@@ -175,15 +175,15 @@ document.addEventListener('DOMContentLoaded', function () {
     let itemToDelete = null;
 
     function closeModal() {
-        if(deleteModal) {
+        if (deleteModal) {
             deleteModal.classList.remove('show');
             itemToDelete = null;
         }
     }
 
-    if(btnConfirmDelete) {
-        btnConfirmDelete.addEventListener('click', function() {
-            if(itemToDelete) {
+    if (btnConfirmDelete) {
+        btnConfirmDelete.addEventListener('click', function () {
+            if (itemToDelete) {
                 itemToDelete.classList.add('is-deleting');
                 itemToDelete.style.transition = 'all 0.2s ease';
                 itemToDelete.style.opacity = '0';
@@ -200,12 +200,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    if(btnCancelDelete) {
+    if (btnCancelDelete) {
         btnCancelDelete.addEventListener('click', closeModal);
     }
 
-    if(deleteModal) {
-        deleteModal.addEventListener('click', function(e) {
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function (e) {
             if (e.target === deleteModal) {
                 closeModal();
             }
@@ -214,11 +214,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (categorySelect && attributeSelect && attributesContainer) {
 
-        categorySelect.addEventListener('change', function() {
+        categorySelect.addEventListener('change', function () {
             const categoryId = this.value;
             attributeSelect.innerHTML = '<option value="">Đang tải...</option>';
 
-            if(categoryId) {
+            if (categoryId) {
                 const contextPath = (typeof globalContextPath !== 'undefined') ? globalContextPath : '';
                 const apiUrl = contextPath + '/api/get-attributes?categoryId=' + categoryId;
 
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
             categorySelect.dispatchEvent(new Event('change'));
         }
 
-        attributeSelect.addEventListener('change', function() {
+        attributeSelect.addEventListener('change', function () {
             const selectedOption = this.options[this.selectedIndex];
             const attrId = selectedOption.value;
             const attrName = selectedOption.dataset.name;
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function () {
             this.value = "";
         });
 
-        attributesContainer.addEventListener('click', function(e) {
+        attributesContainer.addEventListener('click', function (e) {
             const target = e.target;
             console.log("Bạn vừa click vào:", target);
             if (target.classList.contains('attr-delete')) {
@@ -304,15 +304,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.stopPropagation();
 
                 const item = target.closest('.attribute-item');
-                if(item) {
+                if (item) {
                     itemToDelete = item;
 
                     const nameEl = item.querySelector('.attr-name');
-                    if(nameEl && modalSpecName) {
+                    if (nameEl && modalSpecName) {
                         modalSpecName.textContent = nameEl.textContent;
                     }
 
-                    if(deleteModal) deleteModal.classList.add('show');
+                    if (deleteModal) deleteModal.classList.add('show');
                 }
                 return;
             }
@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     const productForm = document.querySelector('.upload-product-container');
-    productForm.addEventListener('submit', function(e) {
+    productForm.addEventListener('submit', function (e) {
         const discountInput = document.querySelector('input[name="discountValue"]');
         if (discountInput && discountInput.value.trim() !== "") {
             const val = parseFloat(discountInput.value);
@@ -358,43 +358,90 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const discountInput = document.querySelector('input[name="discountValue"]');
-        const startDateInput = document.querySelector('input[name="discountStart"]');
-        const endDateInput = document.querySelector('input[name="discountEnd"]');
+    const discountInput = document.querySelector('input[name="discountValue"]');
+    const startDateInput = document.querySelector('input[name="discountStart"]');
+    const endDateInput = document.querySelector('input[name="discountEnd"]');
 
-        function toggleDiscountDates() {
-            const hasDiscount = discountInput.value.trim() !== "" && parseFloat(discountInput.value) > 0;
+    function toggleDiscountDates() {
+        if (!discountInput) return;
+        const hasDiscount = discountInput.value.trim() !== "" && parseFloat(discountInput.value) > 0;
 
-            startDateInput.addEventListener('change', function() {
-                if (startDateInput.value) {
+        if (startDateInput) {
+            startDateInput.addEventListener('change', function () {
+                if (startDateInput.value && endDateInput) {
                     endDateInput.min = startDateInput.value;
                 }
             });
+        }
 
-            endDateInput.addEventListener('change', function() {
-                if (endDateInput.value) {
+        if (endDateInput) {
+            endDateInput.addEventListener('change', function () {
+                if (endDateInput.value && startDateInput) {
                     startDateInput.max = endDateInput.value;
                 }
             });
+        }
 
-            if (hasDiscount) {
+        if (hasDiscount) {
+            if (startDateInput) {
                 startDateInput.removeAttribute('disabled');
-                endDateInput.removeAttribute('disabled');
                 startDateInput.style.backgroundColor = "#fff";
+            }
+            if (endDateInput) {
+                endDateInput.removeAttribute('disabled');
                 endDateInput.style.backgroundColor = "#fff";
-            } else {
+            }
+        } else {
+            if (startDateInput) {
                 startDateInput.setAttribute('disabled', 'true');
-                endDateInput.setAttribute('disabled', 'true');
                 startDateInput.value = "";
-                endDateInput.value = "";
                 startDateInput.style.backgroundColor = "#f1f5f9";
+            }
+            if (endDateInput) {
+                endDateInput.setAttribute('disabled', 'true');
+                endDateInput.value = "";
                 endDateInput.style.backgroundColor = "#f1f5f9";
             }
         }
+    }
 
+    if (discountInput) {
         toggleDiscountDates();
-
         discountInput.addEventListener('input', toggleDiscountDates);
-    });
+    }
+
+    function formatNumberInput(selector) {
+        const inputs = document.querySelectorAll(selector);
+        inputs.forEach(input => {
+            if (input.value && input.value !== '0' && input.value !== '0.0') {
+                let val = input.value.replace(/\D/g, '');
+                if (val !== '') {
+                    val = parseInt(val, 10).toString();
+                    input.value = val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                }
+            } else if (input.value === '0.0') {
+                input.value = '0';
+            }
+
+            input.addEventListener('input', function(e) {
+                let cursorPosition = this.selectionStart;
+                let originalLength = this.value.length;
+                
+                let val = this.value.replace(/\D/g, '');
+                if (val !== '') {
+                    val = parseInt(val, 10).toString();
+                    let formatted = val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    this.value = formatted;
+                    
+                    let newLength = formatted.length;
+                    cursorPosition = cursorPosition + (newLength - originalLength);
+                    this.setSelectionRange(cursorPosition, cursorPosition);
+                } else {
+                    this.value = '';
+                }
+            });
+        });
+    }
+    formatNumberInput('input[name="oldPrice"]');
+    formatNumberInput('input[name="stock"]');
 });
