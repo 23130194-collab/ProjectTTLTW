@@ -7,6 +7,7 @@ import java.util.List;
 
 public class ContactService {
     private final ContactDao contactDao = new ContactDao();
+    private final NotificationService notificationService = new NotificationService();
 
     public List<Contact> getContactsByPage(int currentPage, int pageSize, String keyword, String status) {
         int offset = (currentPage - 1) * pageSize;
@@ -27,6 +28,11 @@ public class ContactService {
 
     public void saveResponse(int id, String responseContent) {
         contactDao.saveResponse(id, responseContent);
+    }
+
+    public void submitContact(Contact contact) {
+        int newId = contactDao.insertContact(contact);
+        notificationService.notifyAdminNewContact(newId, contact.getName());
     }
 
     private Boolean parseStatus(String status) {

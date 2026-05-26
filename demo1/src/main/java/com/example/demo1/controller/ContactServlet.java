@@ -1,9 +1,9 @@
 package com.example.demo1.controller;
 
-import com.example.demo1.dao.ContactDao;
 import com.example.demo1.model.Contact;
 import com.example.demo1.model.User;
 
+import com.example.demo1.service.ContactService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,12 +14,12 @@ import java.io.IOException;
 
 @WebServlet(name = "ContactServlet", value = "/contact")
 public class ContactServlet extends HttpServlet {
-    private ContactDao contactDao;
+    private ContactService contactService;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        this.contactDao = new ContactDao();
+        this.contactService = new ContactService();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ContactServlet extends HttpServlet {
         } else {
             try {
                 Contact contact = new Contact(name, email, content);
-                contactDao.insertContact(contact);
+                contactService.submitContact(contact);
                 session.setAttribute("contactMessage", "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.");
                 session.setAttribute("messageType", "success");
             } catch (Exception e) {

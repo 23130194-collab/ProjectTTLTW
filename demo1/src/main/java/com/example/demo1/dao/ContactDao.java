@@ -11,11 +11,13 @@ public class ContactDao {
     private static final String BASE_SELECT = "SELECT id, name, email, content, created_at AS createdAt, " +
             "is_processed AS processed, response_content AS responseContent, responded_at AS respondedAt FROM contacts ";
 
-    public void insertContact(Contact contact) {
-        jdbi.useHandle(handle ->
+    public int insertContact(Contact contact) {
+        return jdbi.withHandle(handle ->
                 handle.createUpdate("INSERT INTO contacts (name, email, content) VALUES (:name, :email, :content)")
                         .bindBean(contact)
-                        .execute()
+                        .executeAndReturnGeneratedKeys("id")
+                        .mapTo(Integer.class)
+                        .one()
         );
     }
 
