@@ -116,14 +116,19 @@ public class UserDao {
     }
 
     public int countCustomersByFilter(String status, String keyword) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE role = 0");
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
 
-        boolean hasStatus = status != null && !status.equals("all");
+        boolean isAdmin = "admin".equals(status);
+        boolean hasStatus = status != null && !status.equals("all") && !isAdmin;
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
 
-        if (hasStatus) {
-            sql.append(" AND status = :status");
+        if (isAdmin) {
+            sql.append(" AND role = 1");
+        } else {
+            sql.append(" AND role = 0");
+            if (hasStatus) sql.append(" AND status = :status");
         }
+
         if (hasKeyword) {
             sql.append(" AND (name LIKE :keyword OR email LIKE :keyword)");
         }
@@ -138,38 +143,34 @@ public class UserDao {
 
     public List<User> getCustomersPaging(int limit, int offset, String status, String keyword) {
         StringBuilder sql = new StringBuilder();
-
         sql.append("SELECT u.*, COUNT(o.id) as orderCount ");
         sql.append("FROM users u ");
         sql.append("LEFT JOIN orders o ON u.id = o.user_id ");
-        sql.append("WHERE u.role = 0 ");
+        sql.append("WHERE 1=1 ");
 
-        boolean hasStatus = status != null && !status.equals("all");
+        boolean isAdmin = "admin".equals(status);
+        boolean hasStatus = status != null && !status.equals("all") && !isAdmin;
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
 
-        if (hasStatus) {
-            sql.append("AND u.status = :status ");
+        if (isAdmin) {
+            sql.append("AND u.role = 1 ");
+        } else {
+            sql.append("AND u.role = 0 ");
+            if (hasStatus) sql.append("AND u.status = :status ");
         }
+
         if (hasKeyword) {
             sql.append("AND (u.name LIKE :keyword OR u.email LIKE :keyword) ");
         }
 
-        sql.append("GROUP BY u.id ");
-        sql.append("ORDER BY u.created_at DESC LIMIT :limit OFFSET :offset");
+        sql.append("GROUP BY u.id ORDER BY u.created_at DESC LIMIT :limit OFFSET :offset");
 
         return jdbi.withHandle(h -> {
             var query = h.createQuery(sql.toString())
                     .bind("limit", limit)
                     .bind("offset", offset);
-
-            if (hasStatus) {
-                query.bind("status", status);
-            }
-
-            if (hasKeyword) {
-                query.bind("keyword", "%" + keyword + "%");
-            }
-
+            if (hasStatus) query.bind("status", status);
+            if (hasKeyword) query.bind("keyword", "%" + keyword + "%");
             return query.mapToBean(User.class).list();
         });
     }
@@ -232,5 +233,24 @@ public class UserDao {
                         .bind("created_at", new java.sql.Timestamp(System.currentTimeMillis()))
                         .execute()
         );
+    }
+
+    public int getRoleById(int userId) {
+        return jdbi.withHandle(h ->
+                h.createQuery("SELECT role FROM users WHERE id = :id")
+                        .bind("id", userId)
+                        .mapTo(Integer.class)
+                        .one()
+        );
+    }
+
+    public boolean updateRole(int userId, int newRole) {
+        int rowsAffected = jdbi.withHandle(h ->
+                h.createUpdate("UPDATE users SET role = :role WHERE id = :id")
+                        .bind("role", newRole)
+                        .bind("id", userId)
+                        .execute()
+        );
+        return rowsAffected > 0;
     }
 }

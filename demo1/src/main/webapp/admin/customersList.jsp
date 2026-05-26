@@ -115,6 +115,9 @@
                     <option value="locked" ${param.status=='locked' ? 'selected' : '' }>
                         Đã khóa
                     </option>
+                    <option value="admin" ${param.status=='admin' ? 'selected' : '' }>
+                        Quản trị viên
+                    </option>
                 </select>
 
                 <div class="search-wrapper">
@@ -194,6 +197,15 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </a>
+
+                                <a href="#" class="action-btn"
+                                   style="background-color: ${u.role == 1 ? '#f3e8ff' : '#fef9c3'};
+                                           color: ${u.role == 1 ? '#7c3aed' : '#b45309'};"
+                                   title="${u.role == 1 ? 'Hạ về quyền User' : 'Cấp quyền Admin'}"
+                                   onclick="openRoleModal(event, '${contextPath}/admin/change-role?id=${u.id}', ${u.role})">
+                                    <i class="fa-solid fa-user-shield"></i>
+                                </a>
+
                             </div>
                         </td>
                     </tr>
@@ -242,6 +254,30 @@
     </div>
 </div>
 
+<div id="roleConfirmModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 id="roleModalTitle">Xác nhận chuyển quyền</h3>
+        <p id="roleModalMessage">Nội dung xác nhận...</p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-cancel" id="cancelRoleBtn">Hủy</button>
+            <form id="roleForm" method="post" action="" style="display:inline;">
+                <button type="submit" class="modal-btn modal-confirm" id="confirmRoleBtn">Đồng ý</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="logoutConfirmModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>Xác nhận đăng xuất</h3>
+        <p>Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?</p>
+        <div class="modal-buttons">
+            <a href="#" class="modal-btn modal-cancel" id="cancelLogout">Hủy</a>
+            <a href="${contextPath}/logout" class="modal-btn modal-confirm">Đăng xuất</a>
+        </div>
+    </div>
+</div>
+
 <script>
     function openLockModal(event, actionUrl, currentStatus) {
         event.preventDefault();
@@ -268,6 +304,32 @@
         lockModal.classList.add('show');
     }
 
+    function openRoleModal(event, actionUrl, currentRole) {
+        event.preventDefault();
+
+        const modal = document.getElementById('roleConfirmModal');
+        const title = document.getElementById('roleModalTitle');
+        const message = document.getElementById('roleModalMessage');
+        const confirmBtn = document.getElementById('confirmRoleBtn');
+        const form = document.getElementById('roleForm');
+
+        form.action = actionUrl;
+
+        if (currentRole == 1) {
+            title.innerText = "Hạ quyền về User";
+            message.innerText = "Tài khoản này đang là Admin. Bạn có chắc muốn hạ xuống thành User thường không?";
+            confirmBtn.style.backgroundColor = "#0284c7";
+            confirmBtn.innerText = "Hạ quyền";
+        } else {
+            title.innerText = "Nâng quyền thành Admin";
+            message.innerText = "Bạn có chắc muốn cấp quyền Admin cho tài khoản này không?";
+            confirmBtn.style.backgroundColor = "#ef4444";
+            confirmBtn.innerText = "Cấp quyền Admin";
+        }
+
+        modal.classList.add('show');
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
 
         const lockModal = document.getElementById('lockConfirmModal');
@@ -287,19 +349,22 @@
                 }
             });
         }
+
+        const roleModal = document.getElementById('roleConfirmModal');
+        const cancelRoleBtn = document.getElementById('cancelRoleBtn');
+        if (cancelRoleBtn) {
+            cancelRoleBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                roleModal.classList.remove('show');
+            });
+        }
+        if (roleModal) {
+            roleModal.addEventListener('click', function (e) {
+                if (e.target === roleModal) roleModal.classList.remove('show');
+            });
+        }
     });
 </script>
-
-<div id="logoutConfirmModal" class="modal-overlay">
-    <div class="modal-content">
-        <h3>Xác nhận đăng xuất</h3>
-        <p>Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?</p>
-        <div class="modal-buttons">
-            <a href="#" class="modal-btn modal-cancel" id="cancelLogout">Hủy</a>
-            <a href="${contextPath}/logout" class="modal-btn modal-confirm">Đăng xuất</a>
-        </div>
-    </div>
-</div>
 
 <script>
     function closeAlert(alertId) {
