@@ -9,10 +9,12 @@
     function applyAddressToForm(card) {
     document.getElementById('form-address').value    = card.dataset.fullAddress || '';
     document.getElementById('form-province').value   = card.dataset.province    || '';
+    document.getElementById('form-district').value   = card.dataset.district    || '';
     document.getElementById('form-ward').value       = card.dataset.ward        || '';
     document.getElementById('form-address-id').value = card.dataset.id          || '';
     document.getElementById('form-fullname-addr').value = card.dataset.fullname || '';
     document.getElementById('form-phone-addr').value    = card.dataset.phone    || '';
+    updateShippingFee(card.dataset.id || '');
 }
 
     function _highlightAndApply(card) {
@@ -82,7 +84,7 @@
     this.querySelector('i').className = form.classList.contains('show') ? 'fa-solid fa-minus' : 'fa-solid fa-plus';
 });
 
-    fetch('https://provinces.open-api.vn/api/v2/')
+    fetch('https://provinces.open-api.vn/api/')
     .then(r => r.json())
     .then(data => {
     let html = '<option value="">Chọn Tỉnh/Thành phố*</option>';
@@ -95,10 +97,29 @@
 
     document.getElementById('newProvince').addEventListener('change', function () {
     const code = this.value ? this.value.split('|')[0] : null;
+    const districtSel = document.getElementById('newDistrict');
+    const wardSel = document.getElementById('newWard');
+    districtSel.innerHTML = '<option value="">Chọn Quận/Huyện*</option>';
+    wardSel.innerHTML = '<option value="">Chọn Phường/Xã*</option>';
+    if (!code) return;
+    fetch('https://provinces.open-api.vn/api/p/' + code + '?depth=2')
+    .then(r => r.json())
+    .then(data => {
+    let html = '<option value="">Chọn Quận/Huyện*</option>';
+    (data.districts || []).forEach(d => {
+    html += '<option value="' + d.code + '|' + d.name + '">' + d.name + '</option>';
+});
+    districtSel.innerHTML = html;
+})
+    .catch(err => console.error('Lỗi tải quận/huyện:', err));
+});
+
+    document.getElementById('newDistrict').addEventListener('change', function () {
+    const code = this.value ? this.value.split('|')[0] : null;
     const wardSel = document.getElementById('newWard');
     wardSel.innerHTML = '<option value="">Chọn Phường/Xã*</option>';
     if (!code) return;
-    fetch('https://provinces.open-api.vn/api/v2/p/' + code + '?depth=2')
+    fetch('https://provinces.open-api.vn/api/d/' + code + '?depth=2')
     .then(r => r.json())
     .then(data => {
     let html = '<option value="">Chọn Phường/Xã*</option>';
@@ -119,9 +140,10 @@
     if (errBox) errBox.remove();
 
     const provinceVal = form.querySelector('[name="province"]').value;
+    const districtVal = form.querySelector('[name="district"]').value;
     const wardVal     = form.querySelector('[name="ward"]').value;
-    if (!provinceVal || !wardVal) {
-    showFormError(form, 'Vui lòng chọn đầy đủ Tỉnh/Thành phố và Phường/Xã.');
+    if (!provinceVal || !districtVal || !wardVal) {
+    showFormError(form, 'Vui lòng chọn đầy đủ Tỉnh/Thành phố, Quận/Huyện và Phường/Xã.');
     return;
 }
 
@@ -131,7 +153,7 @@
     const params = new URLSearchParams();
     new FormData(form).forEach((val, key) => params.append(key, val));
 
-    fetch('${pageContext.request.contextPath}/account-address', {
+    fetch((window.CONTEXT_PATH || '') + '/account-address', {
     method: 'POST',
     headers: {
     'X-Requested-With': 'XMLHttpRequest',
@@ -167,6 +189,7 @@
 
     form.classList.remove('show');
     form.reset();
+    document.getElementById('newDistrict').innerHTML = '<option value="">Chọn Quận/Huyện*</option>';
     document.getElementById('newWard').innerHTML = '<option value="">Chọn Phường/Xã*</option>';
     document.getElementById('toggleNewAddressForm').querySelector('i').className = 'fa-solid fa-plus';
 
@@ -195,6 +218,7 @@
     card.dataset.phone       = addr.phone;
     card.dataset.fullAddress = addr.fullAddress;
     card.dataset.ward        = addr.ward;
+    card.dataset.district    = addr.district;
     card.dataset.province    = addr.province;
     card.dataset.default     = addr.isDefault ? 'true' : 'false';
     card.onclick = function () { selectAddress(this); };
@@ -213,6 +237,60 @@
 
     function escHtml(s) {
     return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+    function updateShippingFee(addressId) {
+    if (!addressId) return;
+
+    const shippingDisplay = document.getElementById('shippingFeeDisplay');
+    const payableDisplay = document.getElementById('payableAmountDisplay');
+    const footerDisplay = document.getElementById('footerPayableAmount');
+    const hiddenShipping = document.getElementById('form-shipping-fee');
+    const submitBtn = document.querySelector('#checkoutForm button[type="submit"]');
+
+    if (shippingDisplay) shippingDisplay.textContent = 'Đang tính...';
+    if (submitBtn) submitBtn.disabled = true;
+
+    const params = new URLSearchParams();
+    params.append('addressId', addressId);
+    document.querySelectorAll('#checkoutForm input[name="productIds"]').forEach(input => {
+    params.append('productIds', input.value);
+});
+
+    fetch((window.CONTEXT_PATH || '') + '/api/shipping/fee', {
+    method: 'POST',
+    headers: {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+},
+    body: params.toString()
+})
+    .then(r => r.json())
+    .then(json => {
+    if (!json.success) {
+    if (shippingDisplay) shippingDisplay.textContent = json.message || 'Không tính được phí GHN';
+    if (hiddenShipping) hiddenShipping.value = '0';
+    return;
+}
+
+    const shippingFee = Number(json.shippingFee || 0);
+    const totalAmount = Number(json.totalAmount || 0);
+    if (hiddenShipping) hiddenShipping.value = shippingFee;
+    if (shippingDisplay) shippingDisplay.textContent = shippingFee === 0 ? 'Miễn phí' : formatCurrency(shippingFee);
+    if (payableDisplay) payableDisplay.textContent = formatCurrency(totalAmount);
+    if (footerDisplay) footerDisplay.textContent = formatCurrency(totalAmount);
+})
+    .catch(() => {
+    if (shippingDisplay) shippingDisplay.textContent = 'Không tính được phí GHN';
+    if (hiddenShipping) hiddenShipping.value = '0';
+})
+    .finally(() => {
+    if (submitBtn) submitBtn.disabled = false;
+});
+}
+
+    function formatCurrency(value) {
+    return Math.round(Number(value || 0)).toLocaleString('vi-VN') + '₫';
 }
 
     const checkoutForm = document.getElementById('checkoutForm');

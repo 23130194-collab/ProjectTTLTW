@@ -105,18 +105,20 @@ public class UpdateProfileServlet extends HttpServlet {
     private String buildAddressFromRequest(HttpServletRequest request, User currentUser) {
         String addressDetail = trim(request.getParameter("addressDetail"));
         String provinceOption = trim(request.getParameter("province"));
+        String districtOption = trim(request.getParameter("district"));
         String wardOption = trim(request.getParameter("ward"));
 
-        boolean hasAddressChange = !addressDetail.isEmpty() || !provinceOption.isEmpty() || !wardOption.isEmpty();
+        boolean hasAddressChange = !addressDetail.isEmpty() || !provinceOption.isEmpty() || !districtOption.isEmpty() || !wardOption.isEmpty();
         if (!hasAddressChange) {
             return currentUser.getAddress();
         }
 
-        if (provinceOption.isEmpty() || wardOption.isEmpty()) {
+        if (provinceOption.isEmpty() || districtOption.isEmpty() || wardOption.isEmpty()) {
             return null;
         }
 
         String provinceName = VietnamAddressService.getNameFromOptionValue(provinceOption);
+        String districtName = VietnamAddressService.getNameFromOptionValue(districtOption);
         String wardName = VietnamAddressService.getNameFromOptionValue(wardOption);
 
         StringBuilder address = new StringBuilder();
@@ -125,6 +127,9 @@ public class UpdateProfileServlet extends HttpServlet {
         }
         if (!wardName.isEmpty()) {
             appendAddressPart(address, wardName);
+        }
+        if (!districtName.isEmpty()) {
+            appendAddressPart(address, districtName);
         }
         if (!provinceName.isEmpty()) {
             appendAddressPart(address, provinceName);

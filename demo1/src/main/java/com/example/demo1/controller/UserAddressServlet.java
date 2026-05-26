@@ -43,14 +43,20 @@ public class UserAddressServlet extends HttpServlet {
             if ("add".equals(action)) {
                 UserAddress address = buildAddressFromRequest(request, currentUser);
                 address.setUserId(currentUser.getId());
-                userAddressService.createAddress(address);
+                address = userAddressService.createAddress(address);
                 refreshDefaultAddressInSession(session, currentUser);
 
                 if (isAjax) {
-                    UserAddress saved = userAddressService.getDefaultAddressByUserId(currentUser.getId());
-                    java.util.List<UserAddress> all = userAddressService.getAddressesByUserId(currentUser.getId());
-                    UserAddress newest = all.isEmpty() ? address : all.get(all.size() - 1);
-                    sendJson(response, HttpServletResponse.SC_OK, buildAddressJson(newest, true));
+                    UserAddress toReturn = address;
+                    if (address.getId() <= 0) {
+                        java.util.List<UserAddress> all = userAddressService.getAddressesByUserId(currentUser.getId());
+                        if (!all.isEmpty()) {
+                            toReturn = all.stream()
+                                    .max(java.util.Comparator.comparingInt(UserAddress::getId))
+                                    .orElse(address);
+                        }
+                    }
+                    sendJson(response, HttpServletResponse.SC_OK, buildAddressJson(toReturn, true));
                     return;
                 }
                 session.setAttribute("addressSuccess", "Đã thêm địa chỉ nhận hàng.");
@@ -141,6 +147,7 @@ public class UserAddressServlet extends HttpServlet {
                 + "\"fullName\":\""   + escapeJson(a.getFullName())            + "\","
                 + "\"phone\":\""      + escapeJson(a.getPhone())               + "\","
                 + "\"province\":\""   + escapeJson(a.getProvince())            + "\","
+                + "\"district\":\""   + escapeJson(a.getDistrict())            + "\","
                 + "\"ward\":\""       + escapeJson(a.getWard())                + "\","
                 + "\"fullAddress\":\"" + escapeJson(a.getFullAddress())        + "\","
                 + "\"isDefault\":"    + a.isDefaultAddress()
@@ -161,6 +168,7 @@ public class UserAddressServlet extends HttpServlet {
         String phone         = trim(request.getParameter("phone"));
         String addressDetail = trim(request.getParameter("addressDetail"));
         String provinceOption = trim(request.getParameter("province"));
+        String districtOption = trim(request.getParameter("district"));
         String wardOption     = trim(request.getParameter("ward"));
 
         if (fullName.isEmpty())
@@ -169,12 +177,13 @@ public class UserAddressServlet extends HttpServlet {
             throw new IllegalArgumentException("Số điện thoại phải có 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09.");
         if (addressDetail.isEmpty())
             throw new IllegalArgumentException("Vui lòng nhập số nhà, tên đường.");
-        if (provinceOption.isEmpty() || wardOption.isEmpty())
+        if (provinceOption.isEmpty() || districtOption.isEmpty() || wardOption.isEmpty())
             throw new IllegalArgumentException("Vui lòng chọn đầy đủ Tỉnh/Thành phố và Phường/Xã.");
 
         String provinceName = VietnamAddressService.getNameFromOptionValue(provinceOption);
+        String districtName = VietnamAddressService.getNameFromOptionValue(districtOption);
         String wardName     = VietnamAddressService.getNameFromOptionValue(wardOption);
-        String fullAddress  = buildFullAddress(addressDetail, wardName, provinceName);
+        String fullAddress  = buildFullAddress(addressDetail, wardName, districtName, provinceName);
 
         UserAddress address = new UserAddress();
         address.setLabel(label.isEmpty() ? "Địa chỉ" : label);
@@ -182,6 +191,7 @@ public class UserAddressServlet extends HttpServlet {
         address.setPhone(phone);
         address.setAddressDetail(addressDetail);
         address.setWard(wardName);
+        address.setDistrict(districtName);
         address.setProvince(provinceName);
         address.setFullAddress(fullAddress);
         address.setDefaultAddress(
@@ -191,10 +201,11 @@ public class UserAddressServlet extends HttpServlet {
         return address;
     }
 
-    private String buildFullAddress(String addressDetail, String wardName, String provinceName) {
+    private String buildFullAddress(String addressDetail, String wardName, String districtName, String provinceName) {
         StringBuilder sb = new StringBuilder();
         appendAddressPart(sb, addressDetail);
         appendAddressPart(sb, wardName);
+        appendAddressPart(sb, districtName);
         appendAddressPart(sb, provinceName);
         return sb.toString();
     }

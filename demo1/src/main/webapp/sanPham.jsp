@@ -167,7 +167,7 @@
 
                 <div class="shipping-box">
                     <i class="fa-solid fa-truck"></i>
-                    Thông tin vận chuyển: <span>Miễn phí vận chuyển đơn hàng</span>
+                    Thông tin vận chuyển: <span>Phí vận chuyển được tính theo GHN khi thanh toán</span>
                 </div>
 
                 <div class="buy-box">

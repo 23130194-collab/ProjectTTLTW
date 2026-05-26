@@ -101,6 +101,7 @@
     <input type="hidden" id="form-address-id" name="addressId" value="">
     <input type="hidden" id="form-fullname-addr" name="recipientName"  value="">
     <input type="hidden" id="form-phone-addr"    name="recipientPhone" value="">
+    <input type="hidden" id="form-shipping-fee"  name="shippingFee" value="${shippingFee}">
 
     <div class="app-container">
         <div class="app-scroll">
@@ -220,8 +221,17 @@
                 </select>
             </div>
 
+            <c:set var="shippingFee" value="${empty shippingFee ? 0 : shippingFee}"/>
+            <c:set var="payableAmount" value="${totalAmount + shippingFee}"/>
+
             <div class="box">
                 <div class="section-title">CHI TIẾT THANH TOÁN</div>
+                <c:if test="${not empty shippingError or not empty sessionScope.checkoutError}">
+                    <div class="ajax-error" style="color:#e53935;font-size:13px;margin-bottom:8px;padding:8px 10px;background:#fff0f0;border-radius:6px;border:1px solid #ffc6c6;">
+                        <c:out value="${not empty sessionScope.checkoutError ? sessionScope.checkoutError : shippingError}"/>
+                    </div>
+                    <c:remove var="checkoutError" scope="session"/>
+                </c:if>
                 <div class="line">
                     Tổng tiền hàng
                     <span><fmt:formatNumber value="${totalOldPrice}" pattern="#,###"/>₫</span>
@@ -234,18 +244,23 @@
                 </c:if>
                 <div class="line">
                     Phí vận chuyển
-                    <span>0đ</span>
+                    <span id="shippingFeeDisplay">
+                        <c:choose>
+                            <c:when test="${shippingFee == 0}">Miễn phí</c:when>
+                            <c:otherwise><fmt:formatNumber value="${shippingFee}" pattern="#,###"/>₫</c:otherwise>
+                        </c:choose>
+                    </span>
                 </div>
                 <div class="line total">
                     <b>Tổng tiền thanh toán</b>
-                    <b><fmt:formatNumber value="${totalAmount}" pattern="#,###"/>₫</b>
+                    <b id="payableAmountDisplay"><fmt:formatNumber value="${payableAmount}" pattern="#,###"/>₫</b>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="footer-bar">
-        <span class="total-amount">Tạm tính: <fmt:formatNumber value="${totalAmount}" pattern="#,###"/>₫</span>
+        <span class="total-amount">Tạm tính: <span id="footerPayableAmount"><fmt:formatNumber value="${payableAmount}" pattern="#,###"/>₫</span></span>
         <button type="submit" class="btn-buy-link">Thanh Toán</button>
     </div>
 </form>
@@ -268,6 +283,7 @@
                              data-phone="${addr.phone}"
                              data-full-address="${addr.fullAddress}"
                              data-ward="${addr.ward}"
+                             data-district="${addr.district}"
                              data-province="${addr.province}"
                              data-default="${addr.defaultAddress}"
                              onclick="selectAddress(this)">
@@ -318,6 +334,9 @@
             <select name="province" id="newProvince" required>
                 <option value="">Chọn Tỉnh/Thành phố*</option>
             </select>
+            <select name="district" id="newDistrict" required>
+                <option value="">Chọn Quận/Huyện*</option>
+            </select>
             <select name="ward" id="newWard" required>
                 <option value="">Chọn Phường/Xã*</option>
             </select>
@@ -335,11 +354,11 @@
     </div>
 </div>
 
-<script src="js/header.js"></script>
-<script src="${pageContext.request.contextPath}/js/thanhToan.js"></script>
 <script>
     window.CONTEXT_PATH = '${pageContext.request.contextPath}';
 </script>
+<script src="js/header.js"></script>
+<script src="${pageContext.request.contextPath}/js/thanhToan.js"></script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>
 </html>

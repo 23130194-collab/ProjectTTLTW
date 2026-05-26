@@ -16,9 +16,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class VietnamAddressService {
-    private static final String API_BASE = "https://provinces.open-api.vn/api/v2";
+    private static final String API_BASE = "https://provinces.open-api.vn/api";
     private static final long CACHE_TTL_MILLIS = 60 * 60 * 1000;
     private static final Gson GSON = new Gson();
+    private static final Map<Integer, CacheEntry<List<VietnamAddressUnit>>> DISTRICT_CACHE = new ConcurrentHashMap<>();
     private static final Map<Integer, CacheEntry<List<VietnamAddressUnit>>> WARD_CACHE = new ConcurrentHashMap<>();
 
     private static volatile CacheEntry<List<VietnamAddressUnit>> provinceCache;
@@ -39,19 +40,35 @@ public class VietnamAddressService {
         return provinceList;
     }
 
-    public List<VietnamAddressUnit> getWardsByProvinceCode(int provinceCode) throws IOException {
-        CacheEntry<List<VietnamAddressUnit>> cache = WARD_CACHE.get(provinceCode);
+    public List<VietnamAddressUnit> getDistrictsByProvinceCode(int provinceCode) throws IOException {
+        CacheEntry<List<VietnamAddressUnit>> cache = DISTRICT_CACHE.get(provinceCode);
         if (cache != null && !cache.isExpired()) {
             return cache.data;
         }
 
         String json = readUrl(API_BASE + "/p/" + provinceCode + "?depth=2");
         VietnamAddressUnit province = GSON.fromJson(json, VietnamAddressUnit.class);
-        List<VietnamAddressUnit> wards = province == null
+        List<VietnamAddressUnit> districts = province == null
                 ? Collections.emptyList()
-                : new ArrayList<>(province.getWards());
+                : new ArrayList<>(province.getDistricts());
 
-        WARD_CACHE.put(provinceCode, new CacheEntry<>(wards));
+        DISTRICT_CACHE.put(provinceCode, new CacheEntry<>(districts));
+        return districts;
+    }
+
+    public List<VietnamAddressUnit> getWardsByDistrictCode(int districtCode) throws IOException {
+        CacheEntry<List<VietnamAddressUnit>> cache = WARD_CACHE.get(districtCode);
+        if (cache != null && !cache.isExpired()) {
+            return cache.data;
+        }
+
+        String json = readUrl(API_BASE + "/d/" + districtCode + "?depth=2");
+        VietnamAddressUnit district = GSON.fromJson(json, VietnamAddressUnit.class);
+        List<VietnamAddressUnit> wards = district == null
+                ? Collections.emptyList()
+                : new ArrayList<>(district.getWards());
+
+        WARD_CACHE.put(districtCode, new CacheEntry<>(wards));
         return wards;
     }
 

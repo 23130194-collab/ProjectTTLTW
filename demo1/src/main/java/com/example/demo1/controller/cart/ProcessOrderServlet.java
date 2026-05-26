@@ -2,6 +2,7 @@ package com.example.demo1.controller.cart;
 
 import com.example.demo1.model.*;
 import com.example.demo1.service.CartService;
+import com.example.demo1.service.GhnShippingService;
 import com.example.demo1.service.OrderService;
 import com.example.demo1.service.ProductService;
 import com.example.demo1.service.NotificationService;
@@ -19,6 +20,7 @@ public class ProcessOrderServlet extends HttpServlet {
     private final OrderService orderService = new OrderService();
     private final ProductService productService = new ProductService();
     private final CartService cartService = new CartService();
+    private final GhnShippingService ghnShippingService = new GhnShippingService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -115,21 +117,6 @@ public class ProcessOrderServlet extends HttpServlet {
             subprice += oldPrice * item.getQuantity();
         }
 
-        double discountAmount = subprice - total;
-        double shippingFee = 0;
-
-        String paymentMethod = cleanInput(request.getParameter("payment_method"));
-        if (paymentMethod == null) paymentMethod = "Thanh toán khi nhận hàng (COD)";
-        Payment payment = new Payment(0, paymentMethod, "Thành công", total);
-
-        order.setUserId(user.getId());
-        order.setOrderCode("TN-" + System.currentTimeMillis());
-        order.setOrderStatus("Chờ xác nhận");
-        order.setSubprice(subprice);
-        order.setDiscountAmount(discountAmount);
-        order.setShippingFee(shippingFee);
-        order.setTotalAmount(total);
-
         RecipientInfo recipient = new RecipientInfo();
         recipient.setFullName(fullName);
         recipient.setPhone(phone);
@@ -138,6 +125,29 @@ public class ProcessOrderServlet extends HttpServlet {
         recipient.setDistrict(district);
         recipient.setWard(ward);
         recipient.setAddress(addressDetail);
+
+        double discountAmount = subprice - total;
+        double shippingFee;
+        try {
+            shippingFee = ghnShippingService.calculateShippingFee(recipient, cartItems, total);
+        } catch (Exception e) {
+            session.setAttribute("checkoutError", "Không tính được phí vận chuyển GHN: " + e.getMessage());
+            response.sendRedirect("AddCart?action=checkout&ids=" + idsParam + "&error=shipping");
+            return;
+        }
+        double payableTotal = total + shippingFee;
+
+        String paymentMethod = cleanInput(request.getParameter("payment_method"));
+        if (paymentMethod == null) paymentMethod = "Thanh toán khi nhận hàng (COD)";
+        Payment payment = new Payment(0, paymentMethod, "Thành công", payableTotal);
+
+        order.setUserId(user.getId());
+        order.setOrderCode("TN-" + System.currentTimeMillis());
+        order.setOrderStatus("Chờ xác nhận");
+        order.setSubprice(subprice);
+        order.setDiscountAmount(discountAmount);
+        order.setShippingFee(shippingFee);
+        order.setTotalAmount(payableTotal);
 
         boolean success = orderService.createOrder(order, recipient, cartItems, payment);
 
@@ -190,4 +200,5 @@ public class ProcessOrderServlet extends HttpServlet {
         String cleanedValue = cleanInput(value);
         return cleanedValue == null ? null : cleanedValue.replaceAll("\\s+", "");
     }
+
 }

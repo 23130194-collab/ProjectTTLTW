@@ -9,13 +9,15 @@ import java.util.List;
 
 public class UserAddressDao {
     private static final String SELECT_COLUMNS = "SELECT id, user_id AS userId, label, full_name AS fullName, "
-            + "phone, address_detail AS addressDetail, ward, province, full_address AS fullAddress, "
+            + "phone, address_detail AS addressDetail, ward, district, province, full_address AS fullAddress, "
             + "is_default AS defaultAddress, created_at AS createdAt, updated_at AS updatedAt "
             + "FROM user_addresses ";
+    private static volatile boolean districtColumnEnsured = false;
 
     private final Jdbi jdbi = DatabaseDao.get();
 
     public void ensureDefaultAddressForUser(User user) {
+        ensureDistrictColumn();
         if (user == null || trim(user.getAddress()).isEmpty()) {
             return;
         }
@@ -37,6 +39,7 @@ public class UserAddressDao {
     }
 
     public List<UserAddress> getAddressesByUserId(int userId) {
+        ensureDistrictColumn();
         return jdbi.withHandle(handle ->
                 handle.createQuery(SELECT_COLUMNS
                                 + "WHERE user_id = :userId ORDER BY is_default DESC, updated_at DESC, id DESC")
@@ -47,14 +50,17 @@ public class UserAddressDao {
     }
 
     public UserAddress getDefaultAddressByUserId(int userId) {
+        ensureDistrictColumn();
         return jdbi.withHandle(handle -> getDefaultAddressByUserId(handle, userId));
     }
 
     public UserAddress getAddressById(int userId, int addressId) {
+        ensureDistrictColumn();
         return jdbi.withHandle(handle -> getAddressById(handle, userId, addressId));
     }
 
     public UserAddress createAddress(UserAddress address) {
+        ensureDistrictColumn();
         return jdbi.inTransaction(handle -> {
             boolean shouldBeDefault = address.isDefaultAddress() || countAddressesByUserId(handle, address.getUserId()) == 0;
 
@@ -63,8 +69,8 @@ public class UserAddressDao {
             }
 
             int addressId = handle.createUpdate(
-                            "INSERT INTO user_addresses (user_id, label, full_name, phone, address_detail, ward, province, full_address, is_default) "
-                                    + "VALUES (:userId, :label, :fullName, :phone, :addressDetail, :ward, :province, :fullAddress, :defaultAddress)")
+                            "INSERT INTO user_addresses (user_id, label, full_name, phone, address_detail, ward, district, province, full_address, is_default) "
+                                    + "VALUES (:userId, :label, :fullName, :phone, :addressDetail, :ward, :district, :province, :fullAddress, :defaultAddress)")
                     .bindBean(address)
                     .bind("defaultAddress", shouldBeDefault)
                     .executeAndReturnGeneratedKeys("id")
@@ -83,6 +89,7 @@ public class UserAddressDao {
     }
 
     public boolean updateAddress(UserAddress address) {
+        ensureDistrictColumn();
         return jdbi.inTransaction(handle -> {
             UserAddress currentAddress = getAddressById(handle, address.getUserId(), address.getId());
             if (currentAddress == null) {
@@ -96,7 +103,7 @@ public class UserAddressDao {
 
             int updatedRows = handle.createUpdate(
                             "UPDATE user_addresses SET label = :label, full_name = :fullName, phone = :phone, "
-                                    + "address_detail = :addressDetail, ward = :ward, province = :province, "
+                                    + "address_detail = :addressDetail, ward = :ward, district = :district, province = :province, "
                                     + "full_address = :fullAddress, is_default = :defaultAddress "
                                     + "WHERE id = :id AND user_id = :userId")
                     .bindBean(address)
@@ -112,6 +119,7 @@ public class UserAddressDao {
     }
 
     public boolean deleteAddress(int userId, int addressId) {
+        ensureDistrictColumn();
         return jdbi.inTransaction(handle -> {
             UserAddress address = getAddressById(handle, userId, addressId);
             if (address == null) {
@@ -142,6 +150,7 @@ public class UserAddressDao {
     }
 
     public boolean setDefaultAddress(int userId, int addressId) {
+        ensureDistrictColumn();
         return jdbi.inTransaction(handle -> {
             UserAddress address = getAddressById(handle, userId, addressId);
             if (address == null) {
@@ -213,6 +222,32 @@ public class UserAddressDao {
 
     private String trim(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private void ensureDistrictColumn() {
+        if (districtColumnEnsured) {
+            return;
+        }
+
+        synchronized (UserAddressDao.class) {
+            if (districtColumnEnsured) {
+                return;
+            }
+
+            jdbi.useHandle(handle -> {
+                int columnCount = handle.createQuery(
+                                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS "
+                                        + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'user_addresses' AND COLUMN_NAME = 'district'")
+                        .mapTo(Integer.class)
+                        .one();
+
+                if (columnCount == 0) {
+                    handle.createUpdate("ALTER TABLE user_addresses ADD COLUMN district VARCHAR(255) NULL AFTER ward")
+                            .execute();
+                }
+            });
+            districtColumnEnsured = true;
+        }
     }
 
     private String defaultText(String value, String fallback) {
