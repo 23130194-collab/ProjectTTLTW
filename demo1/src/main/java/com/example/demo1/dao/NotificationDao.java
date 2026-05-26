@@ -62,5 +62,16 @@ public class NotificationDao {
             );
         }
 
+    public void insertAdminNotification(String content, String link) {
+        String sql = "INSERT INTO notifications (user_id, content, link, target_role, created_at) " +
+                "VALUES (NULL, :content, :link, 1, NOW())";
+        jdbi.useHandle(handle ->
+                handle.createUpdate(sql)
+                        .bind("content", content)
+                        .bind("link", link)
+                        .execute()
+        );
+    }
+
 }
 

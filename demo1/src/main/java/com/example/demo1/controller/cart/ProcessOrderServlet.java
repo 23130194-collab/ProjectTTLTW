@@ -160,12 +160,6 @@ public class ProcessOrderServlet extends HttpServlet {
                 Notification userNoti = new Notification(user.getId(), content, link, 0);
                 notiService.insert(userNoti);
 
-                String adminContent = "Đơn hàng mới " + order.getOrderCode() + " từ khách hàng " + fullName;
-                String adminLink = "admin/orders?action=view&id=" + order.getId();
-
-                Notification adminNoti = new Notification(null, adminContent, adminLink, 1);
-                new com.example.demo1.dao.NotificationDao().insert(adminNoti);
-
             } catch (Exception e) {
                 e.printStackTrace();
             }

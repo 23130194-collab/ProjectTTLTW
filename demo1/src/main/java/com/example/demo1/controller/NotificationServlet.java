@@ -31,7 +31,9 @@ public class NotificationServlet extends HttpServlet {
             return;
         }
 
-        List<Notification> userNotifications = notificationService.getNotificationsForUser(user.getUserId());
+        List<Notification> userNotifications = (user.getRole() == 1)
+                ? notificationService.getNotificationsForAdmin()
+                : notificationService.getNotificationsForUser(user.getUserId());
 
         response.getWriter().write(gson.toJson(userNotifications));
     }
@@ -50,6 +52,10 @@ public class NotificationServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"status\": \"error\", \"message\": \"Invalid ID\"}");
             }
+        } else {
+            notificationService.markAllAdminAsRead();
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("{\"status\": \"success\"}");
         }
     }
 }

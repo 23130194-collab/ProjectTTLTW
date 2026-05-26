@@ -25,6 +25,7 @@ public class OrderService {
     private final OrderDao orderDao = new OrderDao();
     private final ProductDao productDao = new ProductDao();
     private final GhnShippingService ghnShippingService = new GhnShippingService();
+    private final NotificationService notificationService = new NotificationService();
 
     public OrderPage getPagedOrders(String keyword, int currentPage, int ordersPerPage) {
         return getPagedOrders(keyword, null, currentPage, ordersPerPage);
@@ -179,7 +180,11 @@ public class OrderService {
     }
 
     public boolean createOrder(Order order, RecipientInfo recipient, List<CartItem> cartItems, Payment payment) {
-        return orderDao.createOrder(order, recipient, cartItems, payment);
+        boolean success = orderDao.createOrder(order, recipient, cartItems, payment);
+        if (success) {
+            notificationService.notifyAdminNewOrder(order.getId(), order.getOrderCode());
+        }
+        return success;
     }
 
     public boolean cancelOrder(int orderId, String reason) {
@@ -199,6 +204,8 @@ public class OrderService {
             for (OrderItem item : items) {
                 productDao.incrementStock(item.getProductId(), item.getQuantity());
             }
+            notificationService.notifyAdminOrderCancelled(orderId, order.getOrderCode());
+
         }
         return success;
     }

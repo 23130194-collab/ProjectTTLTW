@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 
 public class AuthService {
     UserDao authDao = new UserDao();
+    private final NotificationService notificationService = new NotificationService();
 
     public User checkLogin(String email, String password) {
         User u = authDao.getUserByEmail(email);
@@ -33,6 +34,7 @@ public class AuthService {
 
     public void register(String name, String email, String hashedPassword, String otp, Timestamp otpExpiry) {
         authDao.insertUser(name, email, hashedPassword, otp, otpExpiry);
+        notificationService.notifyAdminNewUser(name);
     }
 
     public void activateUser(int userId) {
