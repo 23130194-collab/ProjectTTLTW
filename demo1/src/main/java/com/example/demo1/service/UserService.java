@@ -58,4 +58,12 @@ public class UserService {
         userDao.insertUserByAdmin(name, email, hashedPassword);
 
     }
+
+    public int getRoleById(int userId) {
+        return userDao.getRoleById(userId);
+    }
+
+    public boolean updateRole(int userId, int newRole) {
+        return userDao.updateRole(userId, newRole);
+    }
 }
