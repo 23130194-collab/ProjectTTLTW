@@ -157,22 +157,24 @@
                         <c:when test="${not empty favList}">
                             <c:forEach var="p" items="${favList}">
                                 <article class="product-card-fav">
-                                    <div class="product-fav-thumb">
-                                        <img src="${p.image}" alt="${p.name}">
-                                    </div>
-                                    <div class="product-fav-details">
-                                        <h4 class="product-fav-title">${p.name}</h4>
-                                        <div class="product-fav-price">
-                                        <span class="new-price">
-                                            <fmt:formatNumber value="${p.price}" pattern="#,###"/>đ
-                                        </span>
-                                            <c:if test="${p.oldPrice > p.price}">
-                                            <span class="old-price">
-                                                <fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ
-                                            </span>
-                                            </c:if>
+                                    <a href="${pageContext.request.contextPath}/product-detail?id=${p.id}" style="text-decoration: none; color: inherit; display: contents;">
+                                        <div class="product-fav-thumb">
+                                            <img src="${p.image}" alt="${p.name}">
                                         </div>
-                                    </div>
+                                        <div class="product-fav-details">
+                                            <h4 class="product-fav-title">${p.name}</h4>
+                                            <div class="product-fav-price">
+                                            <span class="new-price">
+                                                <fmt:formatNumber value="${p.price}" pattern="#,###"/>đ
+                                            </span>
+                                                <c:if test="${p.oldPrice > p.price}">
+                                                <span class="old-price">
+                                                    <fmt:formatNumber value="${p.oldPrice}" pattern="#,###"/>đ
+                                                </span>
+                                                </c:if>
+                                            </div>
+                                        </div>
+                                    </a>
                                     <a href="${pageContext.request.contextPath}/remove-favorite?id=${p.id}"
                                        class="fav-remove-link">
                                         <i class="fa-solid fa-heart product-fav-heart"></i>

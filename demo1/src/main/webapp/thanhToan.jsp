@@ -217,7 +217,7 @@
                 <div class="section-title">PHƯƠNG THỨC THANH TOÁN</div>
                 <select name="payment_method" class="payment-select">
                     <option value="Thanh toán khi nhận hàng (COD)">Thanh toán khi nhận hàng (COD)</option>
-                    <option value="Chuyển khoản ngân hàng">Chuyển khoản ngân hàng</option>
+                    <option value="VNPAY">Chuyển khoản qua VNPAY</option>
                 </select>
             </div>
 
