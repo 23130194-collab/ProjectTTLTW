@@ -43,14 +43,14 @@ public class NotificationService {
 
     public void notifyAdminNewOrder(int orderId, String orderCode) {
         notificationDao.insertAdminNotification(
-                "Đơn hàng mới: #" + orderCode,
+                "Đơn hàng mới: " + orderCode,
                 "/admin/orders?action=view&id=" + orderId
         );
     }
 
     public void notifyAdminOrderCancelled(int orderId, String orderCode) {
         notificationDao.insertAdminNotification(
-                "Đơn hàng bị hủy: #" + orderCode,
+                "Đơn hàng bị hủy: " + orderCode,
                 "/admin/orders?action=view&id=?" + orderId
         );
     }
