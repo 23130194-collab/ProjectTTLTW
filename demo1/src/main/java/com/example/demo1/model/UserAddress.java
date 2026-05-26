@@ -10,6 +10,7 @@ public class UserAddress {
     private String phone;
     private String addressDetail;
     private String ward;
+    private String district;
     private String province;
     private String fullAddress;
     private boolean defaultAddress;
@@ -73,6 +74,14 @@ public class UserAddress {
 
     public void setWard(String ward) {
         this.ward = ward;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
     }
 
     public String getProvince() {

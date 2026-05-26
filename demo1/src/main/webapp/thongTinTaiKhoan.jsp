@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+﻿<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -398,6 +398,17 @@
                                         </select>
                                     </label>
                                     <label>
+                                        <span>Quận/Huyện</span>
+                                        <select name="district" id="addressDistrictSelect" ${empty addressFormDistricts ? 'disabled' : ''} required>
+                                            <option value="">Chọn Quận/Huyện</option>
+                                            <c:forEach items="${addressFormDistricts}" var="district">
+                                                <option value="${district.optionValue}" ${selectedAddressDistrictValue == district.optionValue ? 'selected' : ''}>
+                                                    <c:out value="${district.name}"/>
+                                                </option>
+                                            </c:forEach>
+                                        </select>
+                                    </label>
+                                    <label>
                                         <span>Phường/Xã</span>
                                         <select name="ward" id="addressWardSelect" ${empty addressFormWards ? 'disabled' : ''} required>
                                             <option value="">Chọn Phường/Xã</option>
@@ -508,6 +519,7 @@
 
         const accountAddressForm = document.getElementById('accountAddressForm');
         const provinceSelect = document.getElementById('addressProvinceSelect');
+        const districtSelect = document.getElementById('addressDistrictSelect');
         const loadWardsButton = document.getElementById('addressLoadWardsButton');
 
         if (accountAddressForm && provinceSelect && loadWardsButton) {
@@ -521,6 +533,19 @@
                 accountAddressForm.method = loadWardsButton.formMethod || 'get';
                 accountAddressForm.submit();
             });
+
+            if (districtSelect) {
+                districtSelect.addEventListener('change', function () {
+                    if (accountAddressForm.requestSubmit) {
+                        accountAddressForm.requestSubmit(loadWardsButton);
+                        return;
+                    }
+
+                    accountAddressForm.action = loadWardsButton.formAction;
+                    accountAddressForm.method = loadWardsButton.formMethod || 'get';
+                    accountAddressForm.submit();
+                });
+            }
         }
     });
 </script>
@@ -530,3 +555,4 @@
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>
 </html>
+

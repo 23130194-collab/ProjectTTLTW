@@ -17,6 +17,7 @@ public class VietnamAddressUnit {
     private Integer phoneCode;
 
     private List<VietnamAddressUnit> wards;
+    private List<VietnamAddressUnit> districts;
 
     public String getName() {
         return name;
@@ -64,6 +65,14 @@ public class VietnamAddressUnit {
 
     public void setWards(List<VietnamAddressUnit> wards) {
         this.wards = wards;
+    }
+
+    public List<VietnamAddressUnit> getDistricts() {
+        return districts == null ? Collections.emptyList() : districts;
+    }
+
+    public void setDistricts(List<VietnamAddressUnit> districts) {
+        this.districts = districts;
     }
 
     public String getOptionValue() {

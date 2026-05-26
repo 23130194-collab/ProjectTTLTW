@@ -239,7 +239,7 @@
                                 <div class="payment-line-new"><span>Số lượng sản phẩm:</span><strong>${fn:length(orderItems)}</strong></div>
                                 <div class="payment-line-new"><span>Tổng tiền hàng:</span><strong><fmt:formatNumber value="${order.subprice}" pattern="#,###"/>đ</strong></div>
                                 <div class="payment-line-new"><span>Giảm giá:</span><strong style="color:var(--accent-dark);">-<fmt:formatNumber value="${order.discountAmount}" pattern="#,###"/>đ</strong></div>
-                                <div class="payment-line-new"><span>Phí vận chuyển:</span><strong style="color:green;">Miễn phí</strong></div>
+                                <div class="payment-line-new"><span>Phí vận chuyển:</span><strong style="color:green;"><fmt:formatNumber value="${order.shippingFee}" pattern="#,###"/>đ</strong></div>
                             </div>
 
                             <div class="payment-group">

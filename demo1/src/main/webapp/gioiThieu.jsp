@@ -146,7 +146,7 @@
         <div class="core-item">
             <div class="core-number">02</div>
             <h3 class="core-title">Giao Hàng Nhanh</h3>
-            <p class="core-desc">Giao hàng toàn quốc trong 24h, miễn phí ship cho đơn từ 500K</p>
+            <p class="core-desc">Giao hàng toàn quốc, phí vận chuyển được tính theo GHN khi thanh toán</p>
         </div>
         <div class="core-item">
             <div class="core-number">03</div>
