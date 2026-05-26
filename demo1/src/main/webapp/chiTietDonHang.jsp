@@ -249,7 +249,12 @@
                             </div>
                         </div>
 
-                        <c:if test="${order.orderStatus eq 'Chờ xác nhận'}">
+                        <c:if test="${order.orderStatus eq 'Chờ xác nhận' or order.orderStatus eq 'Chờ thanh toán'}">
+                            <c:if test="${order.orderStatus eq 'Chờ thanh toán'}">
+                                <div class="action-footer" style="margin-bottom: -15px;">
+                                    <a href="${contextPath}/repay?id=${order.id}" class="btn-confirm-received" style="text-decoration: none;">Tiếp tục thanh toán</a>
+                                </div>
+                            </c:if>
                             <div class="action-footer">
                                 <button type="button" id="showCancelModalBtn" class="btn-cancel-order">Hủy đơn hàng</button>
                             </div>

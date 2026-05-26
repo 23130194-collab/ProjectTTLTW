@@ -156,7 +156,7 @@ public class OrderController extends HttpServlet {
                 Order order = orderDao.getOrderById(orderId);
 
                 if (order != null && order.getUserId() == user.getId()) {
-                    if ("Chờ xác nhận".equals(order.getOrderStatus())) {
+                    if ("Chờ xác nhận".equals(order.getOrderStatus()) || "Chờ thanh toán".equals(order.getOrderStatus())) {
                         orderService.cancelOrder(orderId, reason);
                     }
                 }

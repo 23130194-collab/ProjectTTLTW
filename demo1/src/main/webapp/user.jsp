@@ -212,6 +212,12 @@
                                             Xác nhận nhận hàng
                                         </button>
                                     </c:if>
+                                    <c:if test="${order.orderStatus eq 'Chờ thanh toán'}">
+                                        <a href="${pageContext.request.contextPath}/repay?id=${order.id}"
+                                                class="btn-confirm-received" style="text-decoration: none; margin-top: 5px; display: inline-block;">
+                                            Tiếp tục thanh toán
+                                        </a>
+                                    </c:if>
                                 </div>
                             </div>
 
