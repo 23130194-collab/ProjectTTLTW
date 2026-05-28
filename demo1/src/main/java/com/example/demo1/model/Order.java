@@ -15,6 +15,7 @@ public class Order {
     private double shippingFee;
     private double totalAmount;
     private String notes;
+    private String cancellationReason;
     private Timestamp createdAt;
     private LocalDateTime updatedAt;
     private List<OrderItem> items;
@@ -103,6 +104,14 @@ public class Order {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
     }
 
     public Timestamp getCreatedAt() {
