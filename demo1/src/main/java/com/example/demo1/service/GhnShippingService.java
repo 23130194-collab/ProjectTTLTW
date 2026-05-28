@@ -1,5 +1,6 @@
 package com.example.demo1.service;
 
+import com.example.demo1.model.CartItem;
 import com.example.demo1.model.GhnCreateOrderResult;
 import com.example.demo1.model.Order;
 import com.example.demo1.model.OrderItem;
@@ -17,11 +18,12 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class GhnShippingService {
-    private static final String DEFAULT_BASE_URL = "https://dev-online-gateway.ghn.vn/shiip/public-api";
+    private static final String DEFAULT_BASE_URL = "https://online-gateway.ghn.vn/shiip/public-api";
     private static final int DEFAULT_PAYMENT_TYPE_ID = 1;
     private static final int DEFAULT_SERVICE_TYPE_ID = 2;
     private static final int DEFAULT_ITEM_WEIGHT = 500;
@@ -33,6 +35,53 @@ public class GhnShippingService {
 
     private final Gson gson = new Gson();
 
+    public int calculateShippingFee(RecipientInfo recipient, List<CartItem> cartItems, double merchandiseTotal)
+            throws IOException {
+        ensureConfigured();
+
+        String provinceName = cleanAddressPart(recipient.getProvince());
+        String districtName = cleanAddressPart(recipient.getDistrict());
+        String wardName = cleanAddressPart(firstNonBlank(recipient.getWard(), extractWardFromAddress(recipient.getAddress())));
+        GhnAddressCodes addressCodes = resolveAddressCodes(provinceName, districtName, wardName);
+
+        JsonObject payload = new JsonObject();
+        payload.addProperty("service_type_id", intConfig("ghn.serviceTypeId", "GHN_SERVICE_TYPE_ID", DEFAULT_SERVICE_TYPE_ID));
+        payload.addProperty("to_district_id", addressCodes.districtId);
+        payload.addProperty("to_ward_code", addressCodes.wardCode);
+        payload.addProperty("height", intConfig("ghn.defaultHeight", "GHN_DEFAULT_HEIGHT", DEFAULT_HEIGHT));
+        payload.addProperty("length", intConfig("ghn.defaultLength", "GHN_DEFAULT_LENGTH", DEFAULT_LENGTH));
+        payload.addProperty("width", intConfig("ghn.defaultWidth", "GHN_DEFAULT_WIDTH", DEFAULT_WIDTH));
+        payload.addProperty("weight", calculateCartWeight(cartItems));
+        payload.addProperty("insurance_value", Math.min(toMoney(merchandiseTotal), MAX_INSURANCE_VALUE));
+
+        int fromDistrictId = intConfig("ghn.fromDistrictId", "GHN_FROM_DISTRICT_ID", 0);
+        if (fromDistrictId > 0) {
+            payload.addProperty("from_district_id", fromDistrictId);
+        }
+
+        String responseText = post("/v2/shipping-order/fee", payload, true);
+        JsonObject response = gson.fromJson(responseText, JsonObject.class);
+        int code = getInt(response, "code", 0);
+        if (code != 200) {
+            throw new IOException(firstNonBlank(
+                    getString(response, "message_display"),
+                    getString(response, "message"),
+                    "GHN không tính được phí vận chuyển."
+            ));
+        }
+
+        JsonObject data = getObject(response, "data");
+        Integer totalFee = firstNonNull(
+                getNullableInt(data, "total"),
+                getNullableInt(data, "total_fee"),
+                getNullableInt(data, "service_fee")
+        );
+        if (totalFee == null) {
+            throw new IOException("GHN trả về phí vận chuyển không hợp lệ.");
+        }
+        return Math.max(totalFee, 0);
+    }
+
     public GhnCreateOrderResult createShippingOrder(Order order, RecipientInfo recipient, List<OrderItem> items, Payment payment)
             throws IOException {
         ensureConfigured();
@@ -40,12 +89,10 @@ public class GhnShippingService {
         String provinceName = cleanAddressPart(recipient.getProvince());
         String districtName = cleanAddressPart(recipient.getDistrict());
         String wardName = cleanAddressPart(firstNonBlank(recipient.getWard(), extractWardFromAddress(recipient.getAddress())));
-        Integer districtId = null;
-        String wardCode = null;
+        GhnAddressCodes addressCodes = null;
 
         try {
-            districtId = resolveDistrictId(provinceName, districtName);
-            wardCode = resolveWardCode(districtId, wardName);
+            addressCodes = resolveAddressCodes(provinceName, districtName, wardName);
         } catch (IOException e) {
             System.err.println("Không map được mã địa chỉ GHN, gửi bằng tên địa chỉ: " + e.getMessage());
         }
@@ -60,11 +107,11 @@ public class GhnShippingService {
         payload.addProperty("to_ward_name", wardName);
         payload.addProperty("to_district_name", districtName);
         payload.addProperty("to_province_name", provinceName);
-        if (wardCode != null) {
-            payload.addProperty("to_ward_code", wardCode);
+        if (addressCodes != null && addressCodes.wardCode != null) {
+            payload.addProperty("to_ward_code", addressCodes.wardCode);
         }
-        if (districtId != null) {
-            payload.addProperty("to_district_id", districtId);
+        if (addressCodes != null && addressCodes.districtId != null) {
+            payload.addProperty("to_district_id", addressCodes.districtId);
         }
         payload.addProperty("cod_amount", calculateCodAmount(order, payment));
         payload.addProperty("content", "Đơn hàng " + order.getOrderCode());
@@ -121,6 +168,27 @@ public class GhnShippingService {
         return itemArray;
     }
 
+    private GhnAddressCodes resolveAddressCodes(String provinceName, String districtName, String wardName) throws IOException {
+        if (!isBlank(districtName)) {
+            int districtId = resolveDistrictId(provinceName, districtName);
+            return new GhnAddressCodes(districtId, resolveWardCode(districtId, wardName));
+        }
+
+        IOException lastError = null;
+        for (Integer districtId : resolveDistrictIdsByProvince(provinceName)) {
+            try {
+                return new GhnAddressCodes(districtId, resolveWardCode(districtId, wardName));
+            } catch (IOException e) {
+                lastError = e;
+            }
+        }
+
+        if (lastError != null) {
+            throw lastError;
+        }
+        throw new IOException("Không tìm thấy mã GHN cho địa chỉ nhận hàng.");
+    }
+
     private int resolveDistrictId(String provinceName, String districtName) throws IOException {
         provinceName = cleanAddressPart(provinceName);
         districtName = cleanAddressPart(districtName);
@@ -148,6 +216,31 @@ public class GhnShippingService {
         throw new IOException("Không tìm thấy mã Quận/Huyện GHN cho: " + districtName + ".");
     }
 
+    private List<Integer> resolveDistrictIdsByProvince(String provinceName) throws IOException {
+        provinceName = cleanAddressPart(provinceName);
+        if (isBlank(provinceName)) {
+            throw new IOException("Thiếu Tỉnh/Thành phố nhận hàng để tính phí GHN.");
+        }
+
+        String responseText = get("/master-data/district");
+        JsonArray districts = getDataArray(responseText);
+        List<Integer> ids = new ArrayList<>();
+        for (JsonElement element : districts) {
+            JsonObject district = element.getAsJsonObject();
+            if (matchesName(district, "ProvinceName", provinceName)) {
+                int districtId = getInt(district, "DistrictID", 0);
+                if (districtId > 0) {
+                    ids.add(districtId);
+                }
+            }
+        }
+
+        if (ids.isEmpty()) {
+            throw new IOException("Không tìm thấy mã Tỉnh/Thành phố GHN cho: " + provinceName + ".");
+        }
+        return ids;
+    }
+
     private String resolveWardCode(int districtId, String wardName) throws IOException {
         wardName = cleanAddressPart(wardName);
         if (districtId <= 0) {
@@ -168,7 +261,24 @@ public class GhnShippingService {
             }
         }
 
+        for (String alias : wardAliases(wardName)) {
+            for (JsonElement element : wards) {
+                JsonObject ward = element.getAsJsonObject();
+                if (matchesName(ward, "WardName", alias)) {
+                    return getString(ward, "WardCode");
+                }
+            }
+        }
+
         throw new IOException("Không tìm thấy mã Phường/Xã GHN cho: " + wardName + ".");
+    }
+
+    private String[] wardAliases(String wardName) {
+        String normalizedWardName = normalize(wardName);
+        if ("phuong my thuong".equals(normalizedWardName) || "my thuong".equals(normalizedWardName)) {
+            return new String[]{"Phú Thượng", "Phú Mỹ", "Phú An"};
+        }
+        return new String[0];
     }
 
     private String get(String path) throws IOException {
@@ -247,11 +357,11 @@ public class GhnShippingService {
     }
 
     private String token() {
-        return config("ghn.token", "GHN_TOKEN", "");
+        return config("ghn.token", "GHN_TOKEN", "2826b406-56db-11f1-b97c-d6dddd159166");
     }
 
     private int shopId() {
-        return intConfig("ghn.shopId", "GHN_SHOP_ID", 0);
+        return intConfig("ghn.shopId", "GHN_SHOP_ID", 6453023);
     }
 
     private int calculateCodAmount(Order order, Payment payment) {
@@ -272,6 +382,16 @@ public class GhnShippingService {
         int totalQuantity = 0;
         if (items != null) {
             for (OrderItem item : items) {
+                totalQuantity += Math.max(item.getQuantity(), 0);
+            }
+        }
+        return Math.max(DEFAULT_ITEM_WEIGHT, totalQuantity * intConfig("ghn.itemWeight", "GHN_ITEM_WEIGHT", DEFAULT_ITEM_WEIGHT));
+    }
+
+    private int calculateCartWeight(List<CartItem> items) {
+        int totalQuantity = 0;
+        if (items != null) {
+            for (CartItem item : items) {
                 totalQuantity += Math.max(item.getQuantity(), 0);
             }
         }
@@ -430,6 +550,18 @@ public class GhnShippingService {
         return null;
     }
 
+    private Integer firstNonNull(Integer... values) {
+        if (values == null) {
+            return null;
+        }
+        for (Integer value : values) {
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
@@ -458,5 +590,14 @@ public class GhnShippingService {
                 .replaceAll("\\p{M}", "")
                 .replace('đ', 'd')
                 .trim();
+    }
+    private static class GhnAddressCodes {
+        private final Integer districtId;
+        private final String wardCode;
+
+        private GhnAddressCodes(Integer districtId, String wardCode) {
+            this.districtId = districtId;
+            this.wardCode = wardCode;
+        }
     }
 }

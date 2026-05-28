@@ -125,9 +125,11 @@ public class OrderController extends HttpServlet {
             }
 
             List<OrderItem> orderItems = orderDao.getOrderItemsByOrderId(orderId);
+            com.example.demo1.model.Payment payment = orderDao.getPaymentByOrderId(orderId);
 
             request.setAttribute("order", order);
             request.setAttribute("orderItems", orderItems);
+            request.setAttribute("payment", payment);
             request.setAttribute("timelineSteps", orderService.getOrderTimelineSteps(order));
             request.getRequestDispatcher("/chiTietDonHang.jsp").forward(request, response);
 
@@ -156,7 +158,7 @@ public class OrderController extends HttpServlet {
                 Order order = orderDao.getOrderById(orderId);
 
                 if (order != null && order.getUserId() == user.getId()) {
-                    if ("Chờ xác nhận".equals(order.getOrderStatus())) {
+                    if ("Chờ xác nhận".equals(order.getOrderStatus()) || "Chờ thanh toán".equals(order.getOrderStatus())) {
                         orderService.cancelOrder(orderId, reason);
                     }
                 }
@@ -255,24 +257,41 @@ public class OrderController extends HttpServlet {
                 selectedProvinceValue = selectedProvince.getOptionValue();
                 request.setAttribute("selectedAddressProvinceValue", selectedProvinceValue);
 
-                List<VietnamAddressUnit> wards = vietnamAddressService.getWardsByProvinceCode(selectedProvince.getCode());
-                request.setAttribute("addressFormWards", wards);
+                List<VietnamAddressUnit> districts = vietnamAddressService.getDistrictsByProvinceCode(selectedProvince.getCode());
+                request.setAttribute("addressFormDistricts", districts);
 
-                String selectedWardValue = request.getParameter("ward");
-                Integer selectedWardCode = VietnamAddressService.getCodeFromOptionValue(selectedWardValue);
-                VietnamAddressUnit selectedWard = selectedWardCode == null
-                        ? findByName(wards, editingAddress == null ? null : editingAddress.getWard())
-                        : findByCode(wards, selectedWardCode);
+                String selectedDistrictValue = request.getParameter("district");
+                Integer selectedDistrictCode = VietnamAddressService.getCodeFromOptionValue(selectedDistrictValue);
+                VietnamAddressUnit selectedDistrict = selectedDistrictCode == null
+                        ? findByName(districts, editingAddress == null ? null : editingAddress.getDistrict())
+                        : findByCode(districts, selectedDistrictCode);
 
-                if (selectedWard != null) {
-                    request.setAttribute("selectedAddressWardValue", selectedWard.getOptionValue());
+                if (selectedDistrict != null) {
+                    request.setAttribute("selectedAddressDistrictValue", selectedDistrict.getOptionValue());
+
+                    List<VietnamAddressUnit> wards = vietnamAddressService.getWardsByDistrictCode(selectedDistrict.getCode());
+                    request.setAttribute("addressFormWards", wards);
+
+                    String selectedWardValue = request.getParameter("ward");
+                    Integer selectedWardCode = VietnamAddressService.getCodeFromOptionValue(selectedWardValue);
+                    VietnamAddressUnit selectedWard = selectedWardCode == null
+                            ? findByName(wards, editingAddress == null ? null : editingAddress.getWard())
+                            : findByCode(wards, selectedWardCode);
+
+                    if (selectedWard != null) {
+                        request.setAttribute("selectedAddressWardValue", selectedWard.getOptionValue());
+                    }
+                } else {
+                    request.setAttribute("addressFormWards", Collections.emptyList());
                 }
             } else {
+                request.setAttribute("addressFormDistricts", Collections.emptyList());
                 request.setAttribute("addressFormWards", Collections.emptyList());
             }
         } catch (IOException e) {
             request.setAttribute("addressFormLoadError", "Không tải được dữ liệu Tỉnh/Thành phố, Phường/Xã. Vui lòng thử lại sau.");
             request.setAttribute("addressFormProvinces", Collections.emptyList());
+            request.setAttribute("addressFormDistricts", Collections.emptyList());
             request.setAttribute("addressFormWards", Collections.emptyList());
         }
     }

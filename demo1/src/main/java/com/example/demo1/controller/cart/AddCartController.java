@@ -2,8 +2,10 @@ package com.example.demo1.controller.cart;
 
 import com.example.demo1.model.CartItem;
 import com.example.demo1.model.Product;
+import com.example.demo1.model.RecipientInfo;
 import com.example.demo1.model.User;
 import com.example.demo1.service.CartService;
+import com.example.demo1.service.GhnShippingService;
 import com.example.demo1.service.ProductService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -13,11 +15,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.example.demo1.model.UserAddress;
+import com.example.demo1.service.UserAddressService;
 
 @WebServlet(name = "AddCartController", value = "/AddCart")
 public class AddCartController extends HttpServlet {
     private final CartService cartService = new CartService();
     private final ProductService productService = new ProductService();
+    private final UserAddressService userAddressService = new UserAddressService();
+    private final GhnShippingService ghnShippingService = new GhnShippingService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -81,7 +87,8 @@ public class AddCartController extends HttpServlet {
 
                 if (num > 0 && product != null && futureQuantity > product.getStock()) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Kho chỉ còn " + product.getStock() + " sản phẩm.");                    return;
+                    response.getWriter().write("Kho chỉ còn " + product.getStock() + " sản phẩm.");
+                    return;
                 }
 
                 cartService.updateQuantity(userId, id, num);
@@ -157,8 +164,33 @@ public class AddCartController extends HttpServlet {
                     total = cartService.calculateTotal(userId);
                 }
 
+                List<UserAddress> userAddresses = userAddressService.getAddressesByUserId(userId);
+                UserAddress defaultAddress = userAddressService.getDefaultAddressByUserId(userId);
+                double shippingFee = 0;
+                String shippingError = null;
+
+                UserAddress shippingAddress = defaultAddress;
+                if (shippingAddress == null && userAddresses != null && !userAddresses.isEmpty()) {
+                    shippingAddress = userAddresses.get(0);
+                }
+                if (shippingAddress != null) {
+                    try {
+                        shippingFee = ghnShippingService.calculateShippingFee(
+                                buildRecipientFromAddress(shippingAddress),
+                                cartItems,
+                                total
+                        );
+                    } catch (Exception e) {
+                        shippingError = "Không tính được phí vận chuyển GHN: " + e.getMessage();
+                    }
+                }
+
                 request.setAttribute("cartItems", cartItems);
                 request.setAttribute("totalAmount", total);
+                request.setAttribute("shippingFee", shippingFee);
+                request.setAttribute("shippingError", shippingError);
+                request.setAttribute("userAddresses", userAddresses);
+                request.setAttribute("defaultAddress", defaultAddress);
 
                 request.getRequestDispatcher("/thanhToan.jsp").forward(request, response);
             }
@@ -166,5 +198,16 @@ public class AddCartController extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect("home.jsp");
         }
+    }
+
+    private RecipientInfo buildRecipientFromAddress(UserAddress address) {
+        RecipientInfo recipient = new RecipientInfo();
+        recipient.setFullName(address.getFullName());
+        recipient.setPhone(address.getPhone());
+        recipient.setProvince(address.getProvince());
+        recipient.setDistrict(address.getDistrict());
+        recipient.setWard(address.getWard());
+        recipient.setAddress(address.getAddressDetail());
+        return recipient;
     }
 }

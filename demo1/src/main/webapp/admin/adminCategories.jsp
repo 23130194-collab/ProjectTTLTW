@@ -15,6 +15,68 @@
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminCategories.css">
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminModal.css">
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminForm.css">
+    <style>
+        .notification-btn { position: relative; }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px; right: -5px;
+            background: red; color: white;
+            border-radius: 50%;
+            width: 18px; height: 18px;
+            font-size: 11px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 60px; right: 20px;
+            width: 320px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 9999;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-header {
+            padding: 12px 16px;
+            font-weight: 600;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 15px;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f9f9f9;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover { background: #f5f5f5; }
+
+        .notification-item.unread { background: #eff6ff; }
+
+        .notification-item .noti-content { flex: 1; font-size: 13px; }
+
+        .notification-item .noti-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .notification-empty {
+            padding: 24px;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+    </style>
 </head>
 
 <body>
@@ -63,7 +125,17 @@
     <div class="header-actions">
         <button class="notification-btn" id="notificationBtn">
             <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge" id="notificationBadge" style="display:none"></span>
         </button>
+        <div class="notification-dropdown" id="notificationDropdown" style="display:none">
+            <div class="notification-header">
+                <span>Thông báo</span>
+            </div>
+            <div class="notification-list" id="notificationList">
+                <div class="notification-empty">Không có thông báo mới</div>
+            </div>
+        </div>
+
         <div class="user-profile">
             <img src="https://www.shutterstock.com/image-vector/admin-icon-strategy-collection-thin-600nw-2307398667.jpg"
                  alt="User Profile">
@@ -281,7 +353,112 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationList = document.getElementById('notificationList');
+        const notificationBadge = document.getElementById('notificationBadge');
 
+        notificationBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const isHidden = notificationDropdown.style.display === 'none';
+            notificationDropdown.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) {
+                loadNotifications();
+            }
+        });
+
+        document.addEventListener('click', function () {
+            notificationDropdown.style.display = 'none';
+        });
+
+        notificationDropdown.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
+        function markAllAdminAsRead() {
+            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+                .then(() => {
+                    const badge = document.getElementById('notificationBadge');
+                    badge.style.display = 'none';
+                    badge.textContent = '0';
+                    loadNotifications();
+                });
+        }
+
+        function loadNotifications() {
+            fetch('${contextPath}/NotificationServlet')
+                .then(res => res.json())
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        notificationList.innerHTML = '<div class="notification-empty">Không có thông báo mới</div>';
+                        notificationBadge.style.display = 'none';
+                        return;
+                    }
+
+                    const unreadCount = data.filter(n => n.read === false || n.isRead === 0 || n.isRead === false).length;
+                    notificationBadge.textContent = unreadCount;
+                    notificationBadge.style.display = unreadCount > 0 ? 'flex' : 'none';
+
+                    notificationList.innerHTML = data.map(function(n) {
+                        var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
+                        var unreadClass = isUnread ? 'unread' : '';
+                        var link = '${contextPath}' + n.link;
+
+                        return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
+                            + '<div class="noti-content">'
+                            + '<div>' + n.content + '</div>'
+                            + '<div class="noti-time">' + formatTime(n.createdAt) + '</div>'
+                            + '</div>'
+                            + '</a>';
+                    }).join('');
+                })
+                .catch(err => console.error('Lỗi load notification:', err));
+        }
+
+        window.markAsRead = function(id, element, link, event) {
+            event.preventDefault();
+
+            if (element.classList.contains('unread')) {
+                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                    .then(response => {
+                        if(response.ok) {
+                            element.classList.remove('unread');
+                            const badge = document.getElementById('notificationBadge');
+                            let count = parseInt(badge.textContent) || 0;
+                            count = Math.max(0, count - 1);
+                            badge.textContent = count;
+                            badge.style.display = count > 0 ? 'flex' : 'none';
+                        }
+                    })
+                    .catch(err => console.error('Lỗi khi đánh dấu đã đọc: ', err))
+                    .finally(() => {
+                        window.location.href = link;
+                    });
+            } else {
+                window.location.href = link;
+            }
+        };
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+            const d = new Date(timestamp);
+            return d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear()
+                + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+        }
+
+        fetch('${contextPath}/NotificationServlet')
+            .then(res => res.json())
+            .then(data => {
+                if (!data || data.length === 0) return;
+                const unreadCount = data.filter(n => n.read === false || n.isRead === 0 || n.isRead === false).length;
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.style.display = unreadCount > 0 ? 'flex' : 'none';
+            })
+            .catch(err => console.error('Lỗi load badge:', err));
+    });
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.alert').forEach(function (alert) {

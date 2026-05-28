@@ -239,17 +239,23 @@
                                 <div class="payment-line-new"><span>Số lượng sản phẩm:</span><strong>${fn:length(orderItems)}</strong></div>
                                 <div class="payment-line-new"><span>Tổng tiền hàng:</span><strong><fmt:formatNumber value="${order.subprice}" pattern="#,###"/>đ</strong></div>
                                 <div class="payment-line-new"><span>Giảm giá:</span><strong style="color:var(--accent-dark);">-<fmt:formatNumber value="${order.discountAmount}" pattern="#,###"/>đ</strong></div>
-                                <div class="payment-line-new"><span>Phí vận chuyển:</span><strong style="color:green;">Miễn phí</strong></div>
+                                <div class="payment-line-new"><span>Phí vận chuyển:</span><strong style="color:green;"><fmt:formatNumber value="${order.shippingFee}" pattern="#,###"/>đ</strong></div>
                             </div>
 
                             <div class="payment-group">
                                 <div class="payment-sub-title">Thanh toán</div>
+                                <div class="payment-line-new final"><span>Phương thức thanh toán:</span><strong style="color:var(--accent-dark);">${not empty payment ? payment.paymentMethod : 'Chưa xác định'}</strong></div>
                                 <div class="payment-line-new final"><span>Tổng số tiền:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
-                                <div class="payment-line-new final"><span>Tổng số tiền đã thanh toán:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
+                                <div class="payment-line-new final"><span>${order.orderStatus eq 'Đã giao' ? 'Tổng số tiền đã thanh toán' : 'Tổng số tiền cần thanh toán'}:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
                             </div>
                         </div>
 
-                        <c:if test="${order.orderStatus eq 'Chờ xác nhận'}">
+                        <c:if test="${order.orderStatus eq 'Chờ xác nhận' or order.orderStatus eq 'Chờ thanh toán'}">
+                            <c:if test="${order.orderStatus eq 'Chờ thanh toán'}">
+                                <div class="action-footer" style="margin-bottom: -15px;">
+                                    <a href="${contextPath}/repay?id=${order.id}" class="btn-confirm-received" style="text-decoration: none;">Tiếp tục thanh toán</a>
+                                </div>
+                            </c:if>
                             <div class="action-footer">
                                 <button type="button" id="showCancelModalBtn" class="btn-cancel-order">Hủy đơn hàng</button>
                             </div>

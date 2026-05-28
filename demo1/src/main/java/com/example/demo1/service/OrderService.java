@@ -25,6 +25,7 @@ public class OrderService {
     private final OrderDao orderDao = new OrderDao();
     private final ProductDao productDao = new ProductDao();
     private final GhnShippingService ghnShippingService = new GhnShippingService();
+    private final NotificationService notificationService = new NotificationService();
 
     public OrderPage getPagedOrders(String keyword, int currentPage, int ordersPerPage) {
         return getPagedOrders(keyword, null, currentPage, ordersPerPage);
@@ -179,7 +180,11 @@ public class OrderService {
     }
 
     public boolean createOrder(Order order, RecipientInfo recipient, List<CartItem> cartItems, Payment payment) {
-        return orderDao.createOrder(order, recipient, cartItems, payment);
+        boolean success = orderDao.createOrder(order, recipient, cartItems, payment);
+        if (success) {
+            notificationService.notifyAdminNewOrder(order.getId(), order.getOrderCode());
+        }
+        return success;
     }
 
     public boolean cancelOrder(int orderId, String reason) {
@@ -199,6 +204,8 @@ public class OrderService {
             for (OrderItem item : items) {
                 productDao.incrementStock(item.getProductId(), item.getQuantity());
             }
+            notificationService.notifyAdminOrderCancelled(orderId, order.getOrderCode());
+
         }
         return success;
     }
@@ -366,13 +373,20 @@ public class OrderService {
         updatedCount += autoAdvanceOrders(
                 STATUS_PENDING,
                 STATUS_PROCESSING,
-                "Tự động chuyển sang Đang xử lý sau 1 phút"
+                "Tự động chuyển sang Đang xử lý sau 1 phút",
+                AUTO_ADVANCE_SECONDS
+        );
+        updatedCount += autoAdvanceOrders(
+                "Chờ thanh toán",
+                STATUS_CANCELLED,
+                "Tự động hủy đơn do quá hạn thanh toán VNPAY (15 phút)",
+                900
         );
         return updatedCount;
     }
 
-    private int autoAdvanceOrders(String fromStatus, String toStatus, String note) {
-        List<Integer> orderIds = orderDao.getOrderIdsReadyForAutoTransition(fromStatus, AUTO_ADVANCE_SECONDS);
+    private int autoAdvanceOrders(String fromStatus, String toStatus, String note, int elapsedSeconds) {
+        List<Integer> orderIds = orderDao.getOrderIdsReadyForAutoTransition(fromStatus, elapsedSeconds);
         int updatedCount = 0;
         for (Integer orderId : orderIds) {
             if (orderId != null && updateOrderStatus(orderId, toStatus, note)) {

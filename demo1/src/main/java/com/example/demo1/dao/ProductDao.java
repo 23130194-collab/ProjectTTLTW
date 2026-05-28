@@ -19,10 +19,10 @@ public class ProductDao {
     private static final String SELECT_PRODUCT_FIELDS = "p.id, p.category_id AS categoryId, p.brand_id AS brandId, p.name, p.discount_id AS discountId, p.description, p.stock, p.image, p.created_at, p.status, "
             +
             "p.old_price AS oldPrice, " +
-            "(CASE WHEN d.id IS NOT NULL AND NOW() BETWEEN d.start_time AND d.end_time THEN p.price ELSE p.old_price END) AS price, "
+            "(CASE WHEN d.id IS NOT NULL AND :currentTime BETWEEN d.start_time AND d.end_time THEN p.price ELSE p.old_price END) AS price, "
             +
             "p.sold_quantity AS soldQuantity, " +
-            "(CASE WHEN d.id IS NOT NULL AND NOW() BETWEEN d.start_time AND d.end_time THEN d.discount_value ELSE 0 END) AS discountValue, "
+            "(CASE WHEN d.id IS NOT NULL AND :currentTime BETWEEN d.start_time AND d.end_time THEN d.discount_value ELSE 0 END) AS discountValue, "
             +
             "d.start_time AS discountStart, " +
             "d.end_time AS discountEnd, " +
@@ -32,11 +32,17 @@ public class ProductDao {
         String whereSql;
         String joinSql;
         Map<String, Object> params;
+        String relevanceSql;
 
         QueryParts(String whereSql, String joinSql, Map<String, Object> params) {
+            this(whereSql, joinSql, params, null);
+        }
+
+        QueryParts(String whereSql, String joinSql, Map<String, Object> params, String relevanceSql) {
             this.whereSql = whereSql;
             this.joinSql = joinSql;
             this.params = params;
+            this.relevanceSql = relevanceSql;
         }
     }
 
@@ -63,21 +69,28 @@ public class ProductDao {
         } else {
             whereSql.append(" AND p.status != 'delete'");
         }
-        if (keyword != null && !keyword.isEmpty()) {
-            String[] keywords = keyword.toLowerCase().split("\\s+và\\s+|,\\s*|\\s+");
-
+        String relevanceSql = null;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String[] keywords = keyword.toLowerCase().split("\\s+");
             StringBuilder keywordSql = new StringBuilder(" AND (");
+            StringBuilder relSql = new StringBuilder(" (");
             for (int i = 0; i < keywords.length; i++) {
                 String paramName = "keyword" + i;
                 keywordSql.append("LOWER(p.name) LIKE :").append(paramName);
+                relSql.append("(CASE WHEN LOWER(p.name) LIKE :").append(paramName).append(" THEN 1 ELSE 0 END)");
 
                 if (i < keywords.length - 1) {
                     keywordSql.append(" OR ");
+                    relSql.append(" + ");
                 }
                 params.put(paramName, "%" + keywords[i].trim() + "%");
             }
             keywordSql.append(")");
             whereSql.append(keywordSql);
+            
+            params.put("exactKeyword", "%" + keyword.toLowerCase().trim() + "%");
+            relSql.append(" + (CASE WHEN LOWER(p.name) LIKE :exactKeyword THEN 100 ELSE 0 END)) DESC, ");
+            relevanceSql = relSql.toString();
         }
         if (brandId != null) {
             whereSql.append(" AND p.brand_id = :brandId");
@@ -98,7 +111,7 @@ public class ProductDao {
             whereSql.append(" AND (").append(specConditions).append(")");
         }
 
-        return new QueryParts(whereSql.toString(), joinSql, params);
+        return new QueryParts(whereSql.toString(), joinSql, params, relevanceSql);
     }
 
     private int countTotalProducts(Handle handle, QueryParts parts, Map<Integer, List<String>> specFilters) {
@@ -125,14 +138,15 @@ public class ProductDao {
             dataSql.append(" HAVING COUNT(DISTINCT ps.attribute_id) = ").append(specFilters.size());
         }
 
-        appendOrderBy(dataSql, sortOrder);
+        appendOrderBy(dataSql, sortOrder, parts.relevanceSql);
 
         dataSql.append(" LIMIT :limit OFFSET :offset");
 
         Query queryData = handle.createQuery(dataSql.toString())
                 .bindMap(parts.params)
                 .bind("limit", pageSize)
-                .bind("offset", (page - 1) * pageSize);
+                .bind("offset", (page - 1) * pageSize)
+                .bind("currentTime", new java.sql.Timestamp(System.currentTimeMillis()));
 
         if (specFilters != null) {
             for (Map.Entry<Integer, List<String>> entry : specFilters.entrySet()) {
@@ -143,24 +157,26 @@ public class ProductDao {
         return queryData.mapToBean(Product.class).list();
     }
 
-    private void appendOrderBy(StringBuilder sql, String sortOrder) {
+    private void appendOrderBy(StringBuilder sql, String sortOrder, String relevanceSql) {
         String orderBy;
-        String effectivePrice = "(CASE WHEN d.id IS NOT NULL AND NOW() BETWEEN d.start_time AND d.end_time THEN p.price ELSE p.old_price END)";
+        String effectivePrice = "(CASE WHEN d.id IS NOT NULL AND :currentTime BETWEEN d.start_time AND d.end_time THEN p.price ELSE p.old_price END)";
+        String prefix = (relevanceSql != null && !relevanceSql.isEmpty()) ? relevanceSql : "";
+
         switch (sortOrder) {
             case "price_asc":
-                orderBy = " ORDER BY " + effectivePrice + " ASC, p.id ASC ";
+                orderBy = " ORDER BY " + prefix + effectivePrice + " ASC, p.id ASC ";
                 break;
             case "price_desc":
-                orderBy = " ORDER BY " + effectivePrice + " DESC, p.id DESC ";
+                orderBy = " ORDER BY " + prefix + effectivePrice + " DESC, p.id DESC ";
                 break;
             case "name_asc":
-                orderBy = " ORDER BY p.name ASC, p.id ASC ";
+                orderBy = " ORDER BY " + prefix + "p.name ASC, p.id ASC ";
                 break;
             case "popular":
-                orderBy = " ORDER BY p.sold_quantity DESC, avgRating DESC, p.id DESC ";
+                orderBy = " ORDER BY " + prefix + "p.sold_quantity DESC, avgRating DESC, p.id DESC ";
                 break;
             default:
-                orderBy = " ORDER BY p.created_at DESC, p.id DESC ";
+                orderBy = " ORDER BY " + prefix + "p.created_at DESC, p.id DESC ";
                 break;
         }
         sql.append(orderBy);
@@ -190,6 +206,7 @@ public class ProductDao {
                 "WHERE p.id = :id AND p.status != 'delete' " +
                 "GROUP BY p.id")
                 .bind("id", productId)
+                .bind("currentTime", new java.sql.Timestamp(System.currentTimeMillis()))
                 .mapToBean(Product.class)
                 .findOne()).orElse(null);
     }
@@ -204,6 +221,7 @@ public class ProductDao {
         return jdbi.withHandle(handle -> handle.createQuery(sql)
                 .bind("id", productId)
                 .bind("status", status)
+                .bind("currentTime", new java.sql.Timestamp(System.currentTimeMillis()))
                 .mapToBean(Product.class)
                 .findOne()).orElse(null);
     }
@@ -221,6 +239,7 @@ public class ProductDao {
                 .bind("currentProductId", currentProductId)
                 .bind("limit", limit)
                 .bind("offset", offset)
+                .bind("currentTime", new java.sql.Timestamp(System.currentTimeMillis()))
                 .mapToBean(Product.class)
                 .list());
     }
@@ -358,6 +377,7 @@ public class ProductDao {
                 "ORDER BY p.stock ASC " +
                 "LIMIT 20")
                 .bind("threshold", threshold)
+                .bind("currentTime", new java.sql.Timestamp(System.currentTimeMillis()))
                 .mapToBean(Product.class)
                 .list());
     }

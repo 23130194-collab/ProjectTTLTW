@@ -2,23 +2,35 @@ package com.example.demo1.controller.cart;
 
 import com.example.demo1.model.*;
 import com.example.demo1.service.CartService;
+import com.example.demo1.service.GhnShippingService;
 import com.example.demo1.service.OrderService;
 import com.example.demo1.service.ProductService;
 import com.example.demo1.service.NotificationService;
+import com.example.demo1.exception.OutOfStockException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.IOException;
-import java.util.List;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
+
+import com.example.demo1.config.VnPayConfig;
 
 @WebServlet(name = "ProcessOrderServlet", value = "/ProcessOrderServlet")
 public class ProcessOrderServlet extends HttpServlet {
     private final OrderService orderService = new OrderService();
     private final ProductService productService = new ProductService();
     private final CartService cartService = new CartService();
+    private final GhnShippingService ghnShippingService = new GhnShippingService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -38,6 +50,10 @@ public class ProcessOrderServlet extends HttpServlet {
         List<CartItem> cartItems = cartService.getCartItems(user.getId());
 
         String[] productIds = request.getParameterValues("productIds");
+        String idsParam = "";
+        if (productIds != null) {
+            idsParam = String.join(",", productIds);
+        }
 
         if (productIds != null && cartItems != null && !cartItems.isEmpty()) {
             Set<Integer> selectedIds = new HashSet<>();
@@ -65,6 +81,9 @@ public class ProcessOrderServlet extends HttpServlet {
         String email = cleanInput(request.getParameter("email"));
         String province = cleanInput(request.getParameter("province"));
         String district = cleanInput(request.getParameter("district"));
+        if (district == null) {
+            district = "";
+        }
         String ward = cleanInput(request.getParameter("ward"));
         String addressDetail = cleanInput(request.getParameter("address"));
 
@@ -72,7 +91,7 @@ public class ProcessOrderServlet extends HttpServlet {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
         if (phone == null || !phone.matches(phoneRegex) || email == null || !email.matches(emailRegex)) {
-            response.sendRedirect("thanhToan.jsp?error=invalid_format");
+            response.sendRedirect("AddCart?action=checkout&ids=" + idsParam + "&error=invalid_format");
             return;
         }
 
@@ -108,21 +127,6 @@ public class ProcessOrderServlet extends HttpServlet {
             subprice += oldPrice * item.getQuantity();
         }
 
-        double discountAmount = subprice - total;
-        double shippingFee = 0;
-
-        String paymentMethod = cleanInput(request.getParameter("payment_method"));
-        if (paymentMethod == null) paymentMethod = "Thanh toán khi nhận hàng (COD)";
-        Payment payment = new Payment(0, paymentMethod, "Thành công", total);
-
-        order.setUserId(user.getId());
-        order.setOrderCode("TN-" + System.currentTimeMillis());
-        order.setOrderStatus("Chờ xác nhận");
-        order.setSubprice(subprice);
-        order.setDiscountAmount(discountAmount);
-        order.setShippingFee(shippingFee);
-        order.setTotalAmount(total);
-
         RecipientInfo recipient = new RecipientInfo();
         recipient.setFullName(fullName);
         recipient.setPhone(phone);
@@ -132,7 +136,40 @@ public class ProcessOrderServlet extends HttpServlet {
         recipient.setWard(ward);
         recipient.setAddress(addressDetail);
 
-        boolean success = orderService.createOrder(order, recipient, cartItems, payment);
+        double discountAmount = subprice - total;
+        double shippingFee;
+        try {
+            shippingFee = ghnShippingService.calculateShippingFee(recipient, cartItems, total);
+        } catch (Exception e) {
+            session.setAttribute("checkoutError", "Không tính được phí vận chuyển GHN: " + e.getMessage());
+            response.sendRedirect("AddCart?action=checkout&ids=" + idsParam + "&error=shipping");
+            return;
+        }
+        double payableTotal = total + shippingFee;
+
+        String paymentMethod = cleanInput(request.getParameter("payment_method"));
+        if (paymentMethod == null) paymentMethod = "Thanh toán khi nhận hàng (COD)";
+        
+        boolean isVnPay = "VNPAY".equalsIgnoreCase(paymentMethod) || "Chuyển khoản".equalsIgnoreCase(paymentMethod);
+        
+        Payment payment = new Payment(0, paymentMethod, isVnPay ? "Chờ thanh toán" : "Thành công", payableTotal);
+
+        order.setUserId(user.getId());
+        order.setOrderCode("TN-" + System.currentTimeMillis());
+        order.setOrderStatus(isVnPay ? "Chờ thanh toán" : "Chờ xác nhận");
+        order.setSubprice(subprice);
+        order.setDiscountAmount(discountAmount);
+        order.setShippingFee(shippingFee);
+        order.setTotalAmount(payableTotal);
+
+        boolean success = false;
+        try {
+            success = orderService.createOrder(order, recipient, cartItems, payment);
+        } catch (OutOfStockException e) {
+            session.setAttribute("cartError", e.getMessage());
+            response.sendRedirect("AddCart?action=view");
+            return;
+        }
 
         if (success) {
             try {
@@ -142,12 +179,6 @@ public class ProcessOrderServlet extends HttpServlet {
                 String link = "order-detail?id=" + order.getId();
                 Notification userNoti = new Notification(user.getId(), content, link, 0);
                 notiService.insert(userNoti);
-
-                String adminContent = "Đơn hàng mới " + order.getOrderCode() + " từ khách hàng " + fullName;
-                String adminLink = "admin/orders?action=view&id=" + order.getId();
-
-                Notification adminNoti = new Notification(null, adminContent, adminLink, 1);
-                new com.example.demo1.dao.NotificationDao().insert(adminNoti);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -161,10 +192,80 @@ public class ProcessOrderServlet extends HttpServlet {
                 cartService.clearCart(user.getId());
             }
 
-            response.sendRedirect("thankyouNotification.jsp");
+            if (isVnPay) {
+                String vnpayUrl = generateVnPayUrl(request, order.getOrderCode(), payableTotal);
+                response.sendRedirect(vnpayUrl);
+            } else {
+                response.sendRedirect("thankyouNotification.jsp");
+            }
         } else {
-            response.sendRedirect("thanhToan.jsp?error=db");
+            response.sendRedirect("AddCart?action=checkout&ids=" + idsParam + "&error=db");
         }
+    }
+
+    private String generateVnPayUrl(HttpServletRequest request, String orderCode, double amount) {
+        String vnp_Version = VnPayConfig.vnp_Version;
+        String vnp_Command = VnPayConfig.vnp_Command;
+        String vnp_OrderInfo = "Thanh toan don hang " + orderCode;
+        String orderType = "other";
+        String vnp_TxnRef = orderCode;
+        String vnp_IpAddr = VnPayConfig.getIpAddress(request);
+        String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
+        
+        int amountInVnd = (int) (amount);
+
+        Map<String, String> vnp_Params = new HashMap<>();
+        vnp_Params.put("vnp_Version", vnp_Version);
+        vnp_Params.put("vnp_Command", vnp_Command);
+        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+        vnp_Params.put("vnp_Amount", String.valueOf(amountInVnd * 100));
+        vnp_Params.put("vnp_CurrCode", "VND");
+        vnp_Params.put("vnp_BankCode", ""); 
+        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+        vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
+        vnp_Params.put("vnp_OrderType", orderType);
+        vnp_Params.put("vnp_Locale", "vn");
+        vnp_Params.put("vnp_ReturnUrl", VnPayConfig.vnp_Returnurl);
+        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String vnp_CreateDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+        
+        cld.add(Calendar.MINUTE, 15);
+        String vnp_ExpireDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+        
+        List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+        java.util.Collections.sort(fieldNames);
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
+        java.util.Iterator<String> itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = (String) itr.next();
+            String fieldValue = (String) vnp_Params.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                hashData.append(fieldName);
+                hashData.append('=');
+                try {
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append('=');
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                } catch (java.io.UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                if (itr.hasNext()) {
+                    query.append('&');
+                    hashData.append('&');
+                }
+            }
+        }
+        String queryUrl = query.toString();
+        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, hashData.toString());
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+        return VnPayConfig.vnp_PayUrl + "?" + queryUrl;
     }
 
     private String cleanInput(String value) {
@@ -183,4 +284,5 @@ public class ProcessOrderServlet extends HttpServlet {
         String cleanedValue = cleanInput(value);
         return cleanedValue == null ? null : cleanedValue.replaceAll("\\s+", "");
     }
+
 }
