@@ -210,6 +210,21 @@ public class OrderService {
         return success;
     }
 
+    public boolean cancelOrderByAdmin(int orderId, String reason) {
+        Order order = orderDao.getOrderById(orderId);
+        if (order == null) {
+            return false;
+        }
+
+        boolean success = cancelOrder(orderId, reason);
+        if (success) {
+            notificationService.notifyUserOrderCancelledByAdmin(
+                    order.getUserId(), orderId, order.getOrderCode(), reason
+            );
+        }
+        return success;
+    }
+
     public boolean confirmReceived(int orderId, int userId) {
         Order order = orderDao.getOrderById(orderId);
         if (order == null || order.getUserId() != userId) {
