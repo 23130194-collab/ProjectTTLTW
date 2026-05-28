@@ -76,6 +76,43 @@
             color: #999;
             font-size: 13px;
         }
+
+        #cancel-reason-modal .modal-content select:focus,
+        #cancel-reason-modal .modal-content textarea:focus {
+            border-color: #e53e3e;
+            box-shadow: 0 0 0 3px rgba(229,62,62,0.1);
+            outline: none;
+        }
+        #cancel-reason-modal .modal-content select,
+        #cancel-reason-modal .modal-content textarea {
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .admin-cancellation-reason {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #fff5f5;
+            border: 1.5px solid #feb2b2;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-size: 14px;
+        }
+        .admin-cancellation-reason i {
+            color: #e53e3e;
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .admin-cancellation-reason strong {
+            color: #c53030;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .admin-cancellation-reason span {
+            color: #742a2a;
+        }
     </style>
 </head>
 <body>
@@ -200,6 +237,16 @@
                     </c:choose>
                     Trạng thái hiện tại: <span class="badge ${statusClass}">${orderDetail.order.orderStatus}</span>
                 </div>
+
+                <c:if test="${orderDetail.order.orderStatus == 'Đã hủy' and not empty orderDetail.order.cancellationReason}">
+                    <div class="admin-cancellation-reason">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                        <div>
+                            <strong>Lý do hủy đơn hàng</strong>
+                            <span>${orderDetail.order.cancellationReason}</span>
+                        </div>
+                    </div>
+                </c:if>
 
                 <section class="order-status-section">
                     <form action="${pageContext.request.contextPath}/admin/orders" method="post" class="status-update-container" id="updateStatusForm">
@@ -362,6 +409,36 @@
     </div>
 </div>
 
+<div id="cancel-reason-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width:500px;">
+        <h3 style="color:#e53e3e;"><i class="fa-solid fa-ban" style="margin-right:8px;"></i>Hủy đơn hàng</h3>
+        <p style="margin-bottom:16px; color:#555;">Vui lòng chọn hoặc nhập lý do hủy đơn hàng này. Lý do sẽ được hiển thị cho khách hàng.</p>
+        <div style="margin-bottom:14px;">
+            <label for="cancelReasonSelect" style="display:block; font-weight:600; margin-bottom:6px;">Lý do hủy <span style="color:red;">*</span></label>
+            <select id="cancelReasonSelect" style="width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; outline:none;">
+                <option value="">-- Chọn lý do --</option>
+                <option value="Sản phẩm hết hàng đột xuất">Sản phẩm hết hàng đột xuất</option>
+                <option value="Thông tin giao hàng không hợp lệ">Thông tin giao hàng không hợp lệ</option>
+                <option value="Theo yêu cầu của khách hàng">Theo yêu cầu của khách hàng</option>
+                <option value="Phát hiện đơn hàng gian lận">Phát hiện đơn hàng gian lận</option>
+                <option value="Sản phẩm không còn được bán">Sản phẩm không còn được bán</option>
+                <option value="other">Lý do khác...</option>
+            </select>
+        </div>
+        <div id="cancelReasonCustomWrap" style="display:none; margin-bottom:14px;">
+            <label for="cancelReasonCustom" style="display:block; font-weight:600; margin-bottom:6px;">Nhập lý do cụ thể</label>
+            <textarea id="cancelReasonCustom" rows="3" placeholder="Nhập lý do hủy đơn hàng..." style="width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; resize:vertical; box-sizing:border-box;"></textarea>
+        </div>
+        <div id="cancelReasonError" style="display:none; color:#e53e3e; font-size:13px; margin-bottom:10px;">
+            <i class="fa-solid fa-circle-exclamation"></i> Vui lòng chọn hoặc nhập lý do hủy.
+        </div>
+        <div class="modal-buttons">
+            <a href="#" class="modal-btn modal-cancel" id="cancelReasonModalClose">Quay lại</a>
+            <button type="button" class="modal-btn modal-confirm" id="confirmCancelReasonBtn" style="background:#e53e3e; border-color:#e53e3e;">Xác nhận hủy đơn</button>
+        </div>
+    </div>
+</div>
+
 <div id="confirm-carrier-handover-modal" class="modal-overlay">
     <div class="modal-content">
         <h3>Giao cho đơn vị vận chuyển</h3>
@@ -504,9 +581,61 @@
         document.querySelectorAll('.open-modal-btn').forEach(button => {
             button.addEventListener('click', function(event) {
                 event.preventDefault();
-                const modalId = this.getAttribute('href');
-                document.querySelector(modalId).classList.add('show');
+                const selectedStatus = document.getElementById('orderStatus').value;
+                if (selectedStatus === 'Đã hủy') {
+                    document.getElementById('cancelReasonSelect').value = '';
+                    document.getElementById('cancelReasonCustomWrap').style.display = 'none';
+                    if (document.getElementById('cancelReasonCustom')) document.getElementById('cancelReasonCustom').value = '';
+                    document.getElementById('cancelReasonError').style.display = 'none';
+                    document.getElementById('cancel-reason-modal').classList.add('show');
+                } else {
+                    const modalId = this.getAttribute('href');
+                    document.querySelector(modalId).classList.add('show');
+                }
             });
+        });
+
+        document.getElementById('cancelReasonSelect').addEventListener('change', function() {
+            const customWrap = document.getElementById('cancelReasonCustomWrap');
+            customWrap.style.display = (this.value === 'other') ? 'block' : 'none';
+            document.getElementById('cancelReasonError').style.display = 'none';
+        });
+
+        document.getElementById('confirmCancelReasonBtn').addEventListener('click', function() {
+            const select = document.getElementById('cancelReasonSelect');
+            const customText = document.getElementById('cancelReasonCustom');
+            const errorDiv = document.getElementById('cancelReasonError');
+            let reason = '';
+
+            if (select.value === 'other') {
+                reason = customText ? customText.value.trim() : '';
+            } else {
+                reason = select.value.trim();
+            }
+
+            if (!reason) {
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            let reasonInput = document.getElementById('hiddenCancellationReason');
+            if (!reasonInput) {
+                reasonInput = document.createElement('input');
+                reasonInput.type = 'hidden';
+                reasonInput.name = 'cancellationReason';
+                reasonInput.id = 'hiddenCancellationReason';
+                document.getElementById('updateStatusForm').appendChild(reasonInput);
+            }
+            reasonInput.value = reason;
+            document.getElementById('updateStatusForm').submit();
+        });
+
+        document.getElementById('cancelReasonModalClose').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('cancel-reason-modal').classList.remove('show');
+        });
+        document.getElementById('cancel-reason-modal').addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('show');
         });
 
         document.querySelectorAll('.modal-cancel').forEach(button => {

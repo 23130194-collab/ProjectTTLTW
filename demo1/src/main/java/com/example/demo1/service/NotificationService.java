@@ -51,7 +51,12 @@ public class NotificationService {
     public void notifyAdminOrderCancelled(int orderId, String orderCode) {
         notificationDao.insertAdminNotification(
                 "Đơn hàng bị hủy: " + orderCode,
-                "/admin/orders?action=view&id=?" + orderId
+                "/admin/orders?action=view&id=" + orderId
         );
+    }
+
+    public void notifyUserOrderCancelledByAdmin(int userId, int orderId, String orderCode, String reason) {
+        String content = "Đơn hàng " + orderCode + " đã bị hủy. Lý do: " + reason;
+        notificationDao.insertUserNotification(userId, content, "/order-detail?id=" + orderId);
     }
 }
