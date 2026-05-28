@@ -112,7 +112,13 @@ public class OrderAdminServlet extends HttpServlet {
             boolean success = false;
 
             if ("Đã hủy".equals(status)) {
-                success = orderService.cancelOrder(orderId, "Bị hủy bởi quản trị viên");
+                String reason = request.getParameter("cancellationReason");
+                if (reason == null || reason.trim().isEmpty()) {
+                    reason = "Admin hủy đơn hàng";
+                } else {
+                    reason = reason.trim();
+                }
+                success = orderService.cancelOrderByAdmin(orderId, reason);
             } else {
                 success = orderService.updateOrderStatus(orderId, status, "Quản trị viên cập nhật trạng thái đơn hàng");
 
