@@ -125,9 +125,11 @@ public class OrderController extends HttpServlet {
             }
 
             List<OrderItem> orderItems = orderDao.getOrderItemsByOrderId(orderId);
+            com.example.demo1.model.Payment payment = orderDao.getPaymentByOrderId(orderId);
 
             request.setAttribute("order", order);
             request.setAttribute("orderItems", orderItems);
+            request.setAttribute("payment", payment);
             request.setAttribute("timelineSteps", orderService.getOrderTimelineSteps(order));
             request.getRequestDispatcher("/chiTietDonHang.jsp").forward(request, response);
 

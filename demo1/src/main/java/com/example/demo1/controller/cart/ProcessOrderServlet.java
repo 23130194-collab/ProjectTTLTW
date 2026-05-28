@@ -6,6 +6,7 @@ import com.example.demo1.service.GhnShippingService;
 import com.example.demo1.service.OrderService;
 import com.example.demo1.service.ProductService;
 import com.example.demo1.service.NotificationService;
+import com.example.demo1.exception.OutOfStockException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -161,7 +162,14 @@ public class ProcessOrderServlet extends HttpServlet {
         order.setShippingFee(shippingFee);
         order.setTotalAmount(payableTotal);
 
-        boolean success = orderService.createOrder(order, recipient, cartItems, payment);
+        boolean success = false;
+        try {
+            success = orderService.createOrder(order, recipient, cartItems, payment);
+        } catch (OutOfStockException e) {
+            session.setAttribute("cartError", e.getMessage());
+            response.sendRedirect("AddCart?action=view");
+            return;
+        }
 
         if (success) {
             try {

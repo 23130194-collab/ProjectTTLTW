@@ -9,6 +9,7 @@ import org.jdbi.v3.core.statement.Query;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.example.demo1.exception.OutOfStockException;
 
 public class OrderDao {
     private static final String STATUS_SENT_TO_CARRIER = "Đã giao cho đơn vị vận chuyển";
@@ -356,15 +357,21 @@ public class OrderDao {
                             .bind("originalPrice", originalPrice)
                             .execute();
 
-                    String updateStockSql = "UPDATE products SET stock = stock - :quantity WHERE id = :productId";
-                    handle.createUpdate(updateStockSql)
+                    String updateStockSql = "UPDATE products SET stock = stock - :quantity WHERE id = :productId AND stock >= :quantity";
+                    int updatedRows = handle.createUpdate(updateStockSql)
                             .bind("quantity", item.getQuantity())
                             .bind("productId", item.getProduct().getId())
                             .execute();
+                    if (updatedRows == 0) {
+                        throw new OutOfStockException("Sản phẩm '" + item.getProduct().getName() + "' không đủ số lượng trong kho.");
+                    }
                 }
 
                 return true;
             } catch (Exception e) {
+                if (e instanceof OutOfStockException) {
+                    throw (OutOfStockException) e;
+                }
                 e.printStackTrace();
                 return false;
             }

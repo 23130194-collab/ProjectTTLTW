@@ -244,8 +244,9 @@
 
                             <div class="payment-group">
                                 <div class="payment-sub-title">Thanh toán</div>
+                                <div class="payment-line-new final"><span>Phương thức thanh toán:</span><strong style="color:var(--accent-dark);">${not empty payment ? payment.paymentMethod : 'Chưa xác định'}</strong></div>
                                 <div class="payment-line-new final"><span>Tổng số tiền:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
-                                <div class="payment-line-new final"><span>Tổng số tiền đã thanh toán:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
+                                <div class="payment-line-new final"><span>${order.orderStatus eq 'Đã giao' ? 'Tổng số tiền đã thanh toán' : 'Tổng số tiền cần thanh toán'}:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
                             </div>
                         </div>
 
