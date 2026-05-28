@@ -179,6 +179,18 @@
                                 <span>Trạng thái hiện tại: <strong>${order.orderStatus}</strong></span>
                             </div>
 
+                            <c:if test="${order.orderStatus eq 'Đã hủy' and not empty order.cancellationReason}">
+                                <div class="cancellation-reason-box">
+                                    <div class="cancellation-reason-icon">
+                                        <i class="fa-solid fa-circle-xmark"></i>
+                                    </div>
+                                    <div class="cancellation-reason-content">
+                                        <div class="cancellation-reason-title">Lý do hủy đơn hàng</div>
+                                        <div class="cancellation-reason-text">${order.cancellationReason}</div>
+                                    </div>
+                                </div>
+                            </c:if>
+
                             <c:forEach var="item" items="${orderItems}">
                                 <div class="overview-product">
                                     <img src="${item.productImage}" alt="${item.productName}" class="product-thumb-small">
