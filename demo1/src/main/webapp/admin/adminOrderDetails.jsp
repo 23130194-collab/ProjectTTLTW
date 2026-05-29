@@ -133,6 +133,7 @@
         <li class="nav-item"><a href="${contextPath}/admin/banners" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-images"></i></span>Banner</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/products" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-box-open"></i></span>Sản phẩm</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/orders" class="nav-link active"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>Đơn hàng</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/vouchers" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-ticket"></i></span>Voucher</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/reviews" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-star"></i></span>Đánh giá</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/contacts" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-envelope"></i></span>Liên hệ</a></li>
 
@@ -374,9 +375,13 @@
 
                 <section class="invoice-summary">
                     <div class="summary-details">
+                        <c:set var="productDiscountAmount" value="${orderDetail.order.discountAmount - orderDetail.order.voucherDiscountAmount}"/>
                         <div><span>Tổng tiền hàng</span> <span><fmt:formatNumber value="${orderDetail.order.subprice}" type="currency" currencySymbol="đ"/></span></div>
                         <div><span>Phí vận chuyển</span> <span><fmt:formatNumber value="${orderDetail.order.shippingFee}" type="currency" currencySymbol="đ"/></span></div>
-                        <div><span>Giảm giá</span> <span>-<fmt:formatNumber value="${orderDetail.order.discountAmount}" type="currency" currencySymbol="đ"/></span></div>
+                        <div><span>Giảm giá sản phẩm</span> <span>-<fmt:formatNumber value="${productDiscountAmount lt 0 ? 0 : productDiscountAmount}" type="currency" currencySymbol="đ"/></span></div>
+                        <c:if test="${orderDetail.order.voucherDiscountAmount > 0}">
+                            <div><span>Voucher giảm giá</span> <span>-<fmt:formatNumber value="${orderDetail.order.voucherDiscountAmount}" type="currency" currencySymbol="đ"/></span></div>
+                        </c:if>
                         <div class="summary-total">
                             <strong>Tổng thanh toán</strong>
                             <strong><fmt:formatNumber value="${orderDetail.order.totalAmount}" type="currency" currencySymbol="đ"/></strong>

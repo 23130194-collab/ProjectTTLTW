@@ -93,6 +93,8 @@
         <li class="nav-item"><a href="${contextPath}/admin/banners" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-images"></i></span>Banner</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/products" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-box-open"></i></span>Sản phẩm</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/orders" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>Đơn hàng</a></li>
+        <li class="nav-item"><a href="${contextPath}/admin/vouchers" class="nav-link"><span
+                class="nav-icon"><i class="fa-solid fa-ticket"></i></span>Voucher</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/reviews" class="nav-link"><span class="nav-icon"><i class="fa-solid fa-star"></i></span>Đánh giá</a></li>
         <li class="nav-item"><a href="${contextPath}/admin/contacts" class="nav-link active"><span class="nav-icon"><i class="fa-solid fa-envelope"></i></span>Liên hệ</a></li>
     </ul>

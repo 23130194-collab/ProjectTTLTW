@@ -102,6 +102,9 @@
     <input type="hidden" id="form-fullname-addr" name="recipientName"  value="">
     <input type="hidden" id="form-phone-addr"    name="recipientPhone" value="">
     <input type="hidden" id="form-shipping-fee"  name="shippingFee" value="${shippingFee}">
+    <input type="hidden" id="form-voucher-id" name="voucherId" value="">
+    <input type="hidden" id="base-total-amount" value="${totalAmount}">
+    <input type="hidden" id="voucher-discount-amount" value="0">
 
     <div class="app-container">
         <div class="app-scroll">
@@ -221,6 +224,18 @@
                 </select>
             </div>
 
+            <div class="voucher-select-box">
+                <div class="section-title">VOUCHER</div>
+                <select id="voucherSelect" class="voucher-select">
+                    <option value="" data-discount="0">Không sử dụng voucher</option>
+                    <c:forEach items="${requestScope.userVouchers}" var="voucher">
+                        <option value="${voucher.id}" data-discount="${voucher.discountValue}">
+                            ${voucher.code} - Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ
+                        </option>
+                    </c:forEach>
+                </select>
+            </div>
+
             <c:set var="shippingFee" value="${empty shippingFee ? 0 : shippingFee}"/>
             <c:set var="payableAmount" value="${totalAmount + shippingFee}"/>
 
@@ -242,6 +257,10 @@
                         <span>-<fmt:formatNumber value="${totalOldPrice - totalAmount}" pattern="#,###"/>₫</span>
                     </div>
                 </c:if>
+                <div class="line voucher-discount" id="voucherDiscountLine" style="display:none;">
+                    Voucher
+                    <span id="voucherDiscountDisplay">-0₫</span>
+                </div>
                 <div class="line">
                     Phí vận chuyển
                     <span id="shippingFeeDisplay">

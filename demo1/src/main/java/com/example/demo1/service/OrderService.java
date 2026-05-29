@@ -126,6 +126,7 @@ public class OrderService {
             discountAmount += (item.getOriginalPrice() - item.getUnitPrice()) * item.getQuantity();
         }
 
+        discountAmount += order.getVoucherDiscountAmount();
         double totalAmount = subprice - discountAmount + order.getShippingFee();
 
         orderDao.updateOrderTotals(orderId, subprice, discountAmount, totalAmount);
