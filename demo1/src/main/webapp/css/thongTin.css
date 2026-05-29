@@ -308,6 +308,35 @@ input:checked + .slider:before {
     margin-bottom: 15px;
 }
 
+.voucher-select-box {
+    background: #fff;
+    border-radius: 10px;
+    margin: 12px auto;
+    max-width: 900px;
+    padding: 16px;
+    width: 100%;
+}
+
+.voucher-select {
+    background: #fff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    padding: 12px;
+    width: 100%;
+}
+
+.voucher-hint {
+    color: #777;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.line.voucher-discount {
+    color: #d70018;
+}
+
 label {
     font-size: 14px;
     font-weight: 600;

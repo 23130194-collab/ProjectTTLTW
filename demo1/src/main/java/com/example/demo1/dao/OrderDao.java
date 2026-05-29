@@ -306,13 +306,15 @@ public class OrderDao {
     public boolean createOrder(Order order, RecipientInfo recipient, List<CartItem> cartItems, Payment payment) {
         return jdbi.inTransaction(handle -> {
             try {
-                int orderId = handle.createUpdate("INSERT INTO orders (user_id, order_code, order_status, subprice, discount_amount, shipping_fee, total_amount) " +
-                                "VALUES (:userId, :orderCode, :status, :subprice, :discountAmount, :shippingFee, :total)")
+                int orderId = handle.createUpdate("INSERT INTO orders (user_id, order_code, order_status, subprice, discount_amount, voucher_id, voucher_discount_amount, shipping_fee, total_amount) " +
+                                "VALUES (:userId, :orderCode, :status, :subprice, :discountAmount, :voucherId, :voucherDiscountAmount, :shippingFee, :total)")
                         .bind("userId", order.getUserId())
                         .bind("orderCode", order.getOrderCode())
                         .bind("status", order.getOrderStatus())
                         .bind("subprice", order.getSubprice())
                         .bind("discountAmount", order.getDiscountAmount())
+                        .bind("voucherId", order.getVoucherId())
+                        .bind("voucherDiscountAmount", order.getVoucherDiscountAmount())
                         .bind("shippingFee", order.getShippingFee())
                         .bind("total", order.getTotalAmount())
                         .executeAndReturnGeneratedKeys("id")

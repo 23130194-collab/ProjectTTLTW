@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import com.example.demo1.model.UserAddress;
 import com.example.demo1.service.UserAddressService;
+import com.example.demo1.service.VoucherService;
 
 @WebServlet(name = "AddCartController", value = "/AddCart")
 public class AddCartController extends HttpServlet {
@@ -24,6 +25,7 @@ public class AddCartController extends HttpServlet {
     private final ProductService productService = new ProductService();
     private final UserAddressService userAddressService = new UserAddressService();
     private final GhnShippingService ghnShippingService = new GhnShippingService();
+    private final VoucherService voucherService = new VoucherService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -191,6 +193,7 @@ public class AddCartController extends HttpServlet {
                 request.setAttribute("shippingError", shippingError);
                 request.setAttribute("userAddresses", userAddresses);
                 request.setAttribute("defaultAddress", defaultAddress);
+                request.setAttribute("userVouchers", voucherService.getSavedUsableVouchers(userId));
 
                 request.getRequestDispatcher("/thanhToan.jsp").forward(request, response);
             }
