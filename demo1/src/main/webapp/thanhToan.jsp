@@ -227,13 +227,14 @@
             <div class="voucher-select-box">
                 <div class="section-title">VOUCHER</div>
                 <select id="voucherSelect" class="voucher-select">
-                    <option value="" data-discount="0">Không sử dụng voucher</option>
+                    <option value="" data-discount="0" data-min-order="0">Không sử dụng voucher</option>
                     <c:forEach items="${requestScope.userVouchers}" var="voucher">
-                        <option value="${voucher.id}" data-discount="${voucher.discountValue}">
+                        <option value="${voucher.id}" data-discount="${voucher.discountValue}" data-min-order="${voucher.minOrderValue}">
                             ${voucher.code} - Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ
                         </option>
                     </c:forEach>
                 </select>
+                <div id="voucher-error-msg" style="color: #ef4444; font-size: 13px; margin-top: 5px; display: none;"></div>
             </div>
 
             <c:set var="shippingFee" value="${empty shippingFee ? 0 : shippingFee}"/>

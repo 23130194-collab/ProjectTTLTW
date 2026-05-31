@@ -182,7 +182,10 @@
                                 <div class="voucher-main">
                                     <div class="voucher-code">${voucher.code}</div>
                                     <div class="voucher-value">Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ</div>
-                                    <div class="voucher-date">Hạn dùng: <fmt:formatDate value="${voucher.endDate}" pattern="dd/MM/yyyy HH:mm"/></div>
+                                    <div class="voucher-desc" style="font-size: 13px; color: #475569; margin-top: 4px;">${voucher.description}</div>
+                                    <div class="voucher-min-order" style="font-size: 13px; color: #475569; margin-top: 4px;">Đơn tối thiểu: <strong><fmt:formatNumber value="${voucher.minOrderValue}" pattern="#,###"/>đ</strong></div>
+                                    <div class="voucher-quantity" style="font-size: 13px; color: #ef4444; margin-top: 4px; font-weight: 600;">Còn lại: ${voucher.quantity - voucher.usedCount} lượt</div>
+                                    <div class="voucher-date" style="margin-top: 4px;">Hạn dùng: <fmt:formatDate value="${voucher.endDate}" pattern="dd/MM/yyyy HH:mm"/></div>
                                 </div>
                                 <div class="voucher-action">
                                     <c:choose>

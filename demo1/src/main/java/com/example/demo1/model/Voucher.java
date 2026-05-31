@@ -10,6 +10,10 @@ public class Voucher {
     private Timestamp endDate;
     private String status;
     private Timestamp createdAt;
+    private int quantity;
+    private int usedCount;
+    private double minOrderValue;
+    private String description;
     private boolean saved;
     private boolean used;
 
@@ -70,6 +74,38 @@ public class Voucher {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public int getUsedCount() {
+        return usedCount;
+    }
+
+    public void setUsedCount(int usedCount) {
+        this.usedCount = usedCount;
+    }
+
+    public double getMinOrderValue() {
+        return minOrderValue;
+    }
+
+    public void setMinOrderValue(double minOrderValue) {
+        this.minOrderValue = minOrderValue;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public boolean isSaved() {

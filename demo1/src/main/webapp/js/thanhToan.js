@@ -302,14 +302,28 @@
     const voucherDisplay = document.getElementById('voucherDiscountDisplay');
     const payableDisplay = document.getElementById('payableAmountDisplay');
     const footerDisplay = document.getElementById('footerPayableAmount');
+    const errorMsg = document.getElementById('voucher-error-msg');
 
     let voucherId = '';
     let discount = 0;
     if (voucherSelect && voucherSelect.selectedOptions.length > 0) {
-    const option = voucherSelect.selectedOptions[0];
-    voucherId = option.value || '';
-    discount = Math.min(Number(option.dataset.discount || 0), baseTotal);
-}
+        const option = voucherSelect.selectedOptions[0];
+        const minOrder = Number(option.dataset.minOrder || 0);
+        
+        if (voucherSelect.value !== "" && baseTotal < minOrder) {
+            if (errorMsg) {
+                errorMsg.textContent = 'Voucher này yêu cầu đơn hàng tối thiểu ' + minOrder.toLocaleString('vi-VN') + '₫';
+                errorMsg.style.display = 'block';
+            }
+            voucherSelect.value = '';
+        } else {
+            voucherId = option.value || '';
+            discount = Math.min(Number(option.dataset.discount || 0), baseTotal);
+            if (errorMsg) {
+                errorMsg.style.display = 'none';
+            }
+        }
+    }
 
     if (hiddenVoucherId) hiddenVoucherId.value = voucherId;
     if (hiddenVoucherDiscount) hiddenVoucherDiscount.value = discount;
