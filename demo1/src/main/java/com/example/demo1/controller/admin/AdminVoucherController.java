@@ -72,17 +72,49 @@ public class AdminVoucherController extends HttpServlet {
         Timestamp startDate = parseDateTime(request.getParameter("startDate"));
         Timestamp endDate = parseDateTime(request.getParameter("endDate"));
         int quantity = parseInt(request.getParameter("quantity"), 0);
-        double minOrderValue = parseDouble(request.getParameter("minOrderValue"), 0);
+        double minOrderValue = parseDouble(request.getParameter("minOrderValue"), -1);
         String description = request.getParameter("description");
         String status = request.getParameter("status");
 
-        if (code == null || discountValue <= 0 || startDate == null || endDate == null || !startDate.before(endDate) || quantity <= 0 || minOrderValue < 0) {
-            request.setAttribute("errorMessage", "Vui lòng nhập đầy đủ mã voucher, giá trị giảm, số lượng (>0), đơn tối thiểu (>=0) và thời gian hợp lệ.");
-            forwardWithData(request, response);
-            return;
+        boolean hasError = false;
+
+        if (code == null) {
+            request.setAttribute("codeError", "Mã voucher không được để trống");
+            hasError = true;
+        } else if (voucherService.isCodeExists(code, id)) {
+            request.setAttribute("codeError", "Mã voucher đã tồn tại");
+            hasError = true;
         }
-        if (voucherService.isCodeExists(code, id)) {
-            request.setAttribute("errorMessage", "Mã voucher đã tồn tại.");
+
+        if (discountValue <= 0) {
+            request.setAttribute("discountError", "Mức giảm phải lớn hơn 0");
+            hasError = true;
+        }
+
+        if (quantity <= 0) {
+            request.setAttribute("quantityError", "Số lượng phải lớn hơn 0");
+            hasError = true;
+        }
+
+        if (minOrderValue < 0) {
+            request.setAttribute("minOrderError", "Đơn tối thiểu không hợp lệ");
+            hasError = true;
+        }
+
+        if (startDate == null) {
+            request.setAttribute("startDateError", "Ngày bắt đầu không hợp lệ");
+            hasError = true;
+        }
+
+        if (endDate == null) {
+            request.setAttribute("endDateError", "Ngày kết thúc không hợp lệ");
+            hasError = true;
+        } else if (startDate != null && !startDate.before(endDate)) {
+            request.setAttribute("dateError", "Ngày bắt đầu phải trước ngày kết thúc");
+            hasError = true;
+        }
+
+        if (hasError) {
             forwardWithData(request, response);
             return;
         }
@@ -96,7 +128,7 @@ public class AdminVoucherController extends HttpServlet {
         voucher.setStartDate(startDate);
         voucher.setEndDate(endDate);
         voucher.setQuantity(quantity);
-        voucher.setMinOrderValue(minOrderValue);
+        voucher.setMinOrderValue(Math.max(0, minOrderValue));
         voucher.setDescription(description);
         voucher.setStatus("INACTIVE".equals(status) ? "INACTIVE" : "ACTIVE");
 
