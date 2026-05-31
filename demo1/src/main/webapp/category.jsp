@@ -11,7 +11,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${category.name} | TechNova</title>
+    <title><c:out value="${category.name}" /> | TechNova</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/mucSanPham.css">
@@ -46,7 +46,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -76,7 +76,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -89,7 +89,7 @@
         <div class="breadcrumb">
             <a href="${pageContext.request.contextPath}/home" class="path">Trang chủ</a>
             <span class="separator">/</span>
-            <a href="list-product?id=${category.id}" class="path">${category.name}</a>
+            <a href="list-product?id=${category.id}" class="path"><c:out value="${category.name}" /></a>
         </div>
 
         <div class="banners-container">
@@ -122,7 +122,7 @@
 </div>
 
 <main class="container">
-    <h1 class="page-title">${category.name}</h1>
+    <h1 class="page-title"><c:out value="${category.name}" /></h1>
 
     <div class="brand-filter">
         <c:forEach items="${brandList}" var="brand">
@@ -161,7 +161,7 @@
         <div class="filter-section">
             <c:forEach var="entry" items="${filterableAttributes}">
                 <div class="option-group">
-                    <h4 class="group-title">${entry.key.name}</h4>
+                    <h4 class="group-title"><c:out value="${entry.key.name}" /></h4>
                     <div class="options-grid">
                         <c:forEach var="value" items="${entry.value}">
                             <c:set var="isChecked" value="${false}"/>
@@ -174,7 +174,7 @@
                             </c:if>
                             <input type="checkbox" id="spec-${entry.key.id}-${value}" name="spec_${entry.key.id}"
                                    value="${value}" ${isChecked ? 'checked' : ''}>
-                            <label for="spec-${entry.key.id}-${value}" class="option-label">${value}</label>
+                            <label for="spec-${entry.key.id}-${value}" class="option-label"><c:out value="${value}" /></label>
                         </c:forEach>
                     </div>
                 </div>
@@ -209,7 +209,7 @@
                         </c:url>
 
                         <div class="applied-filter-tag">
-                            <span>${specValue}</span>
+                            <span><c:out value="${specValue}" /></span>
                             <a href="${removeUrl}" class="remove-filter-btn">&times;</a>
                         </div>
                     </c:forEach>
@@ -263,7 +263,7 @@
                         </c:if>
                         <a href="product-detail?id=${p.id}" class="product-link">
                             <img src="${p.image}" alt="${p.name}" class="product-image">
-                            <h3 class="product-title">${p.name}</h3>
+                            <h3 class="product-title"><c:out value="${p.name}" /></h3>
                             <div class="price-section">
                                 <div class="current-price"><fmt:formatNumber value="${p.price}" pattern="#,###"/>đ</div>
                                 <c:if test="${p.discountValue > 0}">
@@ -314,7 +314,7 @@
                         name="spec_${specGroup.key}" value="${specValue}"/></c:forEach></c:forEach>
                 <c:param name="page" value="${currentPage - 1}"/>
             </c:url>
-            <a href="${currentPage > 1 ? prevUrl : '#'}" class="pagination-btn ${currentPage == 1 ? 'disabled' : ''}">
+            <a href="${currentPage > 1 ? prevUrl : '#'}" class="pagination-btn <c:out value="${currentPage == 1 ? 'disabled' : ''}" />">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path fill-rule="evenodd"
                           d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
@@ -333,7 +333,7 @@
                             name="spec_${specGroup.key}" value="${specValue}"/></c:forEach></c:forEach>
                     <c:param name="page" value="${i}"/>
                 </c:url>
-                <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}">${i}</a>
+                <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}"><c:out value="${i}" /></a>
             </c:forEach>
 
             <c:url var="nextUrl" value="list-product">
@@ -424,14 +424,14 @@
 </footer>
 
 <script>
-    const globalContextPath = "${pageContext.request.contextPath}";
+    const globalContextPath = "<c:out value="${pageContext.request.contextPath}" />";
 </script>
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/boLoc.js"></script>
 <script src="${pageContext.request.contextPath}/js/dualBannerSlideshow.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>

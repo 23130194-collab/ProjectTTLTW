@@ -9,11 +9,20 @@ import java.util.List;
 public class VoucherDao {
     private final Jdbi jdbi = DatabaseDao.get();
 
-    public List<Voucher> getVouchers(String keyword, int limit, int offset) {
+    public List<Voucher> getVouchers(String keyword, String filterStatus, int limit, int offset) {
         return jdbi.withHandle(handle -> {
             String sql = "SELECT * FROM vouchers WHERE 1 = 1 ";
             if (keyword != null && !keyword.trim().isEmpty()) {
                 sql += "AND code LIKE :keyword ";
+            }
+            if ("active".equals(filterStatus)) {
+                sql += "AND status = 'ACTIVE' AND used_count < quantity AND end_date >= NOW() ";
+            } else if ("inactive".equals(filterStatus)) {
+                sql += "AND status = 'INACTIVE' ";
+            } else if ("exhausted".equals(filterStatus)) {
+                sql += "AND used_count >= quantity ";
+            } else if ("expired".equals(filterStatus)) {
+                sql += "AND end_date < NOW() ";
             }
             sql += "ORDER BY created_at DESC, id DESC LIMIT :limit OFFSET :offset";
 
@@ -27,11 +36,20 @@ public class VoucherDao {
         });
     }
 
-    public int countVouchers(String keyword) {
+    public int countVouchers(String keyword, String filterStatus) {
         return jdbi.withHandle(handle -> {
             String sql = "SELECT COUNT(*) FROM vouchers WHERE 1 = 1 ";
             if (keyword != null && !keyword.trim().isEmpty()) {
-                sql += "AND code LIKE :keyword";
+                sql += "AND code LIKE :keyword ";
+            }
+            if ("active".equals(filterStatus)) {
+                sql += "AND status = 'ACTIVE' AND used_count < quantity AND end_date >= NOW() ";
+            } else if ("inactive".equals(filterStatus)) {
+                sql += "AND status = 'INACTIVE' ";
+            } else if ("exhausted".equals(filterStatus)) {
+                sql += "AND used_count >= quantity ";
+            } else if ("expired".equals(filterStatus)) {
+                sql += "AND end_date < NOW() ";
             }
             Query query = handle.createQuery(sql);
             if (keyword != null && !keyword.trim().isEmpty()) {

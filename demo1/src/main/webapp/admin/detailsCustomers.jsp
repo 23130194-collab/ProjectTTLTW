@@ -191,21 +191,21 @@
                     <div class="info-body">
                         <div class="info-row">
                             <span>Họ và tên:</span>
-                            <p>${customer.name}</p>
+                            <p><c:out value="${customer.name}" /></p>
                             <span>Số điện thoại:</span>
-                            <p>${customer.phone}</p>
+                            <p><c:out value="${customer.phone}" /></p>
                         </div>
                         <div class="info-row">
                             <span>Giới tính:</span>
-                            <p>${customer.gender}</p>
+                            <p><c:out value="${customer.gender}" /></p>
                             <span>Email:</span>
-                            <p>${customer.email}</p>
+                            <p><c:out value="${customer.email}" /></p>
                         </div>
                         <div class="info-row">
                             <span>Ngày sinh:</span>
-                            <p>${customer.birthday}</p>
+                            <p><c:out value="${customer.birthday}" /></p>
                             <span>Địa chỉ:</span>
-                            <p>${customer.address}</p>
+                            <p><c:out value="${customer.address}" /></p>
                         </div>
                     </div>
                 </div>
@@ -272,7 +272,7 @@
                         <c:forEach var="order" items="${orderList}">
                             <tr>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/admin/orders?action=view&id=${order.id}">${order.orderCode}</a>
+                                    <a href="${pageContext.request.contextPath}/admin/orders?action=view&id=${order.id}"><c:out value="${order.orderCode}" /></a>
                                 </td>
                                 <td>
                                     <fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
@@ -280,13 +280,13 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${order.orderStatus == 'Hoàn thành'}">
-                                            <span class="status completed">${order.orderStatus}</span>
+                                            <span class="status completed"><c:out value="${order.orderStatus}" /></span>
                                         </c:when>
                                         <c:when test="${order.orderStatus == 'Đã hủy'}">
-                                            <span class="status canceled">${order.orderStatus}</span>
+                                            <span class="status canceled"><c:out value="${order.orderStatus}" /></span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="status pending">${order.orderStatus}</span>
+                                            <span class="status pending"><c:out value="${order.orderStatus}" /></span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
@@ -309,7 +309,7 @@
                         </c:if>
                         <c:forEach var="i" begin="1" end="${totalPages}">
                             <a href="${pageContext.request.contextPath}/admin/customer-detail?id=${customer.id}&page=${i}"
-                               class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
+                               class="page-number ${i == currentPage ? 'active' : ''}"><c:out value="${i}" /></a>
                         </c:forEach>
                         <c:if test="${currentPage < totalPages}">
                             <a href="${pageContext.request.contextPath}/admin/customer-detail?id=${customer.id}&page=${currentPage + 1}"
@@ -378,7 +378,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -388,7 +388,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -404,7 +404,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -421,7 +421,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -448,7 +448,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

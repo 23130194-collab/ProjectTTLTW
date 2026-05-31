@@ -25,7 +25,7 @@
                             <i class="fa-solid fa-eye toggle-password" id="toggleOldPassword"></i>
                         </div>
                         <c:if test="${not empty requestScope.oldPassword_error}">
-                            <span class="error-message">${requestScope.oldPassword_error}</span>
+                            <span class="error-message"><c:out value="${requestScope.oldPassword_error}" /></span>
                         </c:if>
                     </div>
                     <div class="input-group ${not empty requestScope.newPassword_error ? 'has-error' : ''}">
@@ -34,7 +34,7 @@
                             <i class="fa-solid fa-eye toggle-password" id="toggleNewPassword"></i>
                         </div>
                         <c:if test="${not empty requestScope.newPassword_error}">
-                            <span class="error-message">${requestScope.newPassword_error}</span>
+                            <span class="error-message"><c:out value="${requestScope.newPassword_error}" /></span>
                         </c:if>
                     </div>
                     <div class="input-group ${not empty requestScope.confirmPassword_error ? 'has-error' : ''}">
@@ -43,7 +43,7 @@
                             <i class="fa-solid fa-eye toggle-password" id="toggleConfirmPassword"></i>
                         </div>
                         <c:if test="${not empty requestScope.confirmPassword_error}">
-                            <span class="error-message">${requestScope.confirmPassword_error}</span>
+                            <span class="error-message"><c:out value="${requestScope.confirmPassword_error}" /></span>
                         </c:if>
                     </div>
                     <button type="submit" class="login-btn">Lưu thay đổi</button>

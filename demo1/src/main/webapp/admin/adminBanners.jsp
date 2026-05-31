@@ -152,14 +152,14 @@
 
         <c:if test="${not empty sessionScope.message}">
             <div class="alert alert-success" id="successAlert">
-                <span>${sessionScope.message}</span>
+                <span><c:out value="${sessionScope.message}" /></span>
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
             </div>
             <c:remove var="message" scope="session"/>
         </c:if>
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger">
-                <span>${errorMessage}</span>
+                <span><c:out value="${errorMessage}" /></span>
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
             </div>
         </c:if>
@@ -216,7 +216,7 @@
                         <c:forEach var="category" items="${categories}">
                             <option value="${category.id}"
                                 ${String.valueOf(category.id) == bannerToEdit.position ? 'selected' : ''}>
-                                    ${category.name}
+                                    <c:out value="${category.name}" />
                             </option>
                         </c:forEach>
                     </select>
@@ -261,7 +261,7 @@
                     <option value="Trang chủ" ${filterPosition == 'Trang chủ' ? 'selected' : ''}>Trang chủ</option>
                     <c:forEach var="cat" items="${categories}">
                         <option value="${cat.id}" ${String.valueOf(cat.id) == filterPosition ? 'selected' : ''}>
-                                ${cat.name}
+                                <c:out value="${cat.name}" />
                         </option>
                     </c:forEach>
                 </select>
@@ -292,26 +292,26 @@
                         <tr>
                             <td colspan="7" class="no-results-cell">
                                 <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
-                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword">${param.keyword}</span>'
+                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword"><c:out value="${param.keyword}" /></span>'
                             </td>
                         </tr>
                     </c:when>
                     <c:otherwise>
                         <c:forEach var="b" items="${banners}" varStatus="status">
                             <tr>
-                                <td>${(currentPage - 1) * 10 + status.count}</td>
+                                <td><c:out value="${(currentPage - 1) * 10 + status.count}" /></td>
                                 <td>
                                     <img src="${b.image}" class="banner-img-preview" alt="Banner"
                                          onerror="this.src='https://via.placeholder.com/100x60?text=No+Image'">
                                 </td>
-                                <td style="text-align: left; font-weight: 600;">${b.name}</td>
-                                <td><span class="status status-active" style="background:#f1f5f9;color:#334155;">${b.position}</span></td>
-                                <td>${b.display_order}</td>
+                                <td style="text-align: left; font-weight: 600;"><c:out value="${b.name}" /></td>
+                                <td><span class="status status-active" style="background:#f1f5f9;color:#334155;"><c:out value="${b.position}" /></span></td>
+                                <td><c:out value="${b.display_order}" /></td>
                                 <td>
                                     <div class="time-range">
-                                        <i class="fa-regular fa-calendar"></i> ${b.start_time}<br>
+                                        <i class="fa-regular fa-calendar"></i> <c:out value="${b.start_time}" /><br>
                                         <i class="fa-solid fa-arrow-down-long" style="font-size:10px;margin:2px 0;"></i><br>
-                                        <i class="fa-regular fa-calendar-check"></i> ${b.end_time}
+                                        <i class="fa-regular fa-calendar-check"></i> <c:out value="${b.end_time}" />
                                     </div>
                                 </td>
                                 <td>
@@ -338,7 +338,7 @@
                 </c:if>
                 <c:forEach var="i" begin="1" end="${totalPages}">
                     <a href="${contextPath}/admin/banners?page=${i}&keyword=${keyword}&filterPosition=${filterPosition}"
-                       class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
+                       class="page-number ${i == currentPage ? 'active' : ''}"><c:out value="${i}" /></a>
                 </c:forEach>
                 <c:if test="${currentPage < totalPages}">
                     <a href="${contextPath}/admin/banners?page=${currentPage + 1}&keyword=${keyword}&filterPosition=${filterPosition}"
@@ -364,7 +364,7 @@
     <div id="confirm-delete-modal-${b.id}" class="modal-overlay">
         <div class="modal-content">
             <h3>Xác nhận xóa</h3>
-            <p>Bạn có chắc chắn muốn xóa banner "${b.name}" không?</p>
+            <p>Bạn có chắc chắn muốn xóa banner "<c:out value="${b.name}" />" không?</p>
             <div class="modal-buttons">
                 <a href="#" class="modal-btn modal-cancel">Hủy</a>
                 <a href="${contextPath}/admin/banners?action=delete&id=${b.id}" class="modal-btn modal-confirm">Xóa</a>
@@ -409,7 +409,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -419,7 +419,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -435,7 +435,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -452,7 +452,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -479,7 +479,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

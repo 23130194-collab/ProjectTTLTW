@@ -150,11 +150,11 @@
                                 chủ</a> / <span>Đơn hàng</span></div>
 
                         <c:if test="${not empty sessionScope.successMessage}">
-                            <div class="alert alert-success">${sessionScope.successMessage}</div>
+                            <div class="alert alert-success"><c:out value="${sessionScope.successMessage}" /></div>
                             <c:remove var="successMessage" scope="session" />
                         </c:if>
                         <c:if test="${not empty sessionScope.errorMessage}">
-                            <div class="alert alert-danger">${sessionScope.errorMessage}</div>
+                            <div class="alert alert-danger"><c:out value="${sessionScope.errorMessage}" /></div>
                             <c:remove var="errorMessage" scope="session" />
                         </c:if>
 
@@ -166,7 +166,7 @@
                                 <select name="status" class="status-filter" onchange="this.form.submit()">
                                     <option value="" ${empty statusFilter ? 'selected' : ''}>Tất cả trạng thái</option>
                                     <c:forEach var="status" items="${orderStatuses}">
-                                        <option value="${status}" ${status == statusFilter ? 'selected' : ''}>${status}</option>
+                                        <option value="${status}" ${status == statusFilter ? 'selected' : ''}><c:out value="${status}" /></option>
                                     </c:forEach>
                                 </select>
                                 <button type="submit" class="search-button">Tìm kiếm</button>
@@ -191,7 +191,7 @@
                                     <c:forEach var="order" items="${orders}">
                                         <tr>
                                             <td><a href="${pageContext.request.contextPath}/admin/orders?action=view&id=${order.id}"
-                                                    class="order-code">${order.orderCode}</a></td>
+                                                    class="order-code"><c:out value="${order.orderCode}" /></a></td>
                                             <td>
                                                 <fmt:formatDate value="${order.createdAt}"
                                                     pattern="HH:mm - dd/MM/yyyy" />
@@ -219,7 +219,7 @@
                                                         <c:set var="statusClass" value="status-cancelled" />
                                                     </c:when>
                                                 </c:choose>
-                                                <span class="badge ${statusClass}">${order.orderStatus}</span>
+                                                <span class="badge ${statusClass}"><c:out value="${order.orderStatus}" /></span>
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
@@ -257,7 +257,7 @@
                                 </c:if>
                                 <c:forEach var="i" begin="1" end="${totalPages}">
                                     <a href="${pageContext.request.contextPath}/admin/orders?page=${i}&keyword=${keyword}&status=${statusFilter}"
-                                        class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
+                                        class="page-number ${i == currentPage ? 'active' : ''}"><c:out value="${i}" /></a>
                                 </c:forEach>
                                 <c:if test="${currentPage < totalPages}">
                                     <a href="${pageContext.request.contextPath}/admin/orders?page=${currentPage + 1}&keyword=${keyword}&status=${statusFilter}"
@@ -292,7 +292,7 @@
                         });
 
                         function markAllAdminAsRead() {
-                            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+                            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                                 .then(() => {
                                     const badge = document.getElementById('notificationBadge');
                                     badge.style.display = 'none';
@@ -302,7 +302,7 @@
                         }
 
                         function loadNotifications() {
-                            fetch('${contextPath}/NotificationServlet')
+                            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                                 .then(res => res.json())
                                 .then(data => {
                                     if (!data || data.length === 0) {
@@ -318,7 +318,7 @@
                                     notificationList.innerHTML = data.map(function(n) {
                                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                                         var unreadClass = isUnread ? 'unread' : '';
-                                        var link = '${contextPath}' + n.link;
+                                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                                             + '<div class="noti-content">'
@@ -335,7 +335,7 @@
                             event.preventDefault();
 
                             if (element.classList.contains('unread')) {
-                                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                                     .then(response => {
                                         if(response.ok) {
                                             element.classList.remove('unread');
@@ -362,7 +362,7 @@
                                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
                         }
 
-                        fetch('${contextPath}/NotificationServlet')
+                        fetch('<c:out value="${contextPath}" />/NotificationServlet')
                             .then(res => res.json())
                             .then(data => {
                                 if (!data || data.length === 0) return;

@@ -15,22 +15,22 @@
 
         <c:choose>
             <c:when test="${sessionScope.otp_flow == 'reset_password'}">
-                <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email <strong>${sessionScope.email_for_verification}</strong>. Vui lòng nhập mã để đặt lại mật khẩu.</p>
+                <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email <strong><c:out value="${sessionScope.email_for_verification}" /></strong>. Vui lòng nhập mã để đặt lại mật khẩu.</p>
             </c:when>
             <c:when test="${sessionScope.otp_flow == 'update_email'}">
-                <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email mới của bạn: <strong>${sessionScope.new_email_for_display}</strong>. Vui lòng nhập mã để hoàn tất thay đổi.</p>
+                <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email mới của bạn: <strong><c:out value="${sessionScope.new_email_for_display}" /></strong>. Vui lòng nhập mã để hoàn tất thay đổi.</p>
             </c:when>
             <c:otherwise>
-                <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email <strong>${sessionScope.email_for_verification}</strong>. Vui lòng nhập mã để kích hoạt tài khoản.</p>
+                <p style="text-align: center; margin-bottom: 20px;">Một mã OTP đã được gửi đến email <strong><c:out value="${sessionScope.email_for_verification}" /></strong>. Vui lòng nhập mã để kích hoạt tài khoản.</p>
             </c:otherwise>
         </c:choose>
 
         <c:if test="${not empty sessionScope.resend_success}">
-            <div class="success-message-general">${sessionScope.resend_success}</div>
+            <div class="success-message-general"><c:out value="${sessionScope.resend_success}" /></div>
             <c:remove var="resend_success" scope="session"/>
         </c:if>
         <c:if test="${not empty sessionScope.resend_error}">
-            <div class="cooldown-message">${sessionScope.resend_error}</div>
+            <div class="cooldown-message"><c:out value="${sessionScope.resend_error}" /></div>
             <c:remove var="resend_error" scope="session"/>
         </c:if>
 
@@ -39,7 +39,7 @@
                 <input type="text" id="otp" name="otp" placeholder="Nhập mã OTP" class="${not empty otp_error ? 'input-error' : ''}"
                        ${requestScope.disable_otp_input ? 'disabled' : ''} required>
                 <c:if test="${not empty otp_error}">
-                    <span class="error-message">${otp_error}</span>
+                    <span class="error-message"><c:out value="${otp_error}" /></span>
                 </c:if>
             </div>
             <c:if test="${not requestScope.disable_otp_input}">

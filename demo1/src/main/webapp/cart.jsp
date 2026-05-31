@@ -47,7 +47,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -77,7 +77,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -103,7 +103,7 @@
 
     <c:if test="${not empty sessionScope.cartError}">
         <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin: 10px 15px; border: 1px solid #f5c6cb; border-radius: 5px; position: relative;">
-                ${sessionScope.cartError}
+                <c:out value="${sessionScope.cartError}" />
             <span class="close-btn" onclick="this.parentElement.style.display='none';"
                   style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; font-weight: bold; font-size: 20px;">
                 &times;
@@ -161,7 +161,7 @@
                             <div class="info">
                                 <div class="info-line">
                                     <a href="product-detail?id=${item.product.id}" style="text-decoration: none; color: inherit;">
-                                    <span>${item.product.name}</span>
+                                    <span><c:out value="${item.product.name}" /></span>
                                     </a>
                                     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
                                         <a href="AddCart?action=delete&id=${item.product.id}" class="delete-icon">
@@ -207,7 +207,7 @@
                                         <div class="info-line">
                             <span>
                                 <a href="ProductDetail?id=${item.product.id}" class="product-name-link">
-                                    <span class="product-name-text">${item.product.name}</span>
+                                    <span class="product-name-text"><c:out value="${item.product.name}" /></span>
                                 </a>
                                 <span class="badge-out-of-stock">Hết hàng</span>
                             </span>
@@ -369,7 +369,7 @@
 </script>
 
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>

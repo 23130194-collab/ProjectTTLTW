@@ -172,7 +172,7 @@
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger">
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-                ${errorMessage}
+                <c:out value="${errorMessage}" />
             </div>
         </c:if>
 
@@ -205,7 +205,7 @@
                         <c:forEach var="category" items="${categories}">
                             <option value="${category.id}"
                                 ${(not empty oldCategoryId && category.id == oldCategoryId) || (category.id == attributeToEdit.categoryId) ? 'selected' : ''}>
-                                    ${category.name}
+                                    <c:out value="${category.name}" />
                             </option>
                         </c:forEach>
                     </select>
@@ -253,7 +253,7 @@
                     <option value="0">Tất cả danh mục</option>
                     <c:forEach var="cat" items="${categories}">
                         <option value="${cat.id}" ${cat.id == filterCategoryId ? 'selected' : ''}>
-                                ${cat.name}
+                                <c:out value="${cat.name}" />
                         </option>
                     </c:forEach>
                 </select>
@@ -283,24 +283,24 @@
                         <tr>
                             <td colspan="6" class="no-results-cell">
                                 <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
-                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword">${keyword}</span>'
+                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword"><c:out value="${keyword}" /></span>'
                             </td>
                         </tr>
                     </c:when>
                     <c:otherwise>
                         <c:forEach var="attr" items="${attributes}" varStatus="loop">
                             <tr>
-                                <td>${loop.index + 1 + (currentPage - 1) * 10}</td>
+                                <td><c:out value="${loop.index + 1 + (currentPage - 1) * 10}" /></td>
                                 <td><c:out value="${attr.name}"/></td>
                                 <td>
                                     <c:forEach var="cat" items="${categories}">
-                                        <c:if test="${cat.id == attr.categoryId}">${cat.name}</c:if>
+                                        <c:if test="${cat.id == attr.categoryId}"><c:out value="${cat.name}" /></c:if>
                                     </c:forEach>
                                 </td>
-                                <td>${attr.displayOrder}</td>
+                                <td><c:out value="${attr.displayOrder}" /></td>
                                 <td>
                                     <span class="badge ${attr.status == 'active' ? 'active-status' : 'inactive-status'}">
-                                        ${attr.status == 'active' ? 'Hoạt động' : 'Ẩn'}
+                                        <c:out value="${attr.status == 'active' ? 'Hoạt động' : 'Ẩn'}" />
                                     </span>
                                 </td>
                                 <td class="actions">
@@ -325,7 +325,7 @@
                 </c:if>
                 <c:forEach var="i" begin="1" end="${totalPages}">
                     <a href="${contextPath}/admin/attributes?page=${i}&keyword=${keyword}&filterCategoryId=${filterCategoryId}"
-                       class="page-number ${currentPage == i ? 'active' : ''}">${i}</a>
+                       class="page-number ${currentPage == i ? 'active' : ''}"><c:out value="${i}" /></a>
                 </c:forEach>
                 <c:if test="${currentPage < totalPages}">
                     <a href="${contextPath}/admin/attributes?page=${currentPage + 1}&keyword=${keyword}&filterCategoryId=${filterCategoryId}"
@@ -351,7 +351,7 @@
     <div id="confirm-delete-modal-${attr.id}" class="modal-overlay">
         <div class="modal-content">
             <h3>Xác nhận xóa</h3>
-            <p>Bạn có chắc chắn muốn xóa thuộc tính "${attr.name}" không?</p>
+            <p>Bạn có chắc chắn muốn xóa thuộc tính "<c:out value="${attr.name}" />" không?</p>
             <div class="modal-buttons">
                 <a href="#" class="modal-btn modal-cancel">Hủy</a>
                 <form action="${contextPath}/admin/attributes" method="post" style="display:inline;">
@@ -399,7 +399,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -409,7 +409,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -425,7 +425,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -442,7 +442,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -469,7 +469,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;
@@ -511,8 +511,8 @@
             });
         });
 
-        var needConfirm = ${confirmReplaceOrder != null ? confirmReplaceOrder : 'false'};
-        var message = "${conflictMessage}";
+        var needConfirm = <c:out value="${confirmReplaceOrder != null ? confirmReplaceOrder : 'false'}" />;
+        var message = "<c:out value="${conflictMessage}" />";
         if (needConfirm) {
             if (confirm(message)) {
                 var form = document.querySelector('form[action$="/admin/attributes"]');

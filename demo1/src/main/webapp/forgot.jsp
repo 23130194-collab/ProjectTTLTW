@@ -14,7 +14,7 @@
             <p>Vui lòng nhập địa chỉ email của bạn. Chúng tôi sẽ gửi một mã OTP để xác thực.</p>
 
             <c:if test="${not empty error}">
-                <div class="error-message-general">${error}</div>
+                <div class="error-message-general"><c:out value="${error}" /></div>
             </c:if>
 
             <form action="forgot-password" method="post">

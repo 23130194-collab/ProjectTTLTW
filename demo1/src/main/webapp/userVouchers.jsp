@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -42,7 +42,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -72,7 +72,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -86,10 +86,10 @@
         <div class="profile">
             <div class="summary-card">
                 <div class="summary-left">
-                    <div class="reviewer-avatar">${fn:substring(sessionScope.user.name, 0, 1)}</div>
+                    <div class="reviewer-avatar"><c:out value="${fn:substring(sessionScope.user.name, 0, 1)}" /></div>
                     <div class="summary-info">
-                        <div class="summary-name">${sessionScope.user.name}</div>
-                        <div class="summary-phone">${sessionScope.user.phone}</div>
+                        <div class="summary-name"><c:out value="${sessionScope.user.name}" /></div>
+                        <div class="summary-phone"><c:out value="${sessionScope.user.phone}" /></div>
                     </div>
                 </div>
 
@@ -100,7 +100,7 @@
                         <i class="fa-solid fa-cart-shopping" style="color: #ff0000;"></i>
                     </div>
                     <div class="summary-text">
-                        <div class="summary-count">${totalOrders}</div>
+                        <div class="summary-count"><c:out value="${totalOrders}" /></div>
                         <div class="summary-label">Tổng số đơn hàng đã mua</div>
                     </div>
                 </div>
@@ -155,14 +155,14 @@
 
             <c:if test="${not empty sessionScope.voucherSuccess}">
                 <div class="voucher-alert voucher-alert-success">
-                    <span>${sessionScope.voucherSuccess}</span>
+                    <span><c:out value="${sessionScope.voucherSuccess}" /></span>
                     <button type="button" class="voucher-alert-close" aria-label="Đóng">&times;</button>
                 </div>
                 <c:remove var="voucherSuccess" scope="session"/>
             </c:if>
             <c:if test="${not empty sessionScope.voucherError}">
                 <div class="voucher-alert voucher-alert-error">
-                    <span>${sessionScope.voucherError}</span>
+                    <span><c:out value="${sessionScope.voucherError}" /></span>
                     <button type="button" class="voucher-alert-close" aria-label="Đóng">&times;</button>
                 </div>
                 <c:remove var="voucherError" scope="session"/>
@@ -180,9 +180,9 @@
                         <c:forEach var="voucher" items="${vouchers}">
                             <div class="voucher-card ${voucher.used ? 'is-used' : ''}">
                                 <div class="voucher-main">
-                                    <div class="voucher-code" style="margin-bottom: 8px;">${voucher.code} - <span style="color: #111827;">Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ</span></div>
+                                    <div class="voucher-code" style="margin-bottom: 8px;"><c:out value="${voucher.code}" /> - <span style="color: #111827;">Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ</span></div>
                                     <div class="voucher-info-line" style="font-size: 14px; color: #475569; margin-bottom: 6px;">Đơn tối thiểu: <strong style="color: #111827;"><fmt:formatNumber value="${voucher.minOrderValue}" pattern="#,###"/>đ</strong></div>
-                                    <div class="voucher-info-line" style="font-size: 14px; color: #475569; margin-bottom: 6px;">Số lượng: <strong style="color: #ef4444;">${voucher.quantity - voucher.usedCount} lượt</strong></div>
+                                    <div class="voucher-info-line" style="font-size: 14px; color: #475569; margin-bottom: 6px;">Số lượng: <strong style="color: #ef4444;"><c:out value="${voucher.quantity - voucher.usedCount}" /> lượt</strong></div>
                                     <div class="voucher-info-line" style="font-size: 13px; color: #64748b;">Hạn dùng: <fmt:formatDate value="${voucher.endDate}" pattern="dd/MM/yyyy HH:mm"/></div>
                                 </div>
                                 <div class="voucher-action">
@@ -211,7 +211,7 @@
 </div>
 
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>

@@ -49,7 +49,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -79,7 +79,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -100,15 +100,15 @@
         <div class="breadcrumb">
             <a href="${pageContext.request.contextPath}/home" class="path">Trang chủ</a>
             <span class="separator">/</span>
-            <a href="list-product?id=${category.id}" class="path">${category.name}</a>
+            <a href="list-product?id=${category.id}" class="path"><c:out value="${category.name}" /></a>
             <span class="separator">/</span>
-            <span>${p.name}</span>
+            <span><c:out value="${p.name}" /></span>
         </div>
 
         <div class="product-container">
 
             <div class="product-left">
-                <h2>${p.name}</h2>
+                <h2><c:out value="${p.name}" /></h2>
                 <div class="product-actions">
                     <button type="button"
                             class="action-item like-btn ${p.favorite ? 'is-favorite' : ''}"
@@ -132,7 +132,7 @@
                                 <div class="stars-inner" style="width: ${ (p.avgRating * 1.0 / 5) * 100 }%;"></div>
                             </div>
                         </div>
-                        <span class="rating-value">${p.avgRating}</span>
+                        <span class="rating-value"><c:out value="${p.avgRating}" /></span>
                     </div>
                 </div>
 
@@ -198,8 +198,8 @@
                         <div class="spec-items">
                             <c:forEach items="${specs}" var="s">
                                 <div class="spec-item">
-                                    <span class="spec-label">${s.attributeName}</span>
-                                    <span class="spec-value">${s.specValue}</span>
+                                    <span class="spec-label"><c:out value="${s.attributeName}" /></span>
+                                    <span class="spec-value"><c:out value="${s.specValue}" /></span>
                                 </div>
                             </c:forEach>
                         </div>
@@ -210,7 +210,7 @@
                         <div class="spec-items">
                             <div class="spec-item">
                                 <span class="spec-label">Hãng sản xuất</span>
-                                <span class="spec-value">${brand.name}</span>
+                                <span class="spec-value"><c:out value="${brand.name}" /></span>
                             </div>
                         </div>
                     </div>
@@ -222,7 +222,7 @@
             <h3 class="section-title">Giới thiệu sản phẩm</h3>
 
             <div class="description-content">
-                <p>${p.description}</p>
+                <p><c:out value="${p.description}" /></p>
             </div>
         </div>
 
@@ -241,7 +241,7 @@
 
                         <a href="product-detail?id=${rp.id}" class="product-link">
                             <img src="${rp.image}" alt="${rp.name}" class="product-image">
-                            <h3 class="product-title">${rp.name}</h3>
+                            <h3 class="product-title"><c:out value="${rp.name}" /></h3>
                             <div class="price-section">
                                 <div class="current-price"><fmt:formatNumber value="${rp.price}" pattern="#,###"/>đ
                                 </div>
@@ -280,19 +280,19 @@
 
         <div class="product-reviews-section">
             <div class="reviews-header">
-                <h3 class="section-title">Đánh giá ${p.name}</h3>
+                <h3 class="section-title">Đánh giá <c:out value="${p.name}" /></h3>
             </div>
 
             <div class="reviews-summary">
                 <div class="overall-rating">
-                    <div class="rating-number">${p.avgRating}<span>/5</span></div>
+                    <div class="rating-number"><c:out value="${p.avgRating}" /><span>/5</span></div>
 
                     <div class="rating-stars">
                         <div class="stars-outer">
                             <div class="stars-inner" style="width: ${ (p.avgRating * 1.0 / 5) * 100 }%;"></div>
                         </div>
                     </div>
-                    <div class="rating-count">${reviewSummary.totalReviews} lượt đánh giá</div>
+                    <div class="rating-count"><c:out value="${reviewSummary.totalReviews}" /> lượt đánh giá</div>
 
                     <c:choose>
                         <c:when test="${empty sessionScope.user}">
@@ -331,14 +331,14 @@
                     <c:forEach var="star" begin="0" end="4">
                         <c:set var="starLevel" value="${5 - star}"/>
                         <div class="rating-bar-item">
-                            <span class="star-label">${starLevel} <i class="fa-solid fa-star"></i></span>
+                            <span class="star-label"><c:out value="${starLevel}" /> <i class="fa-solid fa-star"></i></span>
                             <div class="bar-container">
                                 <div class="bar-fill"
                                      style="width: ${reviewSummary.starPercentages[starLevel.toString()]}%"></div>
                             </div>
 
                             <span class="rating-count-label">
-                                ${reviewSummary.starCounts[starLevel.toString()]} đánh giá
+                                <c:out value="${reviewSummary.starCounts[starLevel.toString()]}" /> đánh giá
                             </span>
                         </div>
                     </c:forEach>
@@ -370,12 +370,12 @@
                 <c:forEach items="${reviews}" var="r">
                     <div class="review-item" data-rating="${r.rating}">
                         <div class="reviewer-avatar">
-                                ${(not empty r.userName and r.userName.length() > 0) ? r.userName.substring(0, 1) : 'U'}
+                                <c:out value="${(not empty r.userName and r.userName.length() > 0) ? r.userName.substring(0, 1) : 'U'}" />
                         </div>
 
                         <div class="review-content">
                             <div class="reviewer-name">
-                                    ${not empty r.userName ? r.userName : 'Người dùng ẩn danh'}
+                                    <c:out value="${not empty r.userName ? r.userName : 'Người dùng ẩn danh'}" />
                             </div>
 
                             <div class="review-rating">
@@ -393,7 +393,7 @@
                     </span>
                             </div>
 
-                            <div class="review-text">${r.content}</div>
+                            <div class="review-text"><c:out value="${r.content}" /></div>
 
                             <div class="review-time">
                                 <i class="fa-regular fa-clock"></i>
@@ -419,7 +419,7 @@
                     <div class="review-product-info">
                         <img src="${p.image}"
                              alt="RAM Kingston" class="review-product-img">
-                        <div class="review-product-name">${p.name}</div>
+                        <div class="review-product-name"><c:out value="${p.name}" /></div>
                     </div>
 
                     <form id="form-review-product" action="submit-review" method="post">
@@ -486,7 +486,7 @@
             <div class="bottom-bar-left">
                 <img src="${p.image}"
                      alt="RAM Kingston" class="bottom-bar-img">
-                <div class="bottom-bar-product">${p.name}</div>
+                <div class="bottom-bar-product"><c:out value="${p.name}" /></div>
             </div>
             <div class="bottom-bar-right">
                 <div class="bottom-bar-price">
@@ -590,14 +590,14 @@
 </footer>
 
 <script>
-    const globalContextPath = "${pageContext.request.contextPath}";
+    const globalContextPath = "<c:out value="${pageContext.request.contextPath}" />";
 </script>
 
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPham.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>

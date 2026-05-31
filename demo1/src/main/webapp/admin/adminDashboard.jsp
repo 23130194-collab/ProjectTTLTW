@@ -193,12 +193,12 @@
                 </div>
                 <div class="stat-info">
                     <h3 class="stat-label">Tổng đơn hàng</h3>
-                    <p class="stat-value">${totalOrders}</p>
+                    <p class="stat-value"><c:out value="${totalOrders}" /></p>
 
                     <div class="stat-sub">
                         <a href="${contextPath}/admin/orders?status=Chờ+xác+nhận"
                            class="stat-pending-link">
-                            <i class="fa-solid fa-clock"></i> ${pendingOrders} đơn chờ xác nhận
+                            <i class="fa-solid fa-clock"></i> <c:out value="${pendingOrders}" /> đơn chờ xác nhận
                         </a>
                     </div>
                 </div>
@@ -211,9 +211,9 @@
                 </div>
                 <div class="stat-info">
                     <h3 class="stat-label">Khách hàng hoạt động</h3>
-                    <p class="stat-value">${totalCustomers}</p>
+                    <p class="stat-value"><c:out value="${totalCustomers}" /></p>
 
-                    <div class="stat-sub">+${newCustomersThisMonth} khách mới tháng này</div>
+                    <div class="stat-sub">+<c:out value="${newCustomersThisMonth}" /> khách mới tháng này</div>
                 </div>
             </div>
 
@@ -224,7 +224,7 @@
                 </div>
                 <div class="stat-info">
                     <h3 class="stat-label">Sản phẩm đang bán</h3>
-                    <p class="stat-value">${activeProducts}</p>
+                    <p class="stat-value"><c:out value="${activeProducts}" /></p>
                     <div class="stat-secondary">
                                         <span class="stat-change positive">
                                             <i class="fa-solid fa-circle-check"></i> Đang hoạt động
@@ -261,12 +261,12 @@
                 </div>
                 <div class="stat-info">
                     <h3 class="stat-label">Sắp hết hàng</h3>
-                    <p class="stat-value">${lowStockProducts}</p>
+                    <p class="stat-value"><c:out value="${lowStockProducts}" /></p>
                     <div class="stat-secondary">
                                         <span class="stat-change ${lowStockProducts > 0 ? 'negative' : 'positive'}">
                                             <i
                                                     class="fa-solid ${lowStockProducts > 0 ? 'fa-circle-exclamation' : 'fa-check'}"></i>
-                                            ${lowStockProducts > 0 ? 'Cần nhập hàng' : 'Tồn kho ổn định'}
+                                            <c:out value="${lowStockProducts > 0 ? 'Cần nhập hàng' : 'Tồn kho ổn định'}" />
                                         </span>
                     </div>
                     <div class="stat-sub">
@@ -285,12 +285,12 @@
                 </div>
                 <div class="stat-info">
                     <h3 class="stat-label">Tỷ lệ hủy đơn</h3>
-                    <p class="stat-value">${cancelRate}%</p>
+                    <p class="stat-value"><c:out value="${cancelRate}" />%</p>
                     <div class="stat-secondary">
                                         <span class="stat-change ${cancelRate > 10 ? 'negative' : 'positive'}">
                                             <i
                                                     class="fa-solid ${cancelRate > 10 ? 'fa-arrow-trend-up' : 'fa-thumbs-up'}"></i>
-                                            ${cancelRate > 10 ? 'Cảnh báo cao' : 'Mức bình thường'}
+                                            <c:out value="${cancelRate > 10 ? 'Cảnh báo cao' : 'Mức bình thường'}" />
                                         </span>
                     </div>
                     <div class="stat-sub">Tỷ lệ đơn hàng bị hủy</div>
@@ -305,7 +305,7 @@
                 </div>
                 <div class="status-info">
                     <div class="status-label">Đơn chờ xử lý</div>
-                    <div class="status-value">${pendingOrders}</div>
+                    <div class="status-value"><c:out value="${pendingOrders}" /></div>
                 </div>
             </div>
 
@@ -315,7 +315,7 @@
                 </div>
                 <div class="status-info">
                     <div class="status-label">Đơn đang giao</div>
-                    <div class="status-value">${processingOrders}</div>
+                    <div class="status-value"><c:out value="${processingOrders}" /></div>
                 </div>
             </div>
 
@@ -325,7 +325,7 @@
                 </div>
                 <div class="status-info">
                     <div class="status-label">Đơn đã giao</div>
-                    <div class="status-value">${deliveredOrders}</div>
+                    <div class="status-value"><c:out value="${deliveredOrders}" /></div>
                 </div>
             </div>
         </div>
@@ -567,7 +567,7 @@
     });
 
     function fetchChartData(days) {
-        fetch(`${contextPath}/admin/chart-data?days=` + days)
+        fetch(`<c:out value="${contextPath}" />/admin/chart-data?days=` + days)
             .then(response => response.json())
             .then(data => {
                 renderRevenueTimeChart(data.revenueTime);
@@ -1090,13 +1090,13 @@
                            class="low-stock-item">
                             <img src="${item.image}" alt="${item.name}" class="item-img">
                             <div class="item-details">
-                                <div class="item-name">${item.name}</div>
+                                <div class="item-name"><c:out value="${item.name}" /></div>
                                 <div class="item-price-stock">
                                                     <span class="item-price">
                                                         <fmt:formatNumber value="${item.price}" type="number"
                                                                           pattern="#,##0"/>đ
                                                     </span>
-                                    <span class="item-stock">Còn lại: ${item.stock}</span>
+                                    <span class="item-stock">Còn lại: <c:out value="${item.stock}" /></span>
                                 </div>
                             </div>
                         </a>
@@ -1138,7 +1138,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -1148,7 +1148,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -1164,7 +1164,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -1181,7 +1181,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -1208,7 +1208,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;
