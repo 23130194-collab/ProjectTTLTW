@@ -1,6 +1,7 @@
 package com.example.demo1.controller.admin;
 
 import com.example.demo1.service.AuthService;
+import com.example.demo1.service.EmailService;
 import com.example.demo1.service.UserService;
 import com.example.demo1.util.DataValidator;
 import com.example.demo1.util.MD5;
@@ -69,7 +70,12 @@ public class AdminAddCustomerController extends HttpServlet {
             String hashedPassword = MD5.hash(password);
             userService.addCustomerByAdmin(name, email, hashedPassword);
 
-            session.setAttribute("successMessage", "Thêm khách hàng mới thành công!");
+            try {
+                EmailService.sendAdminCreatedAccountEmail(email, name, password);
+                session.setAttribute("successMessage", "Thêm khách hàng mới thành công! Email thông báo đã được gửi đến khách hàng.");
+            } catch (Exception emailException) {
+                session.setAttribute("errorMessage", "Thêm khách hàng mới thành công nhưng gửi email thông báo thất bại. Vui lòng kiểm tra cấu hình email.");
+            }
             response.sendRedirect(request.getContextPath() + "/admin/customers");
         } catch (Exception e) {
             session.setAttribute("errorMessage", "Đã xảy ra lỗi: " + e.getMessage());
