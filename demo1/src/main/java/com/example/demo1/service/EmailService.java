@@ -40,6 +40,24 @@ public class EmailService {
         sendHtmlEmail(toEmail, "Phản hồi liên hệ từ TechNova", emailContent);
     }
 
+    public static void sendAdminCreatedAccountEmail(String toEmail, String customerName, String password) {
+        String safeName = escapeHtml(customerName == null || customerName.trim().isEmpty() ? "bạn" : customerName.trim());
+        String safeEmail = escapeHtml(toEmail == null ? "" : toEmail.trim());
+        String safePassword = escapeHtml(password == null ? "" : password);
+
+        String emailContent = "<h2>Tài khoản TechNova của bạn đã được tạo</h2>"
+                + "<p>Xin chào <strong>" + safeName + "</strong>,</p>"
+                + "<p>TechNova đã tạo tài khoản khách hàng cho bạn. Bạn có thể đăng nhập bằng thông tin sau:</p>"
+                + "<div style='margin: 16px 0; padding: 12px 16px; background: #eff6ff; border-radius: 8px; line-height: 1.7;'>"
+                + "<p><strong>Email:</strong> " + safeEmail + "</p>"
+                + "<p><strong>Mật khẩu:</strong> " + safePassword + "</p>"
+                + "</div>"
+                + "<p>Vui lòng đăng nhập và đổi mật khẩu để bảo mật tài khoản.</p>"
+                + "<p>Trân trọng,<br>Đội ngũ TechNova</p>";
+
+        sendHtmlEmail(toEmail, "Thông tin tài khoản TechNova của bạn", emailContent);
+    }
+
     private static String escapeHtml(String value) {
         return value
                 .replace("&", "&amp;")
