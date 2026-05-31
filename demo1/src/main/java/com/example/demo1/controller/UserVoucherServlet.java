@@ -25,7 +25,18 @@ public class UserVoucherServlet extends HttpServlet {
         }
         request.setAttribute("totalOrders", orderService.countTotalOrdersByUserId(user.getId()));
         request.setAttribute("totalSpent", orderService.calculateTotalSpentByUserId(user.getId()));
-        request.setAttribute("vouchers", voucherService.getActiveVouchersForUser(user.getId()));
+        
+        java.util.List<com.example.demo1.model.Voucher> vouchers = voucherService.getActiveVouchersForUser(user.getId());
+        java.util.List<com.example.demo1.model.Voucher> filteredAndSorted = vouchers.stream()
+                .filter(v -> !v.isUsed())
+                .sorted((v1, v2) -> {
+                    int s1 = v1.isSaved() ? 1 : 0;
+                    int s2 = v2.isSaved() ? 1 : 0;
+                    return Integer.compare(s1, s2);
+                })
+                .collect(java.util.stream.Collectors.toList());
+        
+        request.setAttribute("vouchers", filteredAndSorted);
         request.getRequestDispatcher("/userVouchers.jsp").forward(request, response);
     }
 

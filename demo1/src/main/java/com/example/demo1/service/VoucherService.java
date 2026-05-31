@@ -53,7 +53,7 @@ public class VoucherService {
     }
 
     public double calculateDiscount(Voucher voucher, double orderAmount) {
-        if (voucher == null || orderAmount <= 0) {
+        if (voucher == null || orderAmount <= 0 || orderAmount < voucher.getMinOrderValue()) {
             return 0;
         }
         return Math.min(voucher.getDiscountValue(), orderAmount);

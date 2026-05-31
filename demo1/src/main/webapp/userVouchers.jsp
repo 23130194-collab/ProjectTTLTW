@@ -180,9 +180,10 @@
                         <c:forEach var="voucher" items="${vouchers}">
                             <div class="voucher-card ${voucher.used ? 'is-used' : ''}">
                                 <div class="voucher-main">
-                                    <div class="voucher-code">${voucher.code}</div>
-                                    <div class="voucher-value">Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ</div>
-                                    <div class="voucher-date">Hạn dùng: <fmt:formatDate value="${voucher.endDate}" pattern="dd/MM/yyyy HH:mm"/></div>
+                                    <div class="voucher-code" style="margin-bottom: 8px;">${voucher.code} - <span style="color: #111827;">Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ</span></div>
+                                    <div class="voucher-info-line" style="font-size: 14px; color: #475569; margin-bottom: 6px;">Đơn tối thiểu: <strong style="color: #111827;"><fmt:formatNumber value="${voucher.minOrderValue}" pattern="#,###"/>đ</strong></div>
+                                    <div class="voucher-info-line" style="font-size: 14px; color: #475569; margin-bottom: 6px;">Số lượng: <strong style="color: #ef4444;">${voucher.quantity - voucher.usedCount} lượt</strong></div>
+                                    <div class="voucher-info-line" style="font-size: 13px; color: #64748b;">Hạn dùng: <fmt:formatDate value="${voucher.endDate}" pattern="dd/MM/yyyy HH:mm"/></div>
                                 </div>
                                 <div class="voucher-action">
                                     <c:choose>

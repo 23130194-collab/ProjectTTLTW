@@ -176,19 +176,48 @@
             <div class="admin-form-grid">
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Mã voucher <span class="required">*</span></label>
-                    <input type="text" name="code" class="form-input" value="${voucherToEdit.code}" placeholder="VD: SALE100K" required>
+                    <input type="text" name="code" class="form-input" value="${voucherToEdit.code}" placeholder="VD: SALE100K">
+                    <c:if test="${not empty requestScope.codeError}">
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.codeError}</div>
+                    </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Giá trị giảm <span class="required">*</span></label>
-                    <input type="number" name="discountValue" class="form-input" value="${voucherToEdit.discountValue}" min="1000" step="1000" required>
+                    <input type="number" name="discountValue" class="form-input" value="${voucherToEdit.discountValue}" min="1000" step="1000">
+                    <c:if test="${not empty requestScope.discountError}">
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.discountError}</div>
+                    </c:if>
+                </div>
+                <div class="form-field form-span-1">
+                    <label class="admin-form-label">Số lượng <span class="required">*</span></label>
+                    <input type="number" name="quantity" class="form-input" value="${not empty voucherToEdit ? voucherToEdit.quantity : 100}" min="1">
+                    <c:if test="${not empty requestScope.quantityError}">
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.quantityError}</div>
+                    </c:if>
+                </div>
+                <div class="form-field form-span-1">
+                    <label class="admin-form-label">Đơn tối thiểu <span class="required">*</span></label>
+                    <input type="number" name="minOrderValue" class="form-input" value="${not empty voucherToEdit ? voucherToEdit.minOrderValue : 0}" min="0" step="1000">
+                    <c:if test="${not empty requestScope.minOrderError}">
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.minOrderError}</div>
+                    </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Ngày bắt đầu <span class="required">*</span></label>
-                    <input type="datetime-local" name="startDate" class="form-input" value="${startInput}" required>
+                    <input type="datetime-local" name="startDate" class="form-input" value="${startInput}">
+                    <c:if test="${not empty requestScope.startDateError}">
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.startDateError}</div>
+                    </c:if>
+                    <c:if test="${not empty requestScope.dateError}">
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.dateError}</div>
+                    </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Ngày kết thúc <span class="required">*</span></label>
-                    <input type="datetime-local" name="endDate" class="form-input" value="${endInput}" required>
+                    <input type="datetime-local" name="endDate" class="form-input" value="${endInput}">
+                    <c:if test="${not empty requestScope.endDateError}">
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.endDateError}</div>
+                    </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Trạng thái</label>
@@ -196,6 +225,10 @@
                         <option value="ACTIVE" ${voucherToEdit.status == 'ACTIVE' ? 'selected' : ''}>Đang bật</option>
                         <option value="INACTIVE" ${voucherToEdit.status == 'INACTIVE' ? 'selected' : ''}>Tạm tắt</option>
                     </select>
+                </div>
+                <div class="form-field form-span-2">
+                    <label class="admin-form-label">Mô tả</label>
+                    <input type="text" name="description" class="form-input" placeholder="Nhập mô tả điều kiện sử dụng..." value="${voucherToEdit.description}">
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="admin-btn-primary">
@@ -222,6 +255,7 @@
                     <th>STT</th>
                     <th>Mã</th>
                     <th>Giá trị</th>
+                    <th>Số lượng</th>
                     <th>Bắt đầu</th>
                     <th>Kết thúc</th>
                     <th>Trạng thái</th>
@@ -231,7 +265,7 @@
                 <tbody>
                 <c:choose>
                     <c:when test="${empty vouchers}">
-                        <tr><td colspan="7" class="no-results-cell">Chưa có voucher.</td></tr>
+                        <tr><td colspan="9" class="no-results-cell">Chưa có voucher.</td></tr>
                     </c:when>
                     <c:otherwise>
                         <c:forEach var="voucher" items="${vouchers}" varStatus="loop">
@@ -239,6 +273,7 @@
                                 <td>${(currentPage - 1) * 10 + loop.count}</td>
                                 <td><c:out value="${voucher.code}"/></td>
                                 <td><fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ</td>
+                                <td>${voucher.usedCount}/${voucher.quantity}</td>
                                 <td><fmt:formatDate value="${voucher.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
                                 <td><fmt:formatDate value="${voucher.endDate}" pattern="dd/MM/yyyy HH:mm"/></td>
                                 <td><span class="status ${voucher.status == 'ACTIVE' ? 'status-active' : 'status-hidden'}">${voucher.status == 'ACTIVE' ? 'Đang bật' : 'Tạm tắt'}</span></td>

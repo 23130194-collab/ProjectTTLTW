@@ -69,8 +69,8 @@ public class VoucherDao {
     public void saveVoucher(Voucher voucher) {
         if (voucher.getId() == 0) {
             jdbi.useHandle(handle ->
-                    handle.createUpdate("INSERT INTO vouchers (code, discount_value, start_date, end_date, status) " +
-                                    "VALUES (:code, :discountValue, :startDate, :endDate, :status)")
+                    handle.createUpdate("INSERT INTO vouchers (code, discount_value, start_date, end_date, status, quantity, min_order_value, description) " +
+                                    "VALUES (:code, :discountValue, :startDate, :endDate, :status, :quantity, :minOrderValue, :description)")
                             .bindBean(voucher)
                             .execute()
             );
@@ -79,7 +79,8 @@ public class VoucherDao {
 
         jdbi.useHandle(handle ->
                 handle.createUpdate("UPDATE vouchers SET code = :code, discount_value = :discountValue, " +
-                                "start_date = :startDate, end_date = :endDate, status = :status WHERE id = :id")
+                                "start_date = :startDate, end_date = :endDate, status = :status, " +
+                                "quantity = :quantity, min_order_value = :minOrderValue, description = :description WHERE id = :id")
                         .bindBean(voucher)
                         .execute()
         );
@@ -97,7 +98,7 @@ public class VoucherDao {
         String sql = "SELECT v.*, uv.id IS NOT NULL AS saved, COALESCE(uv.is_used, 0) AS used " +
                 "FROM vouchers v " +
                 "LEFT JOIN user_vouchers uv ON uv.voucher_id = v.id AND uv.user_id = :userId " +
-                "WHERE v.status = 'ACTIVE' AND NOW() BETWEEN v.start_date AND v.end_date " +
+                "WHERE v.status = 'ACTIVE' AND NOW() BETWEEN v.start_date AND v.end_date AND v.used_count < v.quantity " +
                 "ORDER BY v.end_date ASC, v.discount_value DESC";
         return jdbi.withHandle(handle ->
                 handle.createQuery(sql)
@@ -112,7 +113,7 @@ public class VoucherDao {
                 "FROM user_vouchers uv " +
                 "JOIN vouchers v ON v.id = uv.voucher_id " +
                 "WHERE uv.user_id = :userId AND uv.is_used = FALSE " +
-                "AND v.status = 'ACTIVE' AND NOW() BETWEEN v.start_date AND v.end_date " +
+                "AND v.status = 'ACTIVE' AND NOW() BETWEEN v.start_date AND v.end_date AND v.used_count < v.quantity " +
                 "ORDER BY v.end_date ASC, v.discount_value DESC";
         return jdbi.withHandle(handle ->
                 handle.createQuery(sql)
@@ -136,7 +137,7 @@ public class VoucherDao {
                 "FROM user_vouchers uv " +
                 "JOIN vouchers v ON v.id = uv.voucher_id " +
                 "WHERE uv.user_id = :userId AND uv.voucher_id = :voucherId AND uv.is_used = FALSE " +
-                "AND v.status = 'ACTIVE' AND NOW() BETWEEN v.start_date AND v.end_date";
+                "AND v.status = 'ACTIVE' AND NOW() BETWEEN v.start_date AND v.end_date AND v.used_count < v.quantity";
         return jdbi.withHandle(handle ->
                 handle.createQuery(sql)
                         .bind("userId", userId)
@@ -148,13 +149,19 @@ public class VoucherDao {
     }
 
     public void markVoucherUsed(int userId, int voucherId, int orderId) {
-        jdbi.useHandle(handle ->
-                handle.createUpdate("UPDATE user_vouchers SET is_used = TRUE, used_at = NOW(), order_id = :orderId " +
-                                "WHERE user_id = :userId AND voucher_id = :voucherId AND is_used = FALSE")
-                        .bind("userId", userId)
+        jdbi.useTransaction(handle -> {
+            int updated = handle.createUpdate("UPDATE user_vouchers SET is_used = TRUE, used_at = NOW(), order_id = :orderId " +
+                            "WHERE user_id = :userId AND voucher_id = :voucherId AND is_used = FALSE")
+                    .bind("userId", userId)
+                    .bind("voucherId", voucherId)
+                    .bind("orderId", orderId)
+                    .execute();
+            
+            if (updated > 0) {
+                handle.createUpdate("UPDATE vouchers SET used_count = used_count + 1 WHERE id = :voucherId")
                         .bind("voucherId", voucherId)
-                        .bind("orderId", orderId)
-                        .execute()
-        );
+                        .execute();
+            }
+        });
     }
 }
