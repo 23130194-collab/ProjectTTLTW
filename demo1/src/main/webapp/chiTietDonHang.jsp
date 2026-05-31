@@ -131,8 +131,11 @@
                 <a href="${contextPath}/favorites" class="menu-item">
                     <i class="fa-regular fa-heart icon"></i> <span class="label">Sản phẩm yêu thích</span>
                 </a>
-                <a href="${contextPath}//account" class="menu-item">
+                <a href="${contextPath}/account" class="menu-item">
                     <i class="fa-regular fa-user icon"></i> <span class="label">Thông tin tài khoản</span>
+                </a>
+                <a href="${contextPath}/vouchers" class="menu-item">
+                    <i class="fa-solid fa-ticket icon"></i> <span class="label">Voucher của tôi</span>
                 </a>
                 <a href="#" id="logoutLink" class="menu-item">
                     <i class="fa-solid fa-right-from-bracket icon"></i>
@@ -248,9 +251,13 @@
                             <h3 class="card-title">Thông tin thanh toán</h3>
                             <div class="payment-group">
                                 <div class="payment-sub-title">Sản phẩm</div>
+                                <c:set var="productDiscountAmount" value="${order.discountAmount - order.voucherDiscountAmount}"/>
                                 <div class="payment-line-new"><span>Số lượng sản phẩm:</span><strong>${fn:length(orderItems)}</strong></div>
                                 <div class="payment-line-new"><span>Tổng tiền hàng:</span><strong><fmt:formatNumber value="${order.subprice}" pattern="#,###"/>đ</strong></div>
-                                <div class="payment-line-new"><span>Giảm giá:</span><strong style="color:var(--accent-dark);">-<fmt:formatNumber value="${order.discountAmount}" pattern="#,###"/>đ</strong></div>
+                                <div class="payment-line-new"><span>Giảm giá sản phẩm:</span><strong style="color:var(--accent-dark);">-<fmt:formatNumber value="${productDiscountAmount lt 0 ? 0 : productDiscountAmount}" pattern="#,###"/>đ</strong></div>
+                                <c:if test="${order.voucherDiscountAmount > 0}">
+                                    <div class="payment-line-new"><span>Voucher giảm giá:</span><strong style="color:var(--accent-dark);">-<fmt:formatNumber value="${order.voucherDiscountAmount}" pattern="#,###"/>đ</strong></div>
+                                </c:if>
                                 <div class="payment-line-new"><span>Phí vận chuyển:</span><strong style="color:green;"><fmt:formatNumber value="${order.shippingFee}" pattern="#,###"/>đ</strong></div>
                             </div>
 

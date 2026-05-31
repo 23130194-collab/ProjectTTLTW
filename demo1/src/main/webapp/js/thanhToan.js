@@ -274,15 +274,14 @@
 }
 
     const shippingFee = Number(json.shippingFee || 0);
-    const totalAmount = Number(json.totalAmount || 0);
     if (hiddenShipping) hiddenShipping.value = shippingFee;
     if (shippingDisplay) shippingDisplay.textContent = shippingFee === 0 ? 'Miễn phí' : formatCurrency(shippingFee);
-    if (payableDisplay) payableDisplay.textContent = formatCurrency(totalAmount);
-    if (footerDisplay) footerDisplay.textContent = formatCurrency(totalAmount);
+    recalculateVoucherTotal();
 })
     .catch(() => {
     if (shippingDisplay) shippingDisplay.textContent = 'Không tính được phí GHN';
     if (hiddenShipping) hiddenShipping.value = '0';
+    recalculateVoucherTotal();
 })
     .finally(() => {
     if (submitBtn) submitBtn.disabled = false;
@@ -291,6 +290,55 @@
 
     function formatCurrency(value) {
     return Math.round(Number(value || 0)).toLocaleString('vi-VN') + '₫';
+}
+
+    function recalculateVoucherTotal() {
+    const baseTotal = Number((document.getElementById('base-total-amount') || {}).value || 0);
+    const shippingFee = Number((document.getElementById('form-shipping-fee') || {}).value || 0);
+    const voucherSelect = document.getElementById('voucherSelect');
+    const hiddenVoucherId = document.getElementById('form-voucher-id');
+    const hiddenVoucherDiscount = document.getElementById('voucher-discount-amount');
+    const voucherLine = document.getElementById('voucherDiscountLine');
+    const voucherDisplay = document.getElementById('voucherDiscountDisplay');
+    const payableDisplay = document.getElementById('payableAmountDisplay');
+    const footerDisplay = document.getElementById('footerPayableAmount');
+    const errorMsg = document.getElementById('voucher-error-msg');
+
+    let voucherId = '';
+    let discount = 0;
+    if (voucherSelect && voucherSelect.selectedOptions.length > 0) {
+        const option = voucherSelect.selectedOptions[0];
+        const minOrder = Number(option.dataset.minOrder || 0);
+        
+        if (voucherSelect.value !== "" && baseTotal < minOrder) {
+            if (errorMsg) {
+                errorMsg.textContent = 'Voucher này yêu cầu đơn hàng tối thiểu ' + minOrder.toLocaleString('vi-VN') + '₫';
+                errorMsg.style.display = 'block';
+            }
+            voucherSelect.value = '';
+        } else {
+            voucherId = option.value || '';
+            discount = Math.min(Number(option.dataset.discount || 0), baseTotal);
+            if (errorMsg) {
+                errorMsg.style.display = 'none';
+            }
+        }
+    }
+
+    if (hiddenVoucherId) hiddenVoucherId.value = voucherId;
+    if (hiddenVoucherDiscount) hiddenVoucherDiscount.value = discount;
+    if (voucherLine) voucherLine.style.display = discount > 0 ? 'flex' : 'none';
+    if (voucherDisplay) voucherDisplay.textContent = '-' + formatCurrency(discount);
+
+    const payableTotal = Math.max(baseTotal - discount, 0) + shippingFee;
+    if (payableDisplay) payableDisplay.textContent = formatCurrency(payableTotal);
+    if (footerDisplay) footerDisplay.textContent = formatCurrency(payableTotal);
+}
+
+    const voucherSelect = document.getElementById('voucherSelect');
+    if (voucherSelect) {
+    voucherSelect.addEventListener('change', recalculateVoucherTotal);
+    recalculateVoucherTotal();
 }
 
     const checkoutForm = document.getElementById('checkoutForm');

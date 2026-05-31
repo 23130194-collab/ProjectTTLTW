@@ -138,6 +138,10 @@
                     <i class="fa-regular fa-user icon"></i>
                     <span class="label">Thông tin tài khoản</span>
                 </a>
+                <a href="${pageContext.request.contextPath}/vouchers" class="menu-item" data-target="vouchers">
+                    <i class="fa-solid fa-ticket icon"></i>
+                    <span class="label">Voucher của tôi</span>
+                </a>
                 <a href="#" id="logoutLink" class="menu-item">
                     <i class="fa-solid fa-right-from-bracket icon"></i>
                     <span class="label">Đăng xuất</span>

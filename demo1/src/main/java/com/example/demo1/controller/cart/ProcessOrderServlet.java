@@ -6,6 +6,8 @@ import com.example.demo1.service.GhnShippingService;
 import com.example.demo1.service.OrderService;
 import com.example.demo1.service.ProductService;
 import com.example.demo1.service.NotificationService;
+import com.example.demo1.service.UserAddressService;
+import com.example.demo1.service.VoucherService;
 import com.example.demo1.exception.OutOfStockException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -31,6 +33,8 @@ public class ProcessOrderServlet extends HttpServlet {
     private final ProductService productService = new ProductService();
     private final CartService cartService = new CartService();
     private final GhnShippingService ghnShippingService = new GhnShippingService();
+    private final VoucherService voucherService = new VoucherService();
+    private final UserAddressService userAddressService = new UserAddressService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -79,13 +83,16 @@ public class ProcessOrderServlet extends HttpServlet {
         String fullName = cleanInput(request.getParameter("fullname"));
         String phone = cleanPhone(request.getParameter("phone"));
         String email = cleanInput(request.getParameter("email"));
-        String province = cleanInput(request.getParameter("province"));
-        String district = cleanInput(request.getParameter("district"));
+        int addressId = parseInt(request.getParameter("addressId"), 0);
+        UserAddress selectedAddress = addressId > 0 ? userAddressService.getAddressById(user.getId(), addressId) : null;
+
+        String province = cleanInput(selectedAddress != null ? selectedAddress.getProvince() : request.getParameter("province"));
+        String district = cleanInput(selectedAddress != null ? selectedAddress.getDistrict() : request.getParameter("district"));
         if (district == null) {
             district = "";
         }
-        String ward = cleanInput(request.getParameter("ward"));
-        String addressDetail = cleanInput(request.getParameter("address"));
+        String ward = cleanInput(selectedAddress != null ? selectedAddress.getWard() : request.getParameter("ward"));
+        String addressDetail = cleanInput(selectedAddress != null ? selectedAddress.getAddressDetail() : request.getParameter("address"));
 
         String phoneRegex = "^(03|05|07|08|09)[0-9]{8}$";
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
@@ -137,6 +144,9 @@ public class ProcessOrderServlet extends HttpServlet {
         recipient.setAddress(addressDetail);
 
         double discountAmount = subprice - total;
+        int voucherId = parseInt(request.getParameter("voucherId"), 0);
+        Voucher appliedVoucher = voucherId > 0 ? voucherService.getUsableSavedVoucher(user.getId(), voucherId) : null;
+        double voucherDiscountAmount = voucherService.calculateDiscount(appliedVoucher, total);
         double shippingFee;
         try {
             shippingFee = ghnShippingService.calculateShippingFee(recipient, cartItems, total);
@@ -145,7 +155,7 @@ public class ProcessOrderServlet extends HttpServlet {
             response.sendRedirect("AddCart?action=checkout&ids=" + idsParam + "&error=shipping");
             return;
         }
-        double payableTotal = total + shippingFee;
+        double payableTotal = Math.max(total - voucherDiscountAmount, 0) + shippingFee;
 
         String paymentMethod = cleanInput(request.getParameter("payment_method"));
         if (paymentMethod == null) paymentMethod = "Thanh toán khi nhận hàng (COD)";
@@ -158,7 +168,9 @@ public class ProcessOrderServlet extends HttpServlet {
         order.setOrderCode("TN-" + System.currentTimeMillis());
         order.setOrderStatus(isVnPay ? "Chờ thanh toán" : "Chờ xác nhận");
         order.setSubprice(subprice);
-        order.setDiscountAmount(discountAmount);
+        order.setDiscountAmount(discountAmount + voucherDiscountAmount);
+        order.setVoucherId(appliedVoucher == null ? null : appliedVoucher.getId());
+        order.setVoucherDiscountAmount(voucherDiscountAmount);
         order.setShippingFee(shippingFee);
         order.setTotalAmount(payableTotal);
 
@@ -172,6 +184,9 @@ public class ProcessOrderServlet extends HttpServlet {
         }
 
         if (success) {
+            if (appliedVoucher != null) {
+                voucherService.markVoucherUsed(user.getId(), appliedVoucher.getId(), order.getId());
+            }
             try {
                 NotificationService notiService = new NotificationService();
 
@@ -283,6 +298,14 @@ public class ProcessOrderServlet extends HttpServlet {
     private String cleanPhone(String value) {
         String cleanedValue = cleanInput(value);
         return cleanedValue == null ? null : cleanedValue.replaceAll("\\s+", "");
+    }
+
+    private int parseInt(String value, int defaultValue) {
+        try {
+            return value == null || value.trim().isEmpty() ? defaultValue : Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
 }

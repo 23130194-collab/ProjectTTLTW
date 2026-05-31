@@ -12,6 +12,8 @@ public class Order {
     private String orderStatus;
     private double subprice;
     private double discountAmount;
+    private Integer voucherId;
+    private double voucherDiscountAmount;
     private double shippingFee;
     private double totalAmount;
     private String notes;
@@ -80,6 +82,22 @@ public class Order {
 
     public void setDiscountAmount(double discountAmount) {
         this.discountAmount = discountAmount;
+    }
+
+    public Integer getVoucherId() {
+        return voucherId;
+    }
+
+    public void setVoucherId(Integer voucherId) {
+        this.voucherId = voucherId;
+    }
+
+    public double getVoucherDiscountAmount() {
+        return voucherDiscountAmount;
+    }
+
+    public void setVoucherDiscountAmount(double voucherDiscountAmount) {
+        this.voucherDiscountAmount = voucherDiscountAmount;
     }
 
     public double getShippingFee() {
