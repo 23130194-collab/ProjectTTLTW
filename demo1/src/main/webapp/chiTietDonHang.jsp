@@ -45,7 +45,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -75,7 +75,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -88,10 +88,10 @@
         <div class="profile">
             <div class="summary-card">
                 <div class="summary-left">
-                    <div class="reviewer-avatar">${fn:substring(sessionScope.user.name, 0, 1)}</div>
+                    <div class="reviewer-avatar"><c:out value="${fn:substring(sessionScope.user.name, 0, 1)}" /></div>
                     <div class="summary-info">
-                        <div class="summary-name">${sessionScope.user.name}</div>
-                        <div class="summary-phone">${sessionScope.user.phone}</div>
+                        <div class="summary-name"><c:out value="${sessionScope.user.name}" /></div>
+                        <div class="summary-phone"><c:out value="${sessionScope.user.phone}" /></div>
                     </div>
                 </div>
                 <div class="summary-divider"></div>
@@ -100,7 +100,7 @@
                         <i class="fa-solid fa-cart-shopping" style="color: #ff0000;"></i>
                     </div>
                     <div class="summary-text">
-                        <div class="summary-count">${totalOrders}</div>
+                        <div class="summary-count"><c:out value="${totalOrders}" /></div>
                         <div class="summary-label">Tổng số đơn hàng đã mua</div>
                     </div>
                 </div>
@@ -175,11 +175,11 @@
                         <div class="card detail-card">
                             <h3 class="card-title">Tổng quan</h3>
                             <div class="overview-header">
-                                <span>Đơn hàng: <strong>${order.orderCode}</strong></span>
+                                <span>Đơn hàng: <strong><c:out value="${order.orderCode}" /></strong></span>
                                 <span class="divider"></span>
                                 <span>Ngày đặt hàng: <strong><fmt:formatDate value="${order.createdAt}" pattern="HH:mm dd/MM/yyyy"/></strong></span>
                                 <span class="divider"></span>
-                                <span>Trạng thái hiện tại: <strong>${order.orderStatus}</strong></span>
+                                <span>Trạng thái hiện tại: <strong><c:out value="${order.orderStatus}" /></strong></span>
                             </div>
 
                             <c:if test="${order.orderStatus eq 'Đã hủy' and not empty order.cancellationReason}">
@@ -189,7 +189,7 @@
                                     </div>
                                     <div class="cancellation-reason-content">
                                         <div class="cancellation-reason-title">Lý do hủy đơn hàng</div>
-                                        <div class="cancellation-reason-text">${order.cancellationReason}</div>
+                                        <div class="cancellation-reason-text"><c:out value="${order.cancellationReason}" /></div>
                                     </div>
                                 </div>
                             </c:if>
@@ -198,13 +198,13 @@
                                 <div class="overview-product">
                                     <img src="${item.productImage}" alt="${item.productName}" class="product-thumb-small">
                                     <div class="product-details-small">
-                                        <div class="product-title-small">${item.productName}</div>
+                                        <div class="product-title-small"><c:out value="${item.productName}" /></div>
                                         <div class="product-price-small">
                                             <fmt:formatNumber value="${item.unitPrice}" pattern="#,###"/>đ
                                         </div>
                                     </div>
                                     <div class="product-quantity-small">
-                                        <span>Số lượng: <strong>${item.quantity}</strong></span>
+                                        <span>Số lượng: <strong><c:out value="${item.quantity}" /></strong></span>
                                     </div>
                                 </div>
                             </c:forEach>
@@ -229,7 +229,7 @@
                                             </c:choose>
                                         </div>
                                         <div class="timeline-content">
-                                            <div class="timeline-title">${step.status}</div>
+                                            <div class="timeline-title"><c:out value="${step.status}" /></div>
                                             <div class="timeline-time">
                                                 <c:choose>
                                                     <c:when test="${not empty step.occurredAt}">
@@ -252,7 +252,7 @@
                             <div class="payment-group">
                                 <div class="payment-sub-title">Sản phẩm</div>
                                 <c:set var="productDiscountAmount" value="${order.discountAmount - order.voucherDiscountAmount}"/>
-                                <div class="payment-line-new"><span>Số lượng sản phẩm:</span><strong>${fn:length(orderItems)}</strong></div>
+                                <div class="payment-line-new"><span>Số lượng sản phẩm:</span><strong><c:out value="${fn:length(orderItems)}" /></strong></div>
                                 <div class="payment-line-new"><span>Tổng tiền hàng:</span><strong><fmt:formatNumber value="${order.subprice}" pattern="#,###"/>đ</strong></div>
                                 <div class="payment-line-new"><span>Giảm giá sản phẩm:</span><strong style="color:var(--accent-dark);">-<fmt:formatNumber value="${productDiscountAmount lt 0 ? 0 : productDiscountAmount}" pattern="#,###"/>đ</strong></div>
                                 <c:if test="${order.voucherDiscountAmount > 0}">
@@ -263,9 +263,9 @@
 
                             <div class="payment-group">
                                 <div class="payment-sub-title">Thanh toán</div>
-                                <div class="payment-line-new final"><span>Phương thức thanh toán:</span><strong style="color:var(--accent-dark);">${not empty payment ? payment.paymentMethod : 'Chưa xác định'}</strong></div>
+                                <div class="payment-line-new final"><span>Phương thức thanh toán:</span><strong style="color:var(--accent-dark);"><c:out value="${not empty payment ? payment.paymentMethod : 'Chưa xác định'}" /></strong></div>
                                 <div class="payment-line-new final"><span>Tổng số tiền:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
-                                <div class="payment-line-new final"><span>${order.orderStatus eq 'Đã giao' ? 'Tổng số tiền đã thanh toán' : 'Tổng số tiền cần thanh toán'}:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
+                                <div class="payment-line-new final"><span><c:out value="${order.orderStatus eq 'Đã giao' ? 'Tổng số tiền đã thanh toán' : 'Tổng số tiền cần thanh toán'}" />:</span><strong class="final-price"><fmt:formatNumber value="${order.totalAmount}" pattern="#,###"/>đ</strong></div>
                             </div>
                         </div>
 
@@ -322,7 +322,7 @@
                                     <form action="${contextPath}/confirm-received" method="post">
                                         <div class="modal-header">
                                             <h3>Xác nhận nhận hàng</h3>
-                                            <p>Bạn xác nhận đã nhận được đơn hàng ${order.orderCode}? Sau khi xác nhận, đơn hàng sẽ được hoàn tất.</p>
+                                            <p>Bạn xác nhận đã nhận được đơn hàng <c:out value="${order.orderCode}" />? Sau khi xác nhận, đơn hàng sẽ được hoàn tất.</p>
                                         </div>
                                         <input type="hidden" name="id" value="${order.id}">
                                         <div class="modal-footer">
@@ -387,7 +387,7 @@
     });
 </script>
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 

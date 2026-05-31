@@ -162,7 +162,7 @@
         <c:if test="${not empty sessionScope.successMessage}">
             <div id="success-alert" style="background-color: #e6f4ea; color: #1e8e3e; padding: 15px; margin-bottom: 20px; border: 1px solid #ceead6; border-radius: 4px; display: flex; align-items: center; gap: 10px; transition: opacity 0.5s ease;">
                 <i class="fa-solid fa-circle-check"></i>
-                <span>${sessionScope.successMessage}</span>
+                <span><c:out value="${sessionScope.successMessage}" /></span>
             </div>
             <c:remove var="successMessage" scope="session" />
             <script>
@@ -186,7 +186,7 @@
                             <option value="">Tất cả danh mục</option>
                             <c:forEach var="category" items="${categories}">
                                 <option value="${category.id}" ${category.id == selectedCategoryId ? 'selected' : ''}>
-                                        ${category.name}
+                                        <c:out value="${category.name}" />
                                 </option>
                             </c:forEach>
                         </select>
@@ -235,21 +235,21 @@
                         <tr>
                             <td colspan="7" style="text-align: center; padding: 40px 20px; color: #6b7280;">
                                 <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
-                                Không tìm thấy kết quả phù hợp với từ khóa '<strong>${selectedKeyword}</strong>'
+                                Không tìm thấy kết quả phù hợp với từ khóa '<strong><c:out value="${selectedKeyword}" /></strong>'
                             </td>
                         </tr>
                     </c:when>
                     <c:otherwise>
                         <c:forEach var="product" items="${productList}" varStatus="loop">
                             <tr>
-                                <td>${(currentPage - 1) * itemsPerPage + loop.index + 1}</td>
+                                <td><c:out value="${(currentPage - 1) * itemsPerPage + loop.index + 1}" /></td>
                                 <td class="td-image">
                                     <div class="img-wrapper">
                                         <img src="${product.image}" alt="${product.name}"
                                              onerror="this.src='${contextPath}/assets/images/logo-2.png';"></div>
                                 </td>
                                 <td class="td-name">
-                                    <span class="product-name" title="${product.name}">${product.name}</span>
+                                    <span class="product-name" title="${product.name}"><c:out value="${product.name}" /></span>
                                 </td>
                                 <td class="td-price">
                                     <div class="price-group">
@@ -261,7 +261,7 @@
                                         </c:if>
                                     </div>
                                 </td>
-                                <td><span class="stock-text">${product.stock}</span></td>
+                                <td><span class="stock-text"><c:out value="${product.stock}" /></span></td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${product.status == 'active'}">
@@ -274,7 +274,7 @@
                                             <span class="status status-delete">Ngừng bán</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="status status-other">${product.status}</span>
+                                            <span class="status status-other"><c:out value="${product.status}" /></span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
@@ -311,7 +311,7 @@
                     <c:if test="${not empty selectedKeyword}"><c:param name="keyword" value="${selectedKeyword}"/></c:if>
                     <c:if test="${not empty selectedSort}"><c:param name="sort" value="${selectedSort}"/></c:if>
                 </c:url>
-                <a href="${currentPage > 1 ? prevUrl : '#'}" class="pagination-btn ${currentPage == 1 ? 'disabled' : ''}">
+                <a href="${currentPage > 1 ? prevUrl : '#'}" class="pagination-btn <c:out value="${currentPage == 1 ? 'disabled' : ''}" />">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
 
@@ -337,7 +337,7 @@
                             <c:if test="${not empty selectedKeyword}"><c:param name="keyword" value="${selectedKeyword}"/></c:if>
                             <c:if test="${not empty selectedSort}"><c:param name="sort" value="${selectedSort}"/></c:if>
                         </c:url>
-                        <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}">${i}</a>
+                        <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}"><c:out value="${i}" /></a>
                     </c:if>
                 </c:forEach>
 
@@ -361,7 +361,7 @@
     <div id="confirm-delete-modal-${product.id}" class="modal-overlay">
         <div class="modal-content">
             <h3>Xác nhận xoá sản phẩm</h3>
-            <p>Bạn có chắc chắn muốn xoá sản phẩm "${product.name}" không?</p>
+            <p>Bạn có chắc chắn muốn xoá sản phẩm "<c:out value="${product.name}" />" không?</p>
             <div class="modal-buttons">
                 <a href="#" class="modal-btn modal-cancel">Hủy</a>
                 <a href="${contextPath}/admin/products?action=delete&id=${product.id}" class="modal-btn modal-confirm">Đồng ý</a>
@@ -372,7 +372,7 @@
     <div id="confirm-restore-modal-${product.id}" class="modal-overlay">
         <div class="modal-content">
             <h3>Xác nhận khôi phục sản phẩm</h3>
-            <p>Bạn có chắc chắn muốn khôi phục sản phẩm "${product.name}" về trạng thái hoạt động không?</p>
+            <p>Bạn có chắc chắn muốn khôi phục sản phẩm "<c:out value="${product.name}" />" về trạng thái hoạt động không?</p>
             <div class="modal-buttons">
                 <a href="#" class="modal-btn modal-cancel">Hủy</a>
                 <a href="${contextPath}/admin/products?action=restore&id=${product.id}" class="modal-btn modal-confirm" style="background-color: #EF4444;">Đồng ý</a>
@@ -416,7 +416,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -426,7 +426,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -442,7 +442,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -459,7 +459,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -486,7 +486,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

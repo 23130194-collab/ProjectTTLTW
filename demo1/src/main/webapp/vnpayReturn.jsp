@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -16,24 +17,32 @@
 </head>
 <body>
     <div class="container">
-        <% 
-            String status = (String) request.getAttribute("status");
-            String message = (String) request.getAttribute("message");
-        %>
-        
-        <h2 class="<%= status %>">
-            <%= "success".equals(status) ? "Thanh toán thành công!" : ("failed".equals(status) ? "Thanh toán thất bại" : "Lỗi xác thực") %>
+        <h2 class="<c:out value="${status}"/>">
+            <c:choose>
+                <c:when test="${status == 'success'}">
+                    Thanh toán thành công!
+                </c:when>
+                <c:when test="${status == 'failed'}">
+                    Thanh toán thất bại
+                </c:when>
+                <c:otherwise>
+                    Lỗi xác thực
+                </c:otherwise>
+            </c:choose>
         </h2>
         
-        <p><%= message %></p>
+        <p><c:out value="${message}" /></p>
         
-        <% if ("success".equals(status)) { %>
-            <p>Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đang được xử lý.</p>
-            <a href="${pageContext.request.contextPath}/my-orders" class="btn">Xem đơn hàng của tôi</a>
-        <% } else { %>
-            <p>Vui lòng thử lại hoặc chọn phương thức thanh toán khác.</p>
-            <a href="${pageContext.request.contextPath}/AddCart?action=view" class="btn">Thử thanh toán lại</a>
-        <% } %>
+        <c:choose>
+            <c:when test="${status == 'success'}">
+                <p>Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đang được xử lý.</p>
+                <a href="${pageContext.request.contextPath}/my-orders" class="btn">Xem đơn hàng của tôi</a>
+            </c:when>
+            <c:otherwise>
+                <p>Vui lòng thử lại hoặc chọn phương thức thanh toán khác.</p>
+                <a href="${pageContext.request.contextPath}/AddCart?action=view" class="btn">Thử thanh toán lại</a>
+            </c:otherwise>
+        </c:choose>
     </div>
 </body>
 </html>

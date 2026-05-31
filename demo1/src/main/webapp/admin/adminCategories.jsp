@@ -271,14 +271,14 @@
                         <tr>
                             <td colspan="6" class="no-results-cell">
                                 <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
-                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword">${searchKeyword}</span>'
+                                Không tìm thấy kết quả phù hợp với từ khóa '<span class="no-results-keyword"><c:out value="${searchKeyword}" /></span>'
                             </td>
                         </tr>
                     </c:when>
                     <c:otherwise>
                         <c:forEach items="${categoryList}" var="cat" varStatus="loop">
                             <tr>
-                                <td>${loop.index + 1}</td>
+                                <td><c:out value="${loop.index + 1}" /></td>
                                 <td>
                                     <c:set var="imageSrc" value="${cat.image}"/>
                                     <c:choose>
@@ -290,8 +290,8 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
-                                <td>${cat.name}</td>
-                                <td>${cat.display_order}</td>
+                                <td><c:out value="${cat.name}" /></td>
+                                <td><c:out value="${cat.display_order}" /></td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${cat.status.trim().equalsIgnoreCase('active')}">
@@ -324,7 +324,7 @@
     <div id="confirm-delete-modal-${cat.id}" class="modal-overlay">
         <div class="modal-content">
             <h3>Xác nhận xóa</h3>
-            <p>Bạn có chắc chắn muốn xóa danh mục "${cat.name}" không?</p>
+            <p>Bạn có chắc chắn muốn xóa danh mục "<c:out value="${cat.name}" />" không?</p>
             <div class="modal-buttons">
                 <a href="#" class="modal-btn modal-cancel">Hủy</a>
                 <a href="${contextPath}/admin/categories?action=delete&id=${cat.id}"
@@ -380,7 +380,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -390,7 +390,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -406,7 +406,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -423,7 +423,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -450,7 +450,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

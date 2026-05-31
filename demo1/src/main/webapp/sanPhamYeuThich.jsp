@@ -45,7 +45,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -75,7 +75,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -88,10 +88,10 @@
         <div class="profile">
             <div class="summary-card">
                 <div class="summary-left">
-                    <div class="reviewer-avatar">${fn:substring(sessionScope.user.name, 0, 1)}</div>
+                    <div class="reviewer-avatar"><c:out value="${fn:substring(sessionScope.user.name, 0, 1)}" /></div>
                     <div class="summary-info">
-                        <div class="summary-name">${sessionScope.user.name}</div>
-                        <div class="summary-phone">${sessionScope.user.phone}</div>
+                        <div class="summary-name"><c:out value="${sessionScope.user.name}" /></div>
+                        <div class="summary-phone"><c:out value="${sessionScope.user.phone}" /></div>
                     </div>
                 </div>
 
@@ -102,7 +102,7 @@
                         <i class="fa-solid fa-cart-shopping" style="color: #ff0000;"></i>
                     </div>
                     <div class="summary-text">
-                        <div class="summary-count">${totalOrders}</div>
+                        <div class="summary-count"><c:out value="${totalOrders}" /></div>
                         <div class="summary-label">Tổng số đơn hàng đã mua</div>
                     </div>
                 </div>
@@ -167,7 +167,7 @@
                                             <img src="${p.image}" alt="${p.name}">
                                         </div>
                                         <div class="product-fav-details">
-                                            <h4 class="product-fav-title">${p.name}</h4>
+                                            <h4 class="product-fav-title"><c:out value="${p.name}" /></h4>
                                             <div class="product-fav-price">
                                             <span class="new-price">
                                                 <fmt:formatNumber value="${p.price}" pattern="#,###"/>đ
@@ -215,7 +215,7 @@
                                     <span class="page-ellipsis">...</span>
                                 </c:if>
                                 <a href="${pageContext.request.contextPath}/favorites?page=${i}"
-                                   class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                                   class="page-btn ${i == currentPage ? 'active' : ''}"><c:out value="${i}" /></a>
                             </c:if>
                         </c:forEach>
 
@@ -267,11 +267,11 @@
     });
 </script>
 <script>
-    const globalContextPath = "${pageContext.request.contextPath}";
+    const globalContextPath = "<c:out value="${pageContext.request.contextPath}" />";
 </script>
 <script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>

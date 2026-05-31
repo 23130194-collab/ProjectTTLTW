@@ -44,7 +44,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -74,7 +74,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -87,10 +87,10 @@
         <div class="profile">
             <div class="summary-card">
                 <div class="summary-left">
-                    <div class="reviewer-avatar">${fn:substring(sessionScope.user.name, 0, 1)}</div>
+                    <div class="reviewer-avatar"><c:out value="${fn:substring(sessionScope.user.name, 0, 1)}" /></div>
                     <div class="summary-info">
-                        <div class="summary-name">${sessionScope.user.name}</div>
-                        <div class="summary-phone">${sessionScope.user.phone}</div>
+                        <div class="summary-name"><c:out value="${sessionScope.user.name}" /></div>
+                        <div class="summary-phone"><c:out value="${sessionScope.user.phone}" /></div>
                     </div>
                 </div>
 
@@ -101,7 +101,7 @@
                         <i class="fa-solid fa-cart-shopping" style="color: #ff0000;"></i>
                     </div>
                     <div class="summary-text">
-                        <div class="summary-count">${totalOrders}</div>
+                        <div class="summary-count"><c:out value="${totalOrders}" /></div>
                         <div class="summary-label">Tổng số đơn hàng đã mua</div>
                     </div>
                 </div>
@@ -158,16 +158,16 @@
                 <h2>Thông tin tài khoản</h2>
 
                 <c:if test="${not empty sessionScope.updateProfileSuccess}">
-                    <div class="success-message" style="margin-bottom: 20px;">${sessionScope.updateProfileSuccess}<span class="close-btn">&times;</span></div>
+                    <div class="success-message" style="margin-bottom: 20px;"><c:out value="${sessionScope.updateProfileSuccess}" /><span class="close-btn">&times;</span></div>
                     <c:remove var="updateProfileSuccess" scope="session"/>
                 </c:if>
                 <c:if test="${not empty sessionScope.updateProfileError}">
                     <div class="error-message-form"
-                         style="margin-bottom: 20px;">${sessionScope.updateProfileError}<span class="close-btn">&times;</span></div>
+                         style="margin-bottom: 20px;"><c:out value="${sessionScope.updateProfileError}" /><span class="close-btn">&times;</span></div>
                     <c:remove var="updateProfileError" scope="session"/>
                 </c:if>
                 <c:if test="${not empty sessionScope.changePassSuccess}">
-                    <div class="success-message" style="margin-bottom: 20px;">${sessionScope.changePassSuccess}<span class="close-btn">&times;</span></div>
+                    <div class="success-message" style="margin-bottom: 20px;"><c:out value="${sessionScope.changePassSuccess}" /><span class="close-btn">&times;</span></div>
                     <c:remove var="changePassSuccess" scope="session"/>
                 </c:if>
 
@@ -185,15 +185,15 @@
                             <div class="info-body">
                                 <div class="info-row">
                                     <span>Họ và tên:</span>
-                                    <p>${sessionScope.user.name}</p>
+                                    <p><c:out value="${sessionScope.user.name}" /></p>
                                     <span>Số điện thoại:</span>
-                                    <p>${sessionScope.user.phone}</p>
+                                    <p><c:out value="${sessionScope.user.phone}" /></p>
                                 </div>
                                 <div class="info-row">
                                     <span>Giới tính:</span>
-                                    <p>${sessionScope.user.gender}</p>
+                                    <p><c:out value="${sessionScope.user.gender}" /></p>
                                     <span>Email:</span>
-                                    <p>${sessionScope.user.email}</p>
+                                    <p><c:out value="${sessionScope.user.email}" /></p>
                                 </div>
                                 <div class="info-row">
                                     <span>Ngày sinh:</span>
@@ -283,11 +283,11 @@
                     </div>
 
                     <c:if test="${not empty sessionScope.addressSuccess}">
-                        <div class="success-message">${sessionScope.addressSuccess}<span class="close-btn">&times;</span></div>
+                        <div class="success-message"><c:out value="${sessionScope.addressSuccess}" /><span class="close-btn">&times;</span></div>
                         <c:remove var="addressSuccess" scope="session"/>
                     </c:if>
                     <c:if test="${not empty sessionScope.addressError}">
-                        <div class="error-message-form">${sessionScope.addressError}<span class="close-btn">&times;</span></div>
+                        <div class="error-message-form"><c:out value="${sessionScope.addressError}" /><span class="close-btn">&times;</span></div>
                         <c:remove var="addressError" scope="session"/>
                     </c:if>
                     <c:if test="${not empty addressFormError}">
@@ -359,7 +359,7 @@
                         <c:set var="formAddressDefaultChecked" value="${not empty param.defaultAddress or (isAddressEdit and editingAddress.defaultAddress) or (!isAddressEdit and empty userAddresses)}"/>
 
                         <div class="address-form-panel">
-                            <h4>${isAddressEdit ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}</h4>
+                            <h4><c:out value="${isAddressEdit ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}" /></h4>
                             <c:if test="${not empty addressFormLoadError}">
                                 <small class="address-load-error"><c:out value="${addressFormLoadError}"/></small>
                             </c:if>
@@ -441,7 +441,7 @@
                                 </button>
 
                                 <div class="info-actions">
-                                    <button type="submit" class="save-btn">${isAddressEdit ? 'Lưu địa chỉ' : 'Thêm địa chỉ'}</button>
+                                    <button type="submit" class="save-btn"><c:out value="${isAddressEdit ? 'Lưu địa chỉ' : 'Thêm địa chỉ'}" /></button>
                                     <a href="${pageContext.request.contextPath}/account" class="cancel-btn"
                                        style="text-decoration: none; display: inline-block;">Hủy</a>
                                 </div>
@@ -555,7 +555,7 @@
     });
 </script>
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>

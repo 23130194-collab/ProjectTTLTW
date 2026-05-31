@@ -21,25 +21,25 @@
             <div class="form-group">
                 <label>Họ và tên *</label>
                 <input type="text" name="name" value="${name_value}" required placeholder="VD: Nguyễn Văn A">
-                <c:if test="${not empty errors.name}"><span class="error-text"><i class="fa-solid fa-circle-exclamation"></i> ${errors.name}</span></c:if>
+                <c:if test="${not empty errors.name}"><span class="error-text"><i class="fa-solid fa-circle-exclamation"></i> <c:out value="${errors.name}" /></span></c:if>
             </div>
 
             <div class="form-group">
                 <label>Email *</label>
                 <input type="email" name="email" value="${email_value}" required placeholder="VD: email@example.com">
-                <c:if test="${not empty errors.email}"><span class="error-text"><i class="fa-solid fa-circle-exclamation"></i> ${errors.email}</span></c:if>
+                <c:if test="${not empty errors.email}"><span class="error-text"><i class="fa-solid fa-circle-exclamation"></i> <c:out value="${errors.email}" /></span></c:if>
             </div>
 
             <div class="form-group">
                 <label>Mật khẩu tạm thời *</label>
                 <input type="password" name="password" required placeholder="Ít nhất 8 ký tự, có hoa, số và ký tự đặc biệt">
-                <c:if test="${not empty errors.password}"><span class="error-text"><i class="fa-solid fa-circle-exclamation"></i> ${errors.password}</span></c:if>
+                <c:if test="${not empty errors.password}"><span class="error-text"><i class="fa-solid fa-circle-exclamation"></i> <c:out value="${errors.password}" /></span></c:if>
             </div>
 
             <div class="form-group">
                 <label>Xác nhận mật khẩu *</label>
                 <input type="password" name="confirmPassword" required placeholder="Nhập lại mật khẩu">
-                <c:if test="${not empty errors.confirmPassword}"><span class="error-text"><i class="fa-solid fa-circle-exclamation"></i> ${errors.confirmPassword}</span></c:if>
+                <c:if test="${not empty errors.confirmPassword}"><span class="error-text"><i class="fa-solid fa-circle-exclamation"></i> <c:out value="${errors.confirmPassword}" /></span></c:if>
             </div>
 
             <div style="margin-top: 25px;">
