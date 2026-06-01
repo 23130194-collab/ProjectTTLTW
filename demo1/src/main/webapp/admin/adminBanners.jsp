@@ -267,7 +267,7 @@
                 </select>
                 <div class="search-wrapper">
                     <input type="text" name="keyword" class="search-input-banner"
-                           placeholder="Tìm kiếm banner..." value="${param.keyword}">
+                           placeholder="Tìm kiếm banner..." value="<c:out value='${param.keyword}'/>">
                     <button type="submit" class="search-icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
             </div>

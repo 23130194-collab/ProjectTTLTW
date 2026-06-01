@@ -1,0 +1,144 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id "org.hidetake.ssh" version "2.11.2"
+    id 'war'
+}
+
+apply plugin: 'org.hidetake.ssh'
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    providedCompile 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.1'
+    implementation 'org.jdbi:jdbi3-core:3.45.1'
+    implementation 'com.mysql:mysql-connector-j:8.4.0'
+    implementation 'org.springframework.security:spring-security-core:5.8.11'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
+    implementation 'org.eclipse.angus:angus-mail:2.0.3'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'org.apache.httpcomponents:httpcore:4.4.13'
+    implementation 'org.apache.httpcomponents:fluent-hc:4.5.13'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+}
+
+remotes {
+    host {
+        host = '192.168.139.128'
+        user = 'root'
+        password = '123456'
+    }
+}
+
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
+
+task docker_app_start {
+    doLast {
+        println 'begin docker_app_start'
+        ssh.run {
+            session(remotes.host) {
+                execute 'docker rm -f tomcat10 || true'
+                execute 'docker run --rm -d ' +
+                        '--name tomcat10 ' +
+                        '--link mysql_db:mysql_db ' +
+                        '-v /usr/deploy:/usr/local/tomcat/webapps ' +
+                        '-p 80:8080 ' +
+                        '-e TZ=Asia/Ho_Chi_Minh ' +
+                        'tomcat:10.1'
+            }
+        }
+    }
+}
+
+task docker_upload_file_to_server {
+    doLast {
+        println 'begin docker_upload_file_to_server'
+        ssh.run {
+            session(remotes.host) {
+                execute 'mkdir -p /usr/deploy'
+                execute 'rm -rf /usr/deploy/demo1.war /usr/deploy/demo1 /usr/deploy/demo1.war.tmp || true'
+                put from: "${project.projectDir}/build/libs/demo1-1.0-SNAPSHOT.war",
+                    into: '/usr/deploy/demo1.war.tmp'
+                execute 'mv /usr/deploy/demo1.war.tmp /usr/deploy/demo1.war'
+            }
+        }
+    }
+}
+
+task docker_db_start {
+    doLast {
+        println 'begin docker_db_start'
+        ssh.run {
+            session(remotes.host) {
+                // Ignore errors if container does not exist
+                execute 'docker rm -f mysql_db || true'
+                execute 'docker run -d ' +
+                        '--name mysql_db ' +
+                        '-v mysql_data:/var/lib/mysql ' +
+                        '-e MYSQL_ROOT_PASSWORD=123456 ' +
+                        '-e MYSQL_DATABASE=webgroup24 ' +
+                        '-e TZ=Asia/Ho_Chi_Minh ' +
+                        '-p 3306:3306 ' +
+                        'mysql:8.0'
+            }
+        }
+    }
+}
+
+task docker_deploy {
+    dependsOn docker_db_start
+    dependsOn docker_app_start
+    dependsOn docker_upload_file_to_server
+    dependsOn build
+    tasks.getByName('docker_upload_file_to_server').mustRunAfter build
+    tasks.getByName('docker_app_start').mustRunAfter docker_upload_file_to_server
+    tasks.getByName('docker_app_start').mustRunAfter docker_db_start
+}
+
+task fix_server_firewall {
+    doLast {
+        println 'Fixing firewall on server...'
+        ssh.run {
+            session(remotes.host) {
+                execute 'ufw allow 80/tcp || true'
+                execute 'firewall-cmd --zone=public --add-port=80/tcp --permanent || true'
+                execute 'firewall-cmd --reload || true'
+                execute 'iptables -A INPUT -p tcp --dport 80 -j ACCEPT || true'
+                println "--- DOCKER PS ---"
+                execute 'docker ps -a'
+                println "--- DOCKER LOGS tomcat10 ---"
+                execute 'docker logs tomcat10 || true'
+            }
+        }
+    }
+}
+
+task get_logs {
+    doLast {
+        println 'Getting tomcat logs...'
+        ssh.run {
+            session(remotes.host) {
+                println "--- TOMCAT LOGS ---"
+                execute 'docker logs tomcat10 || true'
+            }
+        }
+    }
+}

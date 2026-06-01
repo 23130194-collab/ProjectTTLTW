@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -365,7 +365,7 @@
                             </c:if>
                             <form action="${pageContext.request.contextPath}/account-address" method="post" id="accountAddressForm">
                                 <input type="hidden" name="action" value="${isAddressEdit ? 'update' : 'add'}">
-                                <input type="hidden" name="addressMode" value="${param.addressMode}">
+                                <input type="hidden" name="addressMode" value="<c:out value='${param.addressMode}'/>">
                                 <c:if test="${isAddressEdit}">
                                     <input type="hidden" name="addressId" value="${editingAddress.id}">
                                 </c:if>
