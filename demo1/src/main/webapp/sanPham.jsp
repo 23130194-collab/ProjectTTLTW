@@ -222,7 +222,7 @@
             <h3 class="section-title">Giới thiệu sản phẩm</h3>
 
             <div class="description-content">
-                <p><c:out value="${p.description}" /></p>
+                <p><c:out value="${p.description}" escapeXml="false" /></p>
             </div>
         </div>
 

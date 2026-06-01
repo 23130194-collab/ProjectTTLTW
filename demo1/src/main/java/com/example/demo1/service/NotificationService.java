@@ -29,7 +29,7 @@ public class NotificationService {
 
     public void notifyAdminNewUser( String username) {
         notificationDao.insertAdminNotification(
-                "👤 Người dùng mới đăng ký: " + username,
+                "Người dùng mới đăng ký: " + username,
                 "/admin/customers"
         );
     }
