@@ -39,14 +39,19 @@ public class AdminVoucherController extends HttpServlet {
 
     private void listVouchers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
+        String filterStatus = request.getParameter("filterStatus");
+        if (filterStatus == null || filterStatus.trim().isEmpty()) {
+            filterStatus = "active";
+        }
         int currentPage = parseInt(request.getParameter("page"), 1);
-        int total = voucherService.countVouchers(keyword);
+        int total = voucherService.countVouchers(keyword, filterStatus);
         int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
 
-        request.setAttribute("vouchers", voucherService.getVouchers(keyword, currentPage, PAGE_SIZE));
+        request.setAttribute("vouchers", voucherService.getVouchers(keyword, filterStatus, currentPage, PAGE_SIZE));
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("keyword", keyword);
+        request.setAttribute("filterStatus", filterStatus);
         request.getRequestDispatcher(JSP_PATH).forward(request, response);
     }
 

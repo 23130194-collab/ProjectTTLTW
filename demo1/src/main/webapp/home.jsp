@@ -50,7 +50,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -80,7 +80,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -106,7 +106,7 @@
                                      alt="${cat.name}">
                             </c:otherwise>
                         </c:choose>
-                            ${cat.name}
+                            <c:out value="${cat.name}" />
                         <i class="fa-solid fa-chevron-right"></i>
                     </a>
                 </c:forEach>
@@ -167,7 +167,7 @@
                 <div class="notice-box" id="noticeBox">
                     <div class="notice-header">
                         <span>
-                                Thông báo<span id="unreadBadge" style="display: ${unreadCount > 0 ? 'inline' : 'none'};">(${unreadCount})</span>
+                                Thông báo<span id="unreadBadge" style="display: ${unreadCount > 0 ? 'inline' : 'none'};">(<c:out value="${unreadCount}" />)</span>
                         </span>
                     </div>
 
@@ -190,7 +190,7 @@
                                     <div class="notice-item ${n.isRead == 0 ? 'unread' : ''}" data-id="${n.id}">
                                         <i class="fa-solid fa-truck icon"></i>
                                         <div>
-                                            <div>${n.content}</div>
+                                            <div><c:out value="${n.content}" /></div>
 
                                             <div class="notice-meta">
                                         <span>
@@ -260,7 +260,7 @@
                                 <img src="${p.image.startsWith('http') ? p.image : pageContext.request.contextPath.concat('/').concat(p.image)}"
                                      class="product-image" alt="${p.name}">
 
-                                <div class="product-title" style="font-weight: bold; margin-top: 10px;">${p.name}</div>
+                                <div class="product-title" style="font-weight: bold; margin-top: 10px;"><c:out value="${p.name}" /></div>
 
                                 <div class="price" style="margin-top: 5px;">
                                     <strong style="color: #d70018; font-size: 1.1em;">
@@ -328,7 +328,7 @@
                             </c:otherwise>
                         </c:choose>
 
-                        <h3 class="product-title">${p.name}</h3>
+                        <h3 class="product-title"><c:out value="${p.name}" /></h3>
 
                         <div class="price-section">
                             <div class="current-price">
@@ -437,7 +437,7 @@
 </footer>
 
 <script>
-    const globalContextPath = "${pageContext.request.contextPath}";
+    const globalContextPath = "<c:out value="${pageContext.request.contextPath}" />";
 </script>
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/flashSale.js"></script>
@@ -445,7 +445,7 @@
 <script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 <script src="${pageContext.request.contextPath}/js/Notification.js"></script>
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 

@@ -147,21 +147,21 @@
         <c:if test="${not empty sessionScope.successMessage}">
             <div class="alert alert-success">
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-                ${sessionScope.successMessage}
+                <c:out value="${sessionScope.successMessage}" />
             </div>
             <c:remove var="successMessage" scope="session"/>
         </c:if>
         <c:if test="${not empty sessionScope.errorMessage}">
             <div class="alert alert-danger">
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-                ${sessionScope.errorMessage}
+                <c:out value="${sessionScope.errorMessage}" />
             </div>
             <c:remove var="errorMessage" scope="session"/>
         </c:if>
         <c:if test="${not empty requestScope.errorMessage}">
             <div class="alert alert-danger">
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-                ${requestScope.errorMessage}
+                <c:out value="${requestScope.errorMessage}" />
             </div>
         </c:if>
 
@@ -171,52 +171,52 @@
             <input type="hidden" name="id" value="${voucherToEdit.id}">
             <div class="admin-form-header">
                 <div class="admin-form-header-icon"><i class="fa-solid fa-ticket"></i></div>
-                <h2 class="admin-form-title-text">${not empty voucherToEdit ? 'Chỉnh sửa voucher' : 'Thêm voucher mới'}</h2>
+                <h2 class="admin-form-title-text"><c:out value="${not empty voucherToEdit ? 'Chỉnh sửa voucher' : 'Thêm voucher mới'}" /></h2>
             </div>
             <div class="admin-form-grid">
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Mã voucher <span class="required">*</span></label>
                     <input type="text" name="code" class="form-input" value="${voucherToEdit.code}" placeholder="VD: SALE100K">
                     <c:if test="${not empty requestScope.codeError}">
-                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.codeError}</div>
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;"><c:out value="${requestScope.codeError}" /></div>
                     </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Giá trị giảm <span class="required">*</span></label>
                     <input type="number" name="discountValue" class="form-input" value="${voucherToEdit.discountValue}" min="1000" step="1000">
                     <c:if test="${not empty requestScope.discountError}">
-                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.discountError}</div>
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;"><c:out value="${requestScope.discountError}" /></div>
                     </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Số lượng <span class="required">*</span></label>
                     <input type="number" name="quantity" class="form-input" value="${not empty voucherToEdit ? voucherToEdit.quantity : 100}" min="1">
                     <c:if test="${not empty requestScope.quantityError}">
-                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.quantityError}</div>
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;"><c:out value="${requestScope.quantityError}" /></div>
                     </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Đơn tối thiểu <span class="required">*</span></label>
                     <input type="number" name="minOrderValue" class="form-input" value="${not empty voucherToEdit ? voucherToEdit.minOrderValue : 0}" min="0" step="1000">
                     <c:if test="${not empty requestScope.minOrderError}">
-                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.minOrderError}</div>
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;"><c:out value="${requestScope.minOrderError}" /></div>
                     </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Ngày bắt đầu <span class="required">*</span></label>
                     <input type="datetime-local" name="startDate" class="form-input" value="${startInput}">
                     <c:if test="${not empty requestScope.startDateError}">
-                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.startDateError}</div>
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;"><c:out value="${requestScope.startDateError}" /></div>
                     </c:if>
                     <c:if test="${not empty requestScope.dateError}">
-                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.dateError}</div>
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;"><c:out value="${requestScope.dateError}" /></div>
                     </c:if>
                 </div>
                 <div class="form-field form-span-1">
                     <label class="admin-form-label">Ngày kết thúc <span class="required">*</span></label>
                     <input type="datetime-local" name="endDate" class="form-input" value="${endInput}">
                     <c:if test="${not empty requestScope.endDateError}">
-                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;">${requestScope.endDateError}</div>
+                        <div style="color: #dc3545; font-size: 13px; margin-top: 4px;"><c:out value="${requestScope.endDateError}" /></div>
                     </c:if>
                 </div>
                 <div class="form-field form-span-1">
@@ -241,9 +241,16 @@
             </div>
         </form>
 
-        <form action="${contextPath}/admin/vouchers" method="get" class="form-search-row">
+        <form action="<c:out value='${contextPath}'/>/admin/vouchers" method="get" class="form-search-row" style="display: flex; gap: 10px;">
+            <select name="filterStatus" class="form-select" onchange="this.form.submit()" style="width: 200px;">
+                <option value="all" <c:if test="${filterStatus == 'all'}">selected</c:if>>Tất cả</option>
+                <option value="active" <c:if test="${filterStatus == 'active'}">selected</c:if>>Đang hoạt động</option>
+                <option value="inactive" <c:if test="${filterStatus == 'inactive'}">selected</c:if>>Tạm tắt</option>
+                <option value="exhausted" <c:if test="${filterStatus == 'exhausted'}">selected</c:if>>Hết lượt sử dụng</option>
+                <option value="expired" <c:if test="${filterStatus == 'expired'}">selected</c:if>>Hết hạn</option>
+            </select>
             <div class="search-wrapper">
-                <input type="text" name="keyword" class="search-input-brand" placeholder="Tìm kiếm mã voucher..." value="${keyword}">
+                <input type="text" name="keyword" class="search-input-brand" placeholder="Tìm kiếm mã voucher..." value="<c:out value='${keyword}'/>">
                 <button type="submit" class="search-icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
         </form>
@@ -270,17 +277,17 @@
                     <c:otherwise>
                         <c:forEach var="voucher" items="${vouchers}" varStatus="loop">
                             <tr>
-                                <td>${(currentPage - 1) * 10 + loop.count}</td>
+                                <td><c:out value="${(currentPage - 1) * 10 + loop.count}" /></td>
                                 <td><c:out value="${voucher.code}"/></td>
                                 <td><fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ</td>
-                                <td>${voucher.usedCount}/${voucher.quantity}</td>
+                                <td><c:out value="${voucher.usedCount}" />/<c:out value="${voucher.quantity}" /></td>
                                 <td><fmt:formatDate value="${voucher.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
                                 <td><fmt:formatDate value="${voucher.endDate}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                <td><span class="status ${voucher.status == 'ACTIVE' ? 'status-active' : 'status-hidden'}">${voucher.status == 'ACTIVE' ? 'Đang bật' : 'Tạm tắt'}</span></td>
+                                <td><span class="status ${voucher.status == 'ACTIVE' ? 'status-active' : 'status-hidden'}"><c:out value="${voucher.status == 'ACTIVE' ? 'Đang bật' : 'Tạm tắt'}" /></span></td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a href="${contextPath}/admin/vouchers?action=edit&id=${voucher.id}" class="action-btn edit"><i class="fa-solid fa-pen"></i></a>
-                                        <a href="${contextPath}/admin/vouchers?action=delete&id=${voucher.id}" class="action-btn delete" onclick="return confirm('Xóa voucher này?')"><i class="fa-solid fa-trash"></i></a>
+                                        <a href="<c:out value='${contextPath}'/>/admin/vouchers?action=edit&id=${voucher.id}" class="action-btn edit"><i class="fa-solid fa-pen"></i></a>
+                                        <a href="<c:out value='${contextPath}'/>/admin/vouchers?action=delete&id=${voucher.id}" class="action-btn delete" onclick="return confirm('Xóa voucher này?')"><i class="fa-solid fa-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -289,6 +296,23 @@
                 </c:choose>
                 </tbody>
             </table>
+            
+            <c:if test="${totalPages > 1}">
+                <div class="pagination-container">
+                    <c:if test="${currentPage > 1}">
+                        <a href="<c:out value='${contextPath}'/>/admin/vouchers?page=${currentPage - 1}&keyword=<c:out value='${keyword}'/>&filterStatus=<c:out value='${filterStatus}'/>"
+                            class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></a>
+                    </c:if>
+                    <c:forEach var="i" begin="1" end="${totalPages}">
+                        <a href="<c:out value='${contextPath}'/>/admin/vouchers?page=${i}&keyword=<c:out value='${keyword}'/>&filterStatus=<c:out value='${filterStatus}'/>"
+                            class="page-number ${i == currentPage ? 'active' : ''}"><c:out value="${i}" /></a>
+                    </c:forEach>
+                    <c:if test="${currentPage < totalPages}">
+                        <a href="<c:out value='${contextPath}'/>/admin/vouchers?page=${currentPage + 1}&keyword=<c:out value='${keyword}'/>&filterStatus=<c:out value='${filterStatus}'/>"
+                            class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></a>
+                    </c:if>
+                </div>
+            </c:if>
         </div>
     </div>
 </main>
@@ -329,7 +353,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -339,7 +363,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -355,7 +379,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -372,7 +396,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -399,7 +423,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

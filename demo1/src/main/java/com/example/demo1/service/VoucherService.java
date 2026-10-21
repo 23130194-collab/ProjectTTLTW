@@ -8,12 +8,12 @@ import java.util.List;
 public class VoucherService {
     private final VoucherDao voucherDao = new VoucherDao();
 
-    public List<Voucher> getVouchers(String keyword, int page, int pageSize) {
-        return voucherDao.getVouchers(keyword, pageSize, (page - 1) * pageSize);
+    public List<Voucher> getVouchers(String keyword, String filterStatus, int page, int pageSize) {
+        return voucherDao.getVouchers(keyword, filterStatus, pageSize, (page - 1) * pageSize);
     }
 
-    public int countVouchers(String keyword) {
-        return voucherDao.countVouchers(keyword);
+    public int countVouchers(String keyword, String filterStatus) {
+        return voucherDao.countVouchers(keyword, filterStatus);
     }
 
     public Voucher getVoucherById(int id) {

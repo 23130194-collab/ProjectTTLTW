@@ -15,7 +15,7 @@
     <div class="login-modal">
         <div class="login-form">
             <h2>Tạo mật khẩu mới</h2>
-            <p>Vui lòng nhập mật khẩu mới cho tài khoản <strong>${sessionScope.user_can_reset_password}</strong>.</p>
+            <p>Vui lòng nhập mật khẩu mới cho tài khoản <strong><c:out value="${sessionScope.user_can_reset_password}" /></strong>.</p>
 
             <form action="reset-password" method="post">
                 <div class="input-group ${not empty password_error ? 'has-error' : ''}">
@@ -24,7 +24,7 @@
                         <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
                     </div>
                     <c:if test="${not empty password_error}">
-                        <span class="error-message">${password_error}</span>
+                        <span class="error-message"><c:out value="${password_error}" /></span>
                     </c:if>
                 </div>
                 <div class="input-group ${not empty confirmPassword_error ? 'has-error' : ''}">
@@ -33,7 +33,7 @@
                         <i class="fa-solid fa-eye toggle-password" id="toggleConfirmPassword"></i>
                     </div>
                     <c:if test="${not empty confirmPassword_error}">
-                        <span class="error-message">${confirmPassword_error}</span>
+                        <span class="error-message"><c:out value="${confirmPassword_error}" /></span>
                     </c:if>
                 </div>
                 <button type="submit" class="login-btn">Lưu thay đổi</button>

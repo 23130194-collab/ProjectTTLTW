@@ -11,7 +11,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechNova Admin - ${not empty product ? 'Chỉnh sửa' : 'Thêm'} sản phẩm</title>
+    <title>TechNova Admin - <c:out value="${not empty product ? 'Chỉnh sửa' : 'Thêm'}" /> sản phẩm</title>
     <link rel="stylesheet" href="${contextPath}/admin/admincss/adminUploadProduct.css">
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -150,7 +150,7 @@
 <main class="main-content">
     <div class="content-area">
         <div class="page-title-row">
-            <h1 class="page-title">${not empty product ? 'Chỉnh sửa' : 'Thêm'} sản phẩm</h1>
+            <h1 class="page-title"><c:out value="${not empty product ? 'Chỉnh sửa' : 'Thêm'}" /> sản phẩm</h1>
             <c:if test="${not empty product}">
                 <a href="${contextPath}/admin/product-preview?id=${product.id}" target="_blank" class="btn-preview-product" title="Xem chi tiết sản phẩm">
                     <i class="fa-solid fa-eye"></i>
@@ -160,13 +160,13 @@
         <div class="breadcrumb">
             <a href="${contextPath}/admin/dashboard">Trang chủ</a> / <a
                 href="${contextPath}/admin/products">Danh sách sản phẩm</a> /
-            <span>${not empty product ? 'Chỉnh sửa' : 'Thêm'} sản phẩm</span>
+            <span><c:out value="${not empty product ? 'Chỉnh sửa' : 'Thêm'}" /> sản phẩm</span>
         </div>
 
         <c:if test="${not empty errorMessage}">
             <div
                     style="background-color: #ffebee; color: #c62828; padding: 15px; margin: 20px 0; border: 1px solid #ef9a9a; border-radius: 4px;">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}" />
             </div>
         </c:if>
 
@@ -191,7 +191,7 @@
                             </option>
                             <c:forEach var="category" items="${categoryList}">
                                 <option value="${category.id}" ${product.categoryId==category.id
-                                        ? 'selected' : '' }>${category.name}</option>
+                                        ? 'selected' : '' }><c:out value="${category.name}" /></option>
                             </c:forEach>
                         </select>
                     </div>
@@ -203,7 +203,7 @@
                             </option>
                             <c:forEach var="brand" items="${brandList}">
                                 <option value="${brand.id}" ${product.brandId==brand.id ? 'selected'
-                                        : '' }>${brand.name}</option>
+                                        : '' }><c:out value="${brand.name}" /></option>
                             </c:forEach>
                         </select>
                     </div>
@@ -232,7 +232,7 @@
                     <c:forEach var="spec" items="${specs}">
                         <div class="attribute-item active">
                             <div class="attr-top">
-                                <span class="attr-name">${spec.attributeName}</span>
+                                <span class="attr-name"><c:out value="${spec.attributeName}" /></span>
                                 <div class="attr-controls">
                                     <span class="attr-delete" title="Xóa thuộc tính này">Xóa</span>
                                     <i class="fa-solid fa-chevron-down attr-toggle-icon"></i>
@@ -242,7 +242,7 @@
                                 <input type="hidden" name="specIds" value="${spec.attributeId}">
                                 <div class="attr-row">
                                     <span class="attr-label">Tên:</span>
-                                    <span class="attr-static-val">${spec.attributeName}</span>
+                                    <span class="attr-static-val"><c:out value="${spec.attributeName}" /></span>
                                 </div>
                                 <div class="attr-row">
                                     <span class="attr-label">Giá trị:</span>
@@ -417,7 +417,7 @@
         referrerpolicy="origin" defer></script>
 
 <script>
-    const globalContextPath = "${pageContext.request.contextPath}";
+    const globalContextPath = "<c:out value="${pageContext.request.contextPath}" />";
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -444,7 +444,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -454,7 +454,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -470,7 +470,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -487,7 +487,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -514,7 +514,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

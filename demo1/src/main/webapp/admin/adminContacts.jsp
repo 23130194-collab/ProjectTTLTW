@@ -141,14 +141,14 @@
         <c:if test="${not empty sessionScope.successMessage}">
             <div class="alert alert-success">
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-                    ${sessionScope.successMessage}
+                    <c:out value="${sessionScope.successMessage}" />
             </div>
             <c:remove var="successMessage" scope="session"/>
         </c:if>
         <c:if test="${not empty sessionScope.errorMessage}">
             <div class="alert alert-danger">
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-                    ${sessionScope.errorMessage}
+                    <c:out value="${sessionScope.errorMessage}" />
             </div>
             <c:remove var="errorMessage" scope="session"/>
         </c:if>
@@ -157,7 +157,7 @@
             <fmt:formatDate value="${selectedContact.createdAt}" pattern="HH:mm dd/MM/yyyy" var="selectedContactCreatedAt"/>
             <div class="detail-card">
                 <div class="detail-card-header">
-                    <h2>Chi tiết liên hệ #${selectedContact.id}</h2>
+                    <h2>Chi tiết liên hệ #<c:out value="${selectedContact.id}" /></h2>
                     <a class="btn btn-secondary" href="${contextPath}/admin/contacts?page=${currentPage}&status=${selectedStatus}&keyword=${searchKeyword}">Đóng</a>
                 </div>
 
@@ -182,13 +182,13 @@
 
                 <div class="detail-group">
                     <label>Nội dung liên hệ</label>
-                    <textarea class="form-control textarea-readonly" readonly>${selectedContact.content}</textarea>
+                    <textarea class="form-control textarea-readonly" readonly><c:out value="${selectedContact.content}" /></textarea>
                 </div>
 
                 <c:if test="${selectedContact.processed and not empty selectedContact.responseContent}">
                     <div class="detail-group">
                         <label>Nội dung đã phản hồi</label>
-                        <textarea class="form-control textarea-readonly" readonly>${selectedContact.responseContent}</textarea>
+                        <textarea class="form-control textarea-readonly" readonly><c:out value="${selectedContact.responseContent}" /></textarea>
                         <p class="response-time">Phản hồi lúc:
                             <fmt:formatDate value="${selectedContact.respondedAt}" pattern="HH:mm dd/MM/yyyy"/>
                         </p>
@@ -204,7 +204,7 @@
 
                     <div class="detail-group">
                         <label for="responseContent">Phản hồi qua email</label>
-                        <textarea id="responseContent" name="responseContent" class="form-control textarea-edit" placeholder="Nhập nội dung phản hồi cho khách hàng..." required>${selectedContact.responseContent}</textarea>
+                        <textarea id="responseContent" name="responseContent" class="form-control textarea-edit" placeholder="Nhập nội dung phản hồi cho khách hàng..." required><c:out value="${selectedContact.responseContent}" /></textarea>
                     </div>
 
                     <div class="form-actions">
@@ -267,14 +267,14 @@
                     <c:otherwise>
                         <c:forEach var="contact" items="${contactList}" varStatus="loop">
                             <tr>
-                                <td>${(currentPage - 1) * 10 + loop.count}</td>
-                                <td>${contact.name}</td>
-                                <td>${contact.email}</td>
-                                <td class="text-left"><span class="truncate-text" title="${contact.content}">${contact.content}</span></td>
+                                <td><c:out value="${(currentPage - 1) * 10 + loop.count}" /></td>
+                                <td><c:out value="${contact.name}" /></td>
+                                <td><c:out value="${contact.email}" /></td>
+                                <td class="text-left"><span class="truncate-text" title="${contact.content}"><c:out value="${contact.content}" /></span></td>
                                 <td><fmt:formatDate value="${contact.createdAt}" pattern="HH:mm dd/MM/yyyy"/></td>
                                 <td>
                                     <span class="status-badge ${contact.processed ? 'status-processed' : 'status-pending'}">
-                                            ${contact.processed ? 'Đã xử lý' : 'Chưa xử lý'}
+                                            <c:out value="${contact.processed ? 'Đã xử lý' : 'Chưa xử lý'}" />
                                     </span>
                                 </td>
                                 <td>
@@ -308,7 +308,7 @@
                     <a href="${contextPath}/admin/contacts?page=${currentPage - 1}&status=${selectedStatus}&keyword=${searchKeyword}" class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></a>
                 </c:if>
                 <c:forEach var="i" begin="1" end="${totalPages}">
-                    <a href="${contextPath}/admin/contacts?page=${i}&status=${selectedStatus}&keyword=${searchKeyword}" class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
+                    <a href="${contextPath}/admin/contacts?page=${i}&status=${selectedStatus}&keyword=${searchKeyword}" class="page-number ${i == currentPage ? 'active' : ''}"><c:out value="${i}" /></a>
                 </c:forEach>
                 <c:if test="${currentPage < totalPages}">
                     <a href="${contextPath}/admin/contacts?page=${currentPage + 1}&status=${selectedStatus}&keyword=${searchKeyword}" class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></a>
@@ -353,7 +353,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -363,7 +363,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -379,7 +379,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -396,7 +396,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -423,7 +423,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

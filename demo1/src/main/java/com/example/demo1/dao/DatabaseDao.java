@@ -4,11 +4,11 @@ import com.mysql.cj.jdbc.MysqlDataSource;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.StatementException;
 public class DatabaseDao {
-    private static final String HOST = "localhost";
+    private static final String HOST = "mysql_db";
     private static final String PORT = "3306";
     private static final String DATABASE = "webgroup24";
     private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "";
+    private static final String DB_PASSWORD = "123456";
 
     private static Jdbi jdbi = null;
 

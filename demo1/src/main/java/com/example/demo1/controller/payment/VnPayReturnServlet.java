@@ -48,6 +48,7 @@ public class VnPayReturnServlet extends HttpServlet {
             if ("00".equals(request.getParameter("vnp_TransactionStatus"))) {
                 Order order = orderDao.getOrderByCode(orderCode);
                 if (order != null && "Chờ thanh toán".equals(order.getOrderStatus())) {
+                    orderDao.ensureStatusHistoryExists(order.getId(), "Chờ xác nhận", "Đơn hàng đã được thanh toán (VNPay)");
                     orderDao.updateOrderStatus(order.getId(), "Đang xử lý");
                 }
                 

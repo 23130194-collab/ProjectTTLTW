@@ -17,11 +17,11 @@
         <h2>Chào mừng đến với TechNova!</h2>
 
         <c:if test="${not empty sessionScope.successMessage}">
-            <div class="success-message-general">${sessionScope.successMessage}</div>
+            <div class="success-message-general"><c:out value="${sessionScope.successMessage}" /></div>
             <c:remove var="successMessage" scope="session"/>
         </c:if>
         <c:if test="${not empty errors.general}">
-            <div class="error-message-general">${errors.general}</div>
+            <div class="error-message-general"><c:out value="${errors.general}" /></div>
         </c:if>
 
         <form action="login" method="post">

@@ -304,8 +304,8 @@ public class OrderDao {
     }
 
     public boolean createOrder(Order order, RecipientInfo recipient, List<CartItem> cartItems, Payment payment) {
-        return jdbi.inTransaction(handle -> {
-            try {
+        try {
+            return jdbi.inTransaction(handle -> {
                 int orderId = handle.createUpdate("INSERT INTO orders (user_id, order_code, order_status, subprice, discount_amount, voucher_id, voucher_discount_amount, shipping_fee, total_amount) " +
                                 "VALUES (:userId, :orderCode, :status, :subprice, :discountAmount, :voucherId, :voucherDiscountAmount, :shippingFee, :total)")
                         .bind("userId", order.getUserId())
@@ -322,6 +322,9 @@ public class OrderDao {
                 order.setId(orderId);
 
                 insertOrderStatusHistory(handle, orderId, "Đặt hàng", "Khách hàng đặt đơn hàng");
+                if ("Đang xử lý".equals(order.getOrderStatus())) {
+                    insertOrderStatusHistory(handle, orderId, "Chờ xác nhận", "Đơn hàng đã được thanh toán");
+                }
                 insertOrderStatusHistory(handle, orderId, order.getOrderStatus(), initialStatusNote(order.getOrderStatus()));
 
                 handle.createUpdate("INSERT INTO payment (order_id, payment_method, payment_status, amount, paid_at, created_at) " +
@@ -370,14 +373,14 @@ public class OrderDao {
                 }
 
                 return true;
-            } catch (Exception e) {
-                if (e instanceof OutOfStockException) {
-                    throw (OutOfStockException) e;
-                }
-                e.printStackTrace();
-                return false;
+            });
+        } catch (Exception e) {
+            if (e instanceof OutOfStockException) {
+                throw (OutOfStockException) e;
             }
-        });
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private String initialStatusNote(String status) {

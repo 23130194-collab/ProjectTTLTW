@@ -1,0 +1,27 @@
+plugins {
+    id "org.hidetake.ssh" version "2.11.2"
+}
+
+remotes {
+    host {
+        host = '192.168.139.128'
+        user = 'root'
+        password = '123456'
+    }
+}
+
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
+
+task get_logs {
+    doLast {
+        println 'Getting tomcat logs...'
+        ssh.run {
+            session(remotes.host) {
+                println "--- TOMCAT LOGS ---"
+                execute 'docker logs tomcat10'
+            }
+        }
+    }
+}

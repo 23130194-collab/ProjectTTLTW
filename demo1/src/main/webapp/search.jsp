@@ -12,7 +12,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tìm kiếm: ${selectedKeyword} | TechNova</title>
+    <title>Tìm kiếm: <c:out value="${selectedKeyword}" /> | TechNova</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/mucSanPham.css">
@@ -47,7 +47,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -77,7 +77,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -87,12 +87,12 @@
 <div class="overlay" id="overlay"></div>
 
 <main class="container">
-    <h1 class="page-title">Kết quả tìm kiếm cho: "${selectedKeyword}"</h1>
+    <h1 class="page-title">Kết quả tìm kiếm cho: "<c:out value="${selectedKeyword}" />"</h1>
 
     <c:choose>
         <c:when test="${empty productList}">
             <div class="no-result-container">
-                <h2>Không tìm thấy sản phẩm phù hợp với từ khóa "${selectedKeyword}".</h2>
+                <h2>Không tìm thấy sản phẩm phù hợp với từ khóa "<c:out value="${selectedKeyword}" />".</h2>
                 <p>Vui lòng thử lại với từ khóa khác hoặc quay về trang chủ.</p>
                 <a href="${pageContext.request.contextPath}/home" class="btn-return-home">
                     Quay lại trang chủ
@@ -102,7 +102,7 @@
 
         <c:otherwise>
             <div class="search-info">
-                Tìm thấy <strong>${totalProducts}</strong> sản phẩm.
+                Tìm thấy <strong><c:out value="${totalProducts}" /></strong> sản phẩm.
             </div>
 
             <div class="sort-wrapper">
@@ -127,7 +127,7 @@
                         <a href="product-detail?id=${p.id}" class="product-link">
                             <img src="${p.image.startsWith('http') ? p.image : pageContext.request.contextPath.concat('/').concat(p.image)}"
                                  class="product-image" alt="${p.name}">
-                            <h3 class="product-title">${p.name}</h3>
+                            <h3 class="product-title"><c:out value="${p.name}" /></h3>
                             <div class="price-section">
                                 <div class="current-price"><fmt:formatNumber value="${p.price}" pattern="#,###"/>đ</div>
                                 <c:if test="${p.discountValue > 0}">
@@ -165,7 +165,7 @@
                             <c:param name="sort" value="${selectedSortOrder}"/>
                             <c:param name="page" value="${i}"/>
                         </c:url>
-                        <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}">${i}</a>
+                        <a href="${pageUrl}" class="page-number ${currentPage == i ? 'active' : ''}"><c:out value="${i}" /></a>
                     </c:forEach>
                 </div>
             </c:if>
@@ -209,12 +209,12 @@
 </footer>
 
 <script>
-    const globalContextPath = "${pageContext.request.contextPath}";
+    const globalContextPath = "<c:out value="${pageContext.request.contextPath}" />";
 </script>
 <script src="${pageContext.request.contextPath}/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/sanPhamYeuThich.js"></script>
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="${pageContext.request.contextPath}/js/searchSuggestion.js"></script>
 </body>

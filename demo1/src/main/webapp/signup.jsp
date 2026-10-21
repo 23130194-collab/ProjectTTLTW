@@ -1,7 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="com.example.demo1.model.CartItem" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -17,7 +15,7 @@
         <h2>Tạo tài khoản mới</h2>
 
         <c:if test="${not empty errors.general}">
-            <div class="error-message-general">${errors.general}</div>
+            <div class="error-message-general"><c:out value="${errors.general}" /></div>
         </c:if>
 
         <form action="signup" method="post">
@@ -30,7 +28,7 @@
                 <input type="email" name="email" placeholder="Nhập email" value="${email_value}"
                        class="${not empty errors.email ? 'input-error' : ''}" required/>
                 <c:if test="${not empty errors.email}">
-                    <span class="error-message">${errors.email}</span>
+                    <span class="error-message"><c:out value="${errors.email}" /></span>
                 </c:if>
             </div>
 
@@ -41,7 +39,7 @@
                     <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
                 </div>
                 <c:if test="${not empty errors.password}">
-                    <span class="error-message">${errors.password}</span>
+                    <span class="error-message"><c:out value="${errors.password}" /></span>
                 </c:if>
             </div>
 
@@ -52,7 +50,7 @@
                     <i class="fa-solid fa-eye toggle-password" id="toggleConfirmPassword"></i>
                 </div>
                 <c:if test="${not empty errors.confirmPassword}">
-                    <span class="error-message">${errors.confirmPassword}</span>
+                    <span class="error-message"><c:out value="${errors.confirmPassword}" /></span>
                 </c:if>
             </div>
 

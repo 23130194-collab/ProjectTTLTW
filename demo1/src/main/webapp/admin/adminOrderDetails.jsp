@@ -174,14 +174,14 @@
         <c:if test="${not empty sessionScope.successMessage}">
             <div class="alert alert-success">
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-                ${sessionScope.successMessage}
+                <c:out value="${sessionScope.successMessage}" />
             </div>
             <c:remove var="successMessage" scope="session"/>
         </c:if>
         <c:if test="${not empty sessionScope.errorMessage}">
             <div class="alert alert-danger">
                 <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-                ${sessionScope.errorMessage}
+                <c:out value="${sessionScope.errorMessage}" />
             </div>
             <c:remove var="errorMessage" scope="session"/>
         </c:if>
@@ -197,23 +197,23 @@
                     <div><span class="invoice-logo">TechNova</span></div>
                     <div class="invoice-header-right">
                         <h2>Chi tiết hoá đơn</h2>
-                        <span class="invoice-order-id">Đơn hàng ${orderDetail.order.orderCode}</span>
+                        <span class="invoice-order-id">Đơn hàng <c:out value="${orderDetail.order.orderCode}" /></span>
                     </div>
                 </header>
 
                 <section class="invoice-meta">
                     <div class="meta-column">
                         <strong>Khách hàng:</strong>
-                        <address>${orderDetail.customer.name}<br/>${orderDetail.customer.address}</address>
+                        <address><c:out value="${orderDetail.customer.name}" /><br/><c:out value="${orderDetail.customer.address}" /></address>
                     </div>
                     <div class="meta-column">
                         <strong>Thông tin người nhận:</strong>
                         <address>
-                            ${not empty recipientInfo.fullName ? recipientInfo.fullName : orderDetail.customer.name}<br/>
-                            ${not empty recipientInfo.phone ? recipientInfo.phone : orderDetail.customer.phone}<br/>
-                            ${recipientAddress}<c:if test="${not empty recipientWard}">, ${recipientWard}</c:if><c:if test="${not empty recipientDistrict}">, ${recipientDistrict}</c:if><c:if test="${not empty recipientProvince}">, ${recipientProvince}</c:if>
+                            <c:out value="${not empty recipientInfo.fullName ? recipientInfo.fullName : orderDetail.customer.name}" /><br/>
+                            <c:out value="${not empty recipientInfo.phone ? recipientInfo.phone : orderDetail.customer.phone}" /><br/>
+                            <c:out value="${recipientAddress}" /><c:if test="${not empty recipientWard}">, <c:out value="${recipientWard}" /></c:if><c:if test="${not empty recipientDistrict}">, <c:out value="${recipientDistrict}" /></c:if><c:if test="${not empty recipientProvince}">, <c:out value="${recipientProvince}" /></c:if>
                         </address>
-                        <div>${not empty recipientInfo.email ? recipientInfo.email : orderDetail.customer.email}</div>
+                        <div><c:out value="${not empty recipientInfo.email ? recipientInfo.email : orderDetail.customer.email}" /></div>
                     </div>
                     <div class="meta-column">
                         <strong>Phương thức thanh toán:</strong>
@@ -236,7 +236,7 @@
                         <c:when test="${orderDetail.order.orderStatus == 'Đã giao'}"><c:set var="statusClass" value="status-delivered"/></c:when>
                         <c:when test="${orderDetail.order.orderStatus == 'Đã hủy'}"><c:set var="statusClass" value="status-cancelled"/></c:when>
                     </c:choose>
-                    Trạng thái hiện tại: <span class="badge ${statusClass}">${orderDetail.order.orderStatus}</span>
+                    Trạng thái hiện tại: <span class="badge ${statusClass}"><c:out value="${orderDetail.order.orderStatus}" /></span>
                 </div>
 
                 <c:if test="${orderDetail.order.orderStatus == 'Đã hủy' and not empty orderDetail.order.cancellationReason}">
@@ -244,7 +244,7 @@
                         <i class="fa-solid fa-circle-xmark"></i>
                         <div>
                             <strong>Lý do hủy đơn hàng</strong>
-                            <span>${orderDetail.order.cancellationReason}</span>
+                            <span><c:out value="${orderDetail.order.cancellationReason}" /></span>
                         </div>
                     </div>
                 </c:if>
@@ -322,7 +322,7 @@
                         <tbody>
                         <c:forEach var="item" items="${orderDetail.items}" varStatus="loop">
                         <tr>
-                            <td>${loop.count}</td>
+                            <td><c:out value="${loop.count}" /></td>
                             <td>
                                 <div class="order-product-image-box">
                                     <c:choose>
@@ -362,10 +362,10 @@
                                     </c:choose>
                                 </div>
                             </td>
-                            <td class="product-name-cell"><strong>${item.productName}</strong></td>
+                            <td class="product-name-cell"><strong><c:out value="${item.productName}" /></strong></td>
                             <td><fmt:formatNumber value="${item.originalPrice}" type="currency" currencySymbol="đ"/></td>
                             <td><fmt:formatNumber value="${item.discountPercentage / 100}" type="percent"/></td>
-                            <td>${item.quantity}</td>
+                            <td><c:out value="${item.quantity}" /></td>
                             <td><fmt:formatNumber value="${item.total}" type="currency" currencySymbol="đ"/></td>
                         </tr>
                         </c:forEach>
@@ -392,7 +392,7 @@
                 <footer class="invoice-footer">
                     <div class="invoice-notes">
                         <strong>Ghi chú của khách hàng:</strong>
-                        <p>${not empty orderDetail.order.notes ? orderDetail.order.notes : 'Không có ghi chú.'}</p>
+                        <p><c:out value="${not empty orderDetail.order.notes ? orderDetail.order.notes : 'Không có ghi chú.'}" /></p>
                     </div>
                 </footer>
             </div>
@@ -490,7 +490,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -500,7 +500,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -516,7 +516,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -533,7 +533,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -560,7 +560,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

@@ -46,7 +46,7 @@
             <a href="${pageContext.request.contextPath}/AddCart?action=view" class="icon-btn cart-btn-wrapper" title="Giỏ hàng">
                 <i class="fas fa-shopping-cart"></i>
                 <c:if test="${not empty requestScope.cartItems}">
-                    <span class="cart-badge">${fn:length(requestScope.cartItems)}</span>
+                    <span class="cart-badge"><c:out value="${fn:length(requestScope.cartItems)}" /></span>
                 </c:if>
             </a>
 
@@ -76,7 +76,7 @@
                             <img src="${pageContext.request.contextPath}/${imageSrc}" class="category-icon" alt="${cat.name}">
                         </c:otherwise>
                     </c:choose>
-                        ${cat.name}
+                        <c:out value="${cat.name}" />
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </c:forEach>
@@ -124,7 +124,7 @@
                 <div class="product-box">
                     <img src="${item.product.image}" alt="${item.product.name}">
                     <div class="product-info">
-                        <b>${item.product.name}</b><br>
+                        <b><c:out value="${item.product.name}" /></b><br>
                         <div>
                             <span class="current-price">
                                 <fmt:formatNumber value="${item.product.price}" pattern="#,###"/>₫
@@ -135,7 +135,7 @@
                                 </span>
                             </c:if>
                         </div>
-                        <small class="product-qty">Số lượng: ${item.quantity}</small>
+                        <small class="product-qty">Số lượng: <c:out value="${item.quantity}" /></small>
                     </div>
                 </div>
             </c:forEach>
@@ -166,14 +166,14 @@
                                     <div class="selected-address-display">
                                         <div class="addr-name-phone">
                                             <c:if test="${not empty requestScope.defaultAddress.label}">
-                                                <span class="addr-label">${requestScope.defaultAddress.label}</span>
+                                                <span class="addr-label"><c:out value="${requestScope.defaultAddress.label}" /></span>
                                             </c:if>
-                                                ${requestScope.defaultAddress.fullName}
+                                                <c:out value="${requestScope.defaultAddress.fullName}" />
                                             &nbsp;|&nbsp;
-                                                ${requestScope.defaultAddress.phone}
+                                                <c:out value="${requestScope.defaultAddress.phone}" />
                                             <span class="addr-default-badge">Mặc định</span>
                                         </div>
-                                        <div class="addr-detail">${requestScope.defaultAddress.fullAddress}</div>
+                                        <div class="addr-detail"><c:out value="${requestScope.defaultAddress.fullAddress}" /></div>
                                         <button type="button" class="btn-change-address" id="btnOpenAddressModal">
                                             <i class="fa-solid fa-pen-to-square"></i> Thay đổi
                                         </button>
@@ -184,13 +184,13 @@
                                     <div class="selected-address-display">
                                         <div class="addr-name-phone">
                                             <c:if test="${not empty firstAddr.label}">
-                                                <span class="addr-label">${firstAddr.label}</span>
+                                                <span class="addr-label"><c:out value="${firstAddr.label}" /></span>
                                             </c:if>
-                                                ${firstAddr.fullName}
+                                                <c:out value="${firstAddr.fullName}" />
                                             &nbsp;|&nbsp;
-                                                ${firstAddr.phone}
+                                                <c:out value="${firstAddr.phone}" />
                                         </div>
-                                        <div class="addr-detail">${firstAddr.fullAddress}</div>
+                                        <div class="addr-detail"><c:out value="${firstAddr.fullAddress}" /></div>
                                         <button type="button" class="btn-change-address" id="btnOpenAddressModal">
                                             <i class="fa-solid fa-pen-to-square"></i> Thay đổi
                                         </button>
@@ -230,7 +230,7 @@
                     <option value="" data-discount="0" data-min-order="0">Không sử dụng voucher</option>
                     <c:forEach items="${requestScope.userVouchers}" var="voucher">
                         <option value="${voucher.id}" data-discount="${voucher.discountValue}" data-min-order="${voucher.minOrderValue}">
-                            ${voucher.code} - Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ
+                            <c:out value="${voucher.code}" /> - Giảm <fmt:formatNumber value="${voucher.discountValue}" pattern="#,###"/>đ
                         </option>
                     </c:forEach>
                 </select>
@@ -309,14 +309,14 @@
                              onclick="selectAddress(this)">
                             <div class="addr-name-phone">
                                 <c:if test="${not empty addr.label}">
-                                    <span class="addr-label">${addr.label}</span>
+                                    <span class="addr-label"><c:out value="${addr.label}" /></span>
                                 </c:if>
-                                    ${addr.fullName} &nbsp;|&nbsp; ${addr.phone}
+                                    <c:out value="${addr.fullName}" /> &nbsp;|&nbsp; <c:out value="${addr.phone}" />
                                 <c:if test="${addr.defaultAddress}">
                                     <span class="addr-default-badge">Mặc định</span>
                                 </c:if>
                             </div>
-                            <div class="addr-detail">${addr.fullAddress}</div>
+                            <div class="addr-detail"><c:out value="${addr.fullAddress}" /></div>
                             <input type="radio" class="addr-radio"
                                    name="addrRadio" value="${addr.id}"
                                 ${addr.defaultAddress ? 'checked' : ''}
@@ -375,7 +375,7 @@
 </div>
 
 <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '<c:out value="${pageContext.request.contextPath}" />';
 </script>
 <script src="js/header.js"></script>
 <script src="${pageContext.request.contextPath}/js/thanhToan.js"></script>

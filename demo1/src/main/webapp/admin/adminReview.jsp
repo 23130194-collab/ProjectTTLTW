@@ -153,11 +153,11 @@
         </div>
 
         <c:if test="${not empty sessionScope.successMessage}">
-            <div class="alert alert-success">${sessionScope.successMessage}</div>
+            <div class="alert alert-success"><c:out value="${sessionScope.successMessage}" /></div>
             <c:remove var="successMessage" scope="session"/>
         </c:if>
         <c:if test="${not empty sessionScope.errorMessage}">
-            <div class="alert alert-danger">${sessionScope.errorMessage}</div>
+            <div class="alert alert-danger"><c:out value="${sessionScope.errorMessage}" /></div>
             <c:remove var="errorMessage" scope="session"/>
         </c:if>
 
@@ -176,7 +176,7 @@
                                                                                                  value="${reviewToEdit.productName}"
                                                                                                  readonly></div>
                         <div class="form-group"><label class="form-label">Nội dung</label><textarea
-                                class="form-control content-area" rows="6" readonly>${reviewToEdit.content}</textarea>
+                                class="form-control content-area" rows="6" readonly><c:out value="${reviewToEdit.content}" /></textarea>
                         </div>
                     </div>
                     <div class="form-column-right">
@@ -260,21 +260,21 @@
                         <tr>
                             <td colspan="8" style="text-align: center; padding: 40px 20px; color: #6b7280;">
                                 <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
-                                Không tìm thấy kết quả phù hợp với từ khóa '<strong>${searchKeyword}</strong>'
+                                Không tìm thấy kết quả phù hợp với từ khóa '<strong><c:out value="${searchKeyword}" /></strong>'
                             </td>
                         </tr>
                     </c:when>
                     <c:otherwise>
                         <c:forEach var="review" items="${reviewList}" varStatus="loop">
                             <tr>
-                                <td>${(currentPage - 1) * 10 + loop.count}</td>
+                                <td><c:out value="${(currentPage - 1) * 10 + loop.count}" /></td>
                                 <td class="col-product">
-                                    <span class="truncate-text" title="${review.productName}">${review.productName}</span>
+                                    <span class="truncate-text" title="${review.productName}"><c:out value="${review.productName}" /></span>
                                 </td>
-                                <td>${review.userName}</td>
-                                <td><span class="rating-star">${review.rating} <i class="fa-solid fa-star"></i></span></td>
+                                <td><c:out value="${review.userName}" /></td>
+                                <td><span class="rating-star"><c:out value="${review.rating}" /> <i class="fa-solid fa-star"></i></span></td>
                                 <td class="col-content text-left">
-                                    <span class="truncate-text" title="${review.content}">${review.content}</span>
+                                    <span class="truncate-text" title="${review.content}"><c:out value="${review.content}" /></span>
                                 </td>
                                 <td><fmt:formatDate value="${review.createdAt}" pattern="HH:mm dd/MM/yyyy"/></td>
                                 <td>
@@ -309,7 +309,7 @@
                 </c:if>
                 <c:forEach var="i" begin="1" end="${totalPages}">
                     <a href="${contextPath}/admin/reviews?page=${i}&status=${selectedStatus}&rating=${selectedRating}&searchKeyword=${searchKeyword}"
-                       class="page-number ${i == currentPage ? 'active' : ''}">${i}</a>
+                       class="page-number ${i == currentPage ? 'active' : ''}"><c:out value="${i}" /></a>
                 </c:forEach>
                 <c:if test="${currentPage < totalPages}">
                     <a href="${contextPath}/admin/reviews?page=${currentPage + 1}&status=${selectedStatus}&rating=${selectedRating}&searchKeyword=${searchKeyword}"
@@ -399,7 +399,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -409,7 +409,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -425,7 +425,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -442,7 +442,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -469,7 +469,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;

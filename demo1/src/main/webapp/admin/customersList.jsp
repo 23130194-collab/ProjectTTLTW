@@ -159,7 +159,7 @@
 
         <c:if test="${not empty sessionScope.successMessage}">
             <div class="alert alert-success" id="successAlert">
-                <span class="alert-text">${sessionScope.successMessage}</span>
+                <span class="alert-text"><c:out value="${sessionScope.successMessage}" /></span>
                 <span class="close-btn" onclick="closeAlert('successAlert')">&times;</span>
             </div>
             <c:remove var="successMessage" scope="session"/>
@@ -169,7 +169,7 @@
             <div class="alert alert-danger">
                                 <span class="close-btn"
                                       onclick="this.parentElement.style.display='none';">&times;</span>
-                    ${sessionScope.errorMessage}
+                    <c:out value="${sessionScope.errorMessage}" />
             </div>
             <c:remove var="errorMessage" scope="session"/>
         </c:if>
@@ -221,29 +221,29 @@
                         <td colspan="6" class="no-results-cell">
                             <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
                             Không tìm thấy dữ liệu khách hàng nào phù hợp với từ khóa '<span
-                                class="no-results-keyword">${keyword}</span>'.
+                                class="no-results-keyword"><c:out value="${keyword}" /></span>'.
                         </td>
                     </tr>
                 </c:if>
 
                 <c:forEach var="u" items="${customerList}" varStatus="status">
                     <tr>
-                        <td style="text-align: center;">${(currentPage - 1) * 5 + status.index + 1}
+                        <td style="text-align: center;"><c:out value="${(currentPage - 1) * 5 + status.index + 1}" />
                         </td>
 
                         <td>
                             <a href="${pageContext.request.contextPath}/admin/customer-detail?id=${u.id}"
                                class="customer-link">
                                 <div class="reviewer-avatar">
-                                        ${u.name != null ? u.name.substring(0, 1).toUpperCase() : "?"}
+                                        <c:out value="${u.name != null ? u.name.substring(0, 1).toUpperCase() : '?'}" />
                                 </div>
-                                    ${u.name}
+                                    <c:out value="${u.name}" />
                             </a>
                         </td>
 
-                        <td>${u.email}</td>
+                        <td><c:out value="${u.email}" /></td>
 
-                        <td style="text-align: center;">${u.orderCount}</td>
+                        <td style="text-align: center;"><c:out value="${u.orderCount}" /></td>
 
                         <td>
                             <fmt:formatDate value="${u.created_at}" pattern="dd/MM/yyyy"/>
@@ -299,7 +299,7 @@
                     <c:forEach var="i" begin="1" end="${totalPages}">
                         <a href="${contextPath}/admin/customers?page=${i}&keyword=${keyword}&status=${param.status}"
                            class="page-number ${currentPage == i ? 'active' : ''}">
-                                ${i}
+                                <c:out value="${i}" />
                         </a>
                     </c:forEach>
 
@@ -375,7 +375,7 @@
         });
 
         function markAllAdminAsRead() {
-            fetch('${contextPath}/NotificationServlet', { method: 'POST' })
+            fetch('<c:out value="${contextPath}" />/NotificationServlet', { method: 'POST' })
                 .then(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
@@ -385,7 +385,7 @@
         }
 
         function loadNotifications() {
-            fetch('${contextPath}/NotificationServlet')
+            fetch('<c:out value="${contextPath}" />/NotificationServlet')
                 .then(res => res.json())
                 .then(data => {
                     if (!data || data.length === 0) {
@@ -401,7 +401,7 @@
                     notificationList.innerHTML = data.map(function(n) {
                         var isUnread = n.read === false || n.isRead === 0 || n.isRead === false;
                         var unreadClass = isUnread ? 'unread' : '';
-                        var link = '${contextPath}' + n.link;
+                        var link = '<c:out value="${contextPath}" />' + n.link;
 
                         return '<a class="notification-item ' + unreadClass + '" href="' + link + '" onclick="markAsRead(' + n.id + ', this, \'' + link + '\', event)">'
                             + '<div class="noti-content">'
@@ -418,7 +418,7 @@
             event.preventDefault();
 
             if (element.classList.contains('unread')) {
-                fetch('${contextPath}/NotificationServlet?id=' + id, { method: 'POST' })
+                fetch('<c:out value="${contextPath}" />/NotificationServlet?id=' + id, { method: 'POST' })
                     .then(response => {
                         if(response.ok) {
                             element.classList.remove('unread');
@@ -445,7 +445,7 @@
                 + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        fetch('${contextPath}/NotificationServlet')
+        fetch('<c:out value="${contextPath}" />/NotificationServlet')
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) return;
